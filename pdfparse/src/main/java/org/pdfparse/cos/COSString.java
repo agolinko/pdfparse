@@ -192,6 +192,7 @@ public class COSString implements COSObject {
                 case 0x0D: // '\r':
                 case 0x0A: // '\n':
                     buffer.append(0x0A);
+                    src.pos++;
                     break;
                 default:
                     buffer.append(src.src[src.pos]);
