@@ -201,6 +201,33 @@ public class PDFRawData {
         return true;
     }
 
+    public int reverseScan(int from,  byte[] sign, int limit) {
+        pos = from - sign.length;
+        if (pos < 0) {
+            pos = 0;
+            return -1;
+        }
+
+        int scanto = pos - limit;
+        if (scanto < 0) scanto = 0;
+
+        boolean found;
+
+        while (pos >= scanto) {
+            found = true;
+            for (int i = 0; i < sign.length; i++)
+                if (this.src[pos + i] != sign[i]) {
+                    found = false;
+                    break;
+                }
+            if (found)
+                return pos;
+            pos--;
+        }
+        pos = scanto;
+        return -1;
+    }
+
     public byte[] fetchStream(int stream_len, boolean movePosBeyoundEndObj) throws EParseError {
         skipWS();
         if (!checkSignature(PDFKeywords.STREAM))
