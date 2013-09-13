@@ -20,9 +20,8 @@
 package org.pdfparse.cos;
 
 import org.pdfparse.*;
+import org.pdfparse.utils.ByteBuffer;
 import org.pdfparse.exception.EParseError;
-
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -47,70 +46,20 @@ public class COSHexString extends COSString implements COSObject {
 
     @Override
     public void parse(PDFRawData src, ParsingContext context) throws EParseError {
-        //int b, b2, i, end, len;
-
         src.pos++; // Skip the opening bracket '<'
         byte[] bytes = parseHexStream(src, context);
-        value = convertToString(bytes);
-
-        /*
-
-        for (i = src.pos; i < src.length; i++) {
-            if (src.src[i] == 0x3E) {
-                break; // '>'
-            }
-        }
-        if (src.src[i] != 0x3E) {
-            throw new EParseError("Unterminated hexadecimal string"); // ">"
-        }
-
-        end = i;
-        len = end - src.pos;
-
-        // If the final digit of a hexadecimal string is missing—that is,
-        // if there is an odd number of digits—the final digit shall be assumed to be 0.
-        if (len % 2 == 1) {
-            len++;
-        }
-
-        len = (int) len / 2;
-        byte[] bytes = new byte[len];
-
-
-        for (i = 0; i < len; i++) {
-            b = fetchHexHalfValue(src);
-            if (b == -2) {
-                throw new EParseError(String.format("Illegal character #%x at %d in hexadecimal string", src.src[src.pos], src.pos));
-            }
-
-            b2 = fetchHexHalfValue(src);
-            if (b == -2) {
-                throw new EParseError(String.format("Illegal character #%x at %d in hexadecimal string", src.src[src.pos], src.pos));
-            }
-            if (b == -1) {
-                b = 0;
-            }
-
-            bytes[i] = (byte) ((b << 4) + b2);
-        }
-
-        src.pos = end + 1;
-
-
-        value = convertToString(bytes);*/
-
+        setBinaryValue(bytes);
     }
 
     @Override
     public void produce(OutputStream dst, ParsingContext context) throws IOException {
         int i, j, len;
         int b;
-        byte[] bytes = value.getBytes();
 
-        len = bytes.length;
-        byte[] hex = new byte[bytes.length * 2];
+        len = binaryValue.length;
+        byte[] hex = new byte[binaryValue.length * 2];
         for (i = 0, j = 0; i < len; i++, j += 2) {
-            b = bytes[i] & 0xFF;
+            b = binaryValue[i] & 0xFF;
             hex[j] = V2HEX[b >> 4];
             hex[j + 1] = V2HEX[b & 0xF];
         }
@@ -156,7 +105,7 @@ public class COSHexString extends COSString implements COSObject {
 
         //src.pos++; // Skip the opening bracket '<'
 
-        ByteArrayOutputStream out = context.tmpBuffer;
+        ByteBuffer out = context.tmpBuffer;
         out.reset();
         for (int i = src.pos; i < src.length; i++) {
             ch = src.src[i] & 0xFF;
@@ -164,7 +113,7 @@ public class COSHexString extends COSString implements COSObject {
             if (ch == 0x3E) { // '>' - EOD
                 src.pos = i + 1;
                 if (!first)
-                    out.write((byte)(n1 << 4));
+                    out.append((byte)(n1 << 4));
                 return out.toByteArray();
             }
             // whitespace ?
@@ -181,7 +130,7 @@ public class COSHexString extends COSString implements COSObject {
             if (first)
                 n1 = n;
             else
-                out.write((byte)((n1 << 4) + n));
+                out.append((byte)((n1 << 4) + n));
             first = !first;
         }
 

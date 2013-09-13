@@ -31,8 +31,10 @@ public class ParsingContext {
 
 
     public int errorHandlingPolicy = EP_THROW_EXCEPTION;
-    public ByteBuffer tmpParsingBuffer = new ByteBuffer(256);
-    public ByteArrayOutputStream tmpBuffer = new ByteArrayOutputStream();
+    public boolean allowScan = true;
+    public int headerLookupRange = 100;
+    public int eofLookupRange = 100;
+    public ByteBuffer tmpBuffer = new ByteBuffer(1024);
 
     public ParsingGetObject findObject;
     public boolean useEncryption;

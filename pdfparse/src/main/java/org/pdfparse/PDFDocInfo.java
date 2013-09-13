@@ -21,6 +21,7 @@ package org.pdfparse;
 
 import org.pdfparse.cos.*;
 import org.pdfparse.exception.EParseError;
+import java.util.Calendar;
 
 /**
  * This is the document metadata.  Each getXXX method will return the entry if
@@ -194,20 +195,20 @@ public class PDFDocInfo {
      *
      * @throws EParseError If there is an error creating the date.
      */
-//    public Calendar getCreationDate() throws EParseError
-//    {
-//        return info.getDate( COSName.CREATION_DATE );
-//    }
+    public Calendar getCreationDate() throws EParseError
+    {
+        return info.getDate( COSName.CREATION_DATE, cache, null );
+    }
 
     /**
      * This will set the creation date of the document.
      *
      * @param date The new creation date for the document.
      */
-//    public void setCreationDate( Calendar date )
-//    {
-//        info.setDate( COSName.CREATION_DATE, date );
-//    }
+    public void setCreationDate( Calendar date )
+    {
+        info.setDate( COSName.CREATION_DATE, date );
+    }
 
     /**
      * This will get the modification date of the document.  This will return null if no modification date exists.
@@ -216,20 +217,20 @@ public class PDFDocInfo {
      *
      * @throws EParseError If there is an error creating the date.
      */
-//    public Calendar getModificationDate() throws EParseError
-//    {
-//        return info.getDate( COSName.MOD_DATE );
-//    }
+    public Calendar getModificationDate() throws EParseError
+    {
+        return info.getDate( COSName.MOD_DATE, cache, null );
+    }
 
     /**
      * This will set the modification date of the document.
      *
      * @param date The new modification date for the document.
      */
-//    public void setModificationDate( Calendar date )
-//    {
-//        info.setDate( COSName.MOD_DATE, date );
-//    }
+    public void setModificationDate( Calendar date )
+    {
+        info.setDate( COSName.MOD_DATE, date );
+    }
 
     /**
      * This will get the trapped value for the document.
@@ -265,10 +266,10 @@ public class PDFDocInfo {
      * @return String Value of metadata field
      *
      */
-//    public String getCustomMetadataValue(String fieldName)
-//    {
-//        return info.getStr( fieldName, "" );
-//    }
+    public String getCustomMetadataValue(COSName fieldName)
+    {
+        return info.getStr( fieldName, "" );
+    }
 
     /**
      * Set the custom metadata value.
@@ -276,10 +277,10 @@ public class PDFDocInfo {
      * @param fieldName The name of the custom metadata field.
      * @param fieldValue The value to the custom metadata field.
      */
-//    public void setCustomMetadataValue( String fieldName, String fieldValue )
-//    {
-//        info.setStr( fieldName, fieldValue );
-//    }
+    public void setCustomMetadataValue( COSName fieldName, String fieldValue )
+    {
+        info.setStr( fieldName, fieldValue );
+    }
 
     /**
      * This will set the trapped of the document.  This will be

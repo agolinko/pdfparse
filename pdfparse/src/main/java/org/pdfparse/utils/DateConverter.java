@@ -167,7 +167,7 @@ public class DateConverter
         Calendar retval = null;
         if( date != null )
         {
-            retval = toCalendar( date.value );
+            retval = toCalendar( date.getValue() );
         }
 
         return retval;

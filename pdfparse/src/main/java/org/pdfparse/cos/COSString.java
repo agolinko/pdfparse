@@ -85,14 +85,35 @@ public class COSString implements COSObject {
         }
     }
 
-    public String value;
+    protected String value;
+    protected byte[] binaryValue;
 
     public COSString(String val) {
         value = val;
+        binaryValue = val.getBytes();
     }
 
     public COSString(PDFRawData src, ParsingContext context) throws EParseError {
         parse(src, context);
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String val) {
+        value = val;
+        binaryValue = convertToBytes(val, null);
+    }
+
+
+    public byte[] getBinaryValue() {
+        return binaryValue;
+    }
+
+    public void setBinaryValue(byte[] val) {
+        binaryValue = val;
+        value = convertToString(val);
     }
 
     @Override
@@ -104,11 +125,8 @@ public class COSString implements COSObject {
 
         src.pos++; // Skip the opening bracket '('
 
-        ByteBuffer buffer = context.tmpParsingBuffer;
+        ByteBuffer buffer = context.tmpBuffer;
         buffer.reset();
-        //src.tmpParsingBuffer.reset();
-        //StringBuilder buffer = new StringBuilder();
-
 
         while (src.pos < src.length) {
             ch = src.src[src.pos];
@@ -183,7 +201,8 @@ public class COSString implements COSObject {
                     open_brackets--;
                     if (open_brackets < 0) {
                         src.pos++;
-                        value = convertToString(buffer);
+                        binaryValue = buffer.toByteArray();
+                        value = convertToString(binaryValue);
                         return;
                     }
                     buffer.append(0x29);
@@ -208,10 +227,10 @@ public class COSString implements COSObject {
     public void produce(OutputStream dst, ParsingContext context) throws IOException {
         int i;
         dst.write('(');
-        byte[] bytes = convertToBytes(value, null);
 
-        for (i = 0; i < bytes.length; i++) {
-            switch (bytes[i]) {
+
+        for (i = 0; i < binaryValue.length; i++) {
+            switch (binaryValue[i]) {
                 case 0x28:
                     dst.write(C28);
                     break;
@@ -229,7 +248,7 @@ public class COSString implements COSObject {
                     break;
 
                 default:
-                    dst.write(bytes[i]);
+                    dst.write(binaryValue[i]);
                     break;
             }
         }

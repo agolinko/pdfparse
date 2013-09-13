@@ -26,8 +26,6 @@ import java.io.UnsupportedEncodingException;
 
 /**
  * Acts like a <CODE>StringBuffer</CODE> but works with <CODE>byte</CODE> arrays.
- * Floating point is converted to a format suitable to the PDF.
- * @author Paulo Soares
  */
 
 public class ByteBuffer extends OutputStream {

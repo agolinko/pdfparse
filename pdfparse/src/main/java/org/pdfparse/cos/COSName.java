@@ -71,8 +71,8 @@ public class COSName implements COSObject {
     public static final COSName AUTHOR = new COSName("/Author");
     public static final COSName CREATOR = new COSName("/Creator");
     public static final COSName PRODUCER = new COSName("/Producer");
-    public static final COSName CREATIONDATE = new COSName("/CreationDate");
-    public static final COSName MODDATE = new COSName("/ModDate");
+    public static final COSName CREATION_DATE = new COSName("/CreationDate");
+    public static final COSName MOD_DATE = new COSName("/ModDate");
     public static final COSName TRAPPED = new COSName("/Trapped");
     public static final COSName PAGES = new COSName("/Pages");
     public static final COSName METADATA = new COSName("/Metadata");

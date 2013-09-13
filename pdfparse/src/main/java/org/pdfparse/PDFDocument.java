@@ -24,7 +24,6 @@ import org.pdfparse.exception.EParseError;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import java.nio.ByteBuffer;
@@ -41,13 +40,17 @@ public class PDFDocument implements ParsingEvent {
     private XRef xref;
     private PDFRawData data;
 
-    private COSDictionary encryption = null;
-    private COSReference rootID = null;
-    private COSDictionary dictRoot = null;
-    private COSReference infoID = null;
-    private COSDictionary dictInfo = null;
 
-    private PDFDocInfo docInfo = null;
+    private COSReference rootID = null;
+    private COSReference infoID = null;
+
+    private COSDictionary encryption = null;
+    private COSDictionary dictRoot = null;
+
+    private PDFDocInfo documentInfo = null;
+    private byte[][] documentId = {null,null};
+    private boolean documentIsEncrypted = false;
+    private float documentVersion = 0.0f;
 
     public PDFDocument() {
        data = new PDFRawData();
@@ -99,46 +102,45 @@ public class PDFDocument implements ParsingEvent {
     private void open(PDFRawData data) throws EParseError {
 
 
-        if (data.length < 8) {
+        if (data.length < 10) {
             throw new EParseError("This is not a valid PDF file");
         }
 
-        // Check the PDF version
+        // Check the PDF header & version -----------------------
         data.pos = 0;
-        if (!data.checkSignature(PDFKeywords.PDF)) {
-            throw new EParseError("This is not a PDF file");
+        if (  !( data.checkSignature(PDFKeywords.PDF_HEADER) || data.checkSignature(PDFKeywords.FDF_HEADER) ) ) {
+            if (!context.allowScan)
+                throw new EParseError("This is not a PDF file");
+
+            while ( !(data.checkSignature(PDFKeywords.PDF_HEADER) || data.checkSignature(PDFKeywords.FDF_HEADER))
+                    && (data.pos < context.headerLookupRange) && (data.pos < data.length) ) data.pos++;
+
+            if (  !(data.checkSignature(PDFKeywords.PDF_HEADER) || data.checkSignature(PDFKeywords.FDF_HEADER)) )
+                throw new EParseError("This is not a PDF file (PDF header not found)");
         }
 
-        if ((data.src[5] != '1') || (data.src[7] < '1') || (data.src[7] > '8')) {
+        if (data.length - data.pos < 10)
+            throw new EParseError("This is not a valid PDF file");
+
+
+        if ((data.src[data.pos + 5] != '1') || (data.src[data.pos + 7] < '1') || (data.src[data.pos + 7] > '8')) {
             throw new EParseError("PDF version is not supported");
         }
 
-        int pos, beg, len;
-        len = data.length - 10;
-        beg = len - 100;
-        if (beg < 0) {
-            beg = 0;
-        }
-        pos = len;
+        documentVersion = (data.src[data.pos + 5] - '0') + (data.src[data.pos + 7] - '0')*0.1f;
 
 
-        // Searching 'startxref' tag
-        while (pos > beg) { // startxref 73 74 61 72 74 78 72 65 66
-            if ((data.src[pos + 0] == 0x73) && (data.src[pos + 1] == 0x74) && (data.src[pos + 2] == 0x61)
-                    && (data.src[pos + 3] == 0x72) && (data.src[pos + 4] == 0x74) && (data.src[pos + 5] == 0x78)
-                    && (data.src[pos + 6] == 0x72) && (data.src[pos + 7] == 0x65) && (data.src[pos + 8] == 0x66)) {
-                pos += 10;
-                break;
-            }
-            pos--;
-        }
+        // Scan for EOF -----------------------------------------
+        if (data.reverseScan(data.length, PDFKeywords.EOF, context.eofLookupRange) < 0)
+            throw new EParseError("Missing end of file marker");
 
-        if (pos == 0) {
-            throw new EParseError("Cannot find 'startxref' tag");
-        }
+        // Scan for 'startxref' marker --------------------------
+        if (data.reverseScan(data.pos, PDFKeywords.STARTXREF, 100) < 0)
+            throw new EParseError("Missing 'startxref' marker");
 
-        // Fetch XREF OFFSET
-        data.pos = pos;
+
+        // Fetch XREF offset ------------------------------------
+        data.pos += 10;
         data.skipWS();
 
         int xref_offset = COSInteger.readDecimal(data);
@@ -149,20 +151,41 @@ public class PDFDocument implements ParsingEvent {
 
         data.pos = xref_offset;
         xref.parse(data, this);
+
+
     }
 
     public void setErrorHandlingPolicy(int policy) {
         if ((policy < 0) || (policy > 3))
-            throw new IllegalArgumentException("policy should be between 0 and 3");
+            throw new IllegalArgumentException("Policy should be between 0 and 3");
 
         context.errorHandlingPolicy = policy;
     }
     public int getErrorHandlingPolicy() {
         return context.errorHandlingPolicy;
     }
+
+    /**
+     * Tell if this document is encrypted or not.
+     *
+     * @return true If this document is encrypted.
+     */
+    public boolean isEncrypted() {
+        return documentIsEncrypted;
+    }
+
+    public byte[][] getDocumentId() {
+        return documentId;
+    }
+
+    /**
+     * Get the document info dictionary.  This is guaranteed to not return null.
+     *
+     * @return The documents /Info dictionary
+     */
     public PDFDocInfo getDocumentInfo() throws EParseError {
-        if (docInfo != null)
-            return docInfo;
+        if (documentInfo != null)
+            return documentInfo;
 
         COSDictionary dictInfo;
         try {
@@ -173,10 +196,15 @@ public class PDFDocument implements ParsingEvent {
             dictInfo = null;
         }
 
-        docInfo = new PDFDocInfo(dictInfo, cache);
-        return docInfo;
+        documentInfo = new PDFDocInfo(dictInfo, cache);
+        return documentInfo;
     }
 
+    /**
+     * Return the total page count of the PDF document.
+     *
+     * @return The total number of pages in the PDF document.
+     */
     public int getPagesCount() throws EParseError {
         if (rootID == null)
             return 0;
@@ -189,6 +217,7 @@ public class PDFDocument implements ParsingEvent {
         COSDictionary dictRootPages = cache.getDictionary(refRootPages, true);
         return dictRootPages.getUInt(COSName.COUNT, cache, -1);
     }
+
     public byte[] getXMLMetadata() throws EParseError {
         if (dictRoot == null)
           dictRoot = cache.getDictionary(rootID.id, rootID.gen, true);
@@ -204,20 +233,29 @@ public class PDFDocument implements ParsingEvent {
 
     @Override
     public int onTrailerFound(COSDictionary trailer, int ordering) {
-/*        if (PDFDefines.DEBUG) {
-            PDFOutputStream stm = new PDFOutputStream();
-            try {
-                trailer.produce(stm);
-                System.out.println(stm.toString());
-            } catch (IOException ex) {
-                Logger.getLogger(PDFDocument.class.getName()).log(Level.SEVERE, null, ex);
-            }
-
-        }
-*/
         if (ordering == 0) {
             rootID = trailer.getReference(COSName.ROOT);
             infoID = trailer.getReference(COSName.INFO);
+
+            documentIsEncrypted = trailer.containsKey(COSName.ENCRYPT);
+
+            COSArray Ids = trailer.getArray(COSName.ID, null);
+            if (((Ids == null) || (Ids.size()!=2)) && documentIsEncrypted)
+                throw new EParseError("Missing (required) file identifier for encrypted document");
+
+            if (Ids != null) {
+                if (Ids.size() != 2) {
+                    if ((context.errorHandlingPolicy == ParsingContext.EP_THROW_EXCEPTION) || documentIsEncrypted)
+                        throw new EParseError("Invalid document ID array size (should be 2)");
+                    Ids = null;
+                } else {
+                    if ((Ids.get(0) instanceof COSString) && (Ids.get(1) instanceof COSString)) {
+                        documentId[0] = ((COSString)Ids.get(0)).getBinaryValue();
+                        documentId[1] = ((COSString)Ids.get(1)).getBinaryValue();
+                    } else if (context.errorHandlingPolicy == ParsingContext.EP_THROW_EXCEPTION)
+                        throw new EParseError("Invalid document ID");
+                }
+            } // Ids != null
         }
         return ParsingEvent.CONTINUE;
     }
