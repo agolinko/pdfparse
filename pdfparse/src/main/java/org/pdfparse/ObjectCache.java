@@ -238,12 +238,11 @@ public class ObjectCache implements ParsingGetObject {
 
                 case 0x30: case 0x31: case 0x32: case 0x33: case 0x34: // 0..4
                 case 0x35: case 0x36: case 0x37: case 0x38: case 0x39: // 5..9
-                case 0x2D: case 0x2E: // '-', '.'
+                case 0x2B: case 0x2D: case 0x2E: // '+', '-', '.'
                     COSReference ref = tryFetchReference(src);
                     if (ref != null)
                         return ref; // this is a valid reference
-
-                    return fetchNumericRealToken(src);
+                    return new COSNumber(src, context);
                 default:
                     if (PDFDefines.DEBUG)
                         System.out.println("Bytes before error occurs: " + src.dbgPrintBytes());
@@ -373,59 +372,6 @@ public class ObjectCache implements ParsingGetObject {
 
         return new COSReference(obj_id, obj_gen);
     }
-
-    private static COSObject fetchNumericRealToken(PDFRawData src) throws EParseError {
-        int pos = src.pos;
-        int len = src.length;
-        byte ch;
-        String s = "";
-        boolean is_real = false;
-        int val_int;
-        float val_real;
-
-        while (pos < len) {
-            ch = src.src[pos];
-            switch (ch) {
-                case 0x30: case 0x31: case 0x32: case 0x33: case 0x34: // 0..4
-                case 0x35: case 0x36: case 0x37: case 0x38: case 0x39: // 5..9
-                case 0x2D: case 0x2B: // '-'
-                    s += (char) ch;
-                    break;
-                case 0x2E: // '.'
-                    is_real = true;
-                    s += '.';
-                    break;
-                default:
-                    if (s.isEmpty())
-                        throw new EParseError("Numeric object expected at " + String.valueOf(pos));
-
-                    if (is_real)
-                        try {
-                            val_real = Float.parseFloat(s);
-                            src.pos = pos;
-                            return new COSReal(val_real);
-                        } catch(NumberFormatException e) {
-                            throw new EParseError("Numeric or real object expected at " + String.valueOf(pos) + ", but got " + s);
-                        }
-
-                    try {
-                        val_int = Integer.parseInt(s);
-                        src.pos = pos;
-                        return new COSInteger(val_int);
-                    } catch(NumberFormatException e) {
-                        throw new EParseError("Numeric object expected at " + String.valueOf(pos) + ", but got " + s);
-                    }
-
-            } // switch
-
-            pos++;
-        } // while ...
-
-        // Reach end of file?  WTF?????
-        throw new EParseError("Reach end of file while parsing numeric object");
-    }
-
-
 
     public void dbgSaveAllStreams(String dir) {
         File path = new File (dir);

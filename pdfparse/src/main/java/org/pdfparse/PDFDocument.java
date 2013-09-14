@@ -143,7 +143,7 @@ public class PDFDocument implements ParsingEvent {
         data.pos += 10;
         data.skipWS();
 
-        int xref_offset = COSInteger.readDecimal(data);
+        int xref_offset = COSNumber.readInteger(data);
 
         if ((xref_offset == 0) || (xref_offset >= data.length)) {
             throw new EParseError("Invalid xref offset");

@@ -78,7 +78,7 @@ public class COSArray extends ArrayList<COSObject> implements COSObject {
 
     public int getInt(int idx) {
         COSObject obj = get(idx);
-         if (obj instanceof COSInteger) return ((COSInteger)obj).value;
+         if (obj instanceof COSNumber) return ((COSNumber)obj).intValue();
          else return 0;
     }
 }

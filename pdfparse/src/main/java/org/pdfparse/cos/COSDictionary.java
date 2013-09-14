@@ -149,7 +149,7 @@ public class COSDictionary extends LinkedHashMap<COSName, COSObject> implements 
     public int getInt(COSName name, int def_value) {
         COSObject obj = this.get(name);
         if (obj == null) return def_value;
-        if (obj instanceof COSInteger) return ((COSInteger)obj).value;
+        if (obj instanceof COSNumber) return ((COSNumber)obj).intValue();
         else return def_value;
     }
     public int getInt(COSName name, ParsingGetObject cache, int def_value) throws EParseError {
@@ -157,7 +157,7 @@ public class COSDictionary extends LinkedHashMap<COSName, COSObject> implements 
         if (obj == null) return def_value;
         if (obj instanceof COSReference)
             obj = travel(obj, cache);
-        if (obj instanceof COSInteger) return ((COSInteger)obj).value;
+        if (obj instanceof COSNumber) return ((COSNumber)obj).intValue();
         else return def_value;
     }
     public int getUInt(COSName name, int def_value) {
@@ -168,7 +168,7 @@ public class COSDictionary extends LinkedHashMap<COSName, COSObject> implements 
     }
 
     public void setInt(COSName name, int value) {
-        COSInteger v = new COSInteger(value);
+        COSNumber v = new COSNumber(value);
         this.put(name, v);
     }
 

@@ -240,8 +240,8 @@ public class XRef {
             COSArray index = curr_trailer.getArray(COSName.INDEX, null);
             if (index == null) {
                 index = new COSArray();
-                index.add(new COSInteger(0));
-                index.add(new COSInteger(size));
+                index.add(new COSNumber(0));
+                index.add(new COSNumber(size));
             }
 
             int row_len = w[0] + w[1] + w[2];
