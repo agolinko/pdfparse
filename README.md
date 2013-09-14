@@ -1,4 +1,4 @@
 pdfparse
 ========
 
-A PDF parsing library
+A free standalone PDF parsing library
