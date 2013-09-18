@@ -66,16 +66,12 @@ public class XRef {
         obj.fileOffset = offs;
         obj.isCompressed = false;
 
-        String name = String.format("%d %d R", id, gen);
+        XRefEntry old_obj = by_id.get(id);
 
-
-        if (!by_id.containsKey(id)) {
+        if (old_obj == null) {
             by_id.put(id, obj);
-            //obj_order.push(id);
-            //all_obj_by_id[id] = obj;
-        } else if (by_id.get(id).gen < gen) {
+        } else if (old_obj.gen < gen) {
             by_id.put(id, obj);
-            //all_obj_by_id[id] = obj;
         }
 
         if (max_id < id) max_id = id;
@@ -101,12 +97,7 @@ public class XRef {
         obj.containerObjId = containerId;
         obj.indexWithinContainer = indexWithinContainer;
 
-        String name = String.format("%d 0 R", id);
         by_id.put(id, obj);
-
-        //compressed_obj_by_id[id] = obj;
-        //compressed_obj_order.push(id);
-        //all_obj_by_id[id] = obj;
 
         if (compressed_max_stream_id<containerId) compressed_max_stream_id = containerId;
         if (compressed_max_stream_offs<indexWithinContainer) compressed_max_stream_offs = indexWithinContainer;

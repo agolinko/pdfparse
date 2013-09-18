@@ -27,7 +27,7 @@ import org.pdfparse.utils.IntHashtable;
 import java.io.IOException;
 import java.io.OutputStream;
 
-public class COSString implements COSObject {
+public final class COSString implements COSObject {
 
     private static final byte[] C28 = {'\\', '('};
     private static final byte[] C29 = {'\\', ')'};
@@ -96,9 +96,9 @@ public class COSString implements COSObject {
 
     private static final byte[] EMPTY = {};
 
-    protected String value;
-    protected byte[] binaryValue;
-    protected boolean forceHexForm;
+    private String value;
+    private byte[] binaryValue;
+    private boolean forceHexForm;
 
     public COSString(String val) {
         value = val;

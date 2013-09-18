@@ -179,7 +179,7 @@ public class COSDictionary extends LinkedHashMap<COSName, COSObject> implements 
     public String getStr(COSName name, String def_value) {
         COSObject obj = this.get(name);
         if (obj == null) return def_value;
-        if (obj instanceof COSString) return ((COSString)obj).value;
+        if (obj instanceof COSString) return ((COSString)obj).getValue();
         else return def_value;
 
     }
@@ -190,7 +190,7 @@ public class COSDictionary extends LinkedHashMap<COSName, COSObject> implements 
         if (obj instanceof COSReference)
             obj = travel(obj, cache);
         if (obj == null) return def_value;
-        if (obj instanceof COSString) return ((COSString)obj).value;
+        if (obj instanceof COSString) return ((COSString)obj).getValue();
         return def_value;
     }
     public void setStr(COSName name, String value) {

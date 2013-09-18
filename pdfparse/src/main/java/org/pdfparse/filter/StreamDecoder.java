@@ -70,51 +70,6 @@ public class StreamDecoder {
 
 
 
-    private static byte[] unpredictStream(byte[] stream, int predictor, int column_width) throws EParseError {
-        //      2 - TIFF Predictor 2
-        //      10 - PNG prediction (on encoding, PNG None on all rows)
-        //      11 - PNG prediction (on encoding, PNG Sub on all rows)
-        //      12 - PNG prediction (on encoding, PNG Up on all rows)
-        //      13 - PNG prediction (on encoding, PNG Average on all rows)
-        //      14 - PNG prediction (on encoding, PNG Paeth on all rows)
-        //      15 - PNG prediction (on encoding, PNG optimum)
-
-        // The fuckin manual is too complicated.
-        // Better read this article: http://forums.adobe.com/thread/664902
-
-        if (predictor == 1) return stream; // 1 - No prediction (the default value)
-        if (predictor != 12)
-            throw new ENotSupported("Predictor type " + String.valueOf(predictor) + " not supported yet");
-
-        byte[] prev_row = new byte[column_width];
-
-        int src_idx, dst_idx, j;
-
-        // Strip off the last 10 characters of the string. This is the CRC and is unnecessary to
-        // extract the raw data.
-
-        //stream.length = stream.length - 10;
-
-        // The first byte on the row will be the predictor type. You can actually change the predictor
-        // line-by-line, though I haven't seen an example of this actually happening. For PNG Up prediction
-        // (12, as above), the first byte should be 0x02. You should either strip this off (i.e. assume
-        // all lines use the same prediction), or write code to change the algorithm based on this number.
-        // The simpler solution, albeit potentially hazardous for your reader, is to strip it off
-
-        if (stream.length % (column_width+1) != 0)
-            throw new EParseError("Invalid stream length. Must be multiple of " + String.valueOf(column_width+1) + ".");
-
-        dst_idx = 0;
-        for (src_idx = 0; src_idx < stream.length; ) {
-            src_idx++; // skip first byte of row
-            for (j=0; j < column_width; j++) {
-                prev_row[j] += stream[src_idx++];
-                stream[dst_idx++] = prev_row[j];
-            }
-        }
-        return Arrays.copyOf(stream, dst_idx);
-    }
-
     public static byte[] FLATEDecode(final byte[] src) {
         byte[] buf = new byte[1024];
 
@@ -280,129 +235,11 @@ public class StreamDecoder {
 
 
     /**
-     * @param in
-     * @param dic
-     * @return a byte array
-     */
-    public static byte[] decodePredictor(final byte in[], final COSDictionary dic) { // TODO: Optimize this
-        int predictor = dic.getInt(COSName.PREDICTOR, -1);
-        if (predictor < 0)
-            return in;
-
-        if (predictor < 10 && predictor != 2)
-            return in;
-
-        int width = dic.getInt(COSName.COLUMNS, 1);
-        int colors = dic.getInt(COSName.COLORS, 1);
-        int bpc = dic.getInt(COSName.BITSPERCOMPONENT, 8);
-
-        int bytesPerPixel = colors * bpc / 8;
-        int bytesPerRow = (colors*width*bpc + 7)/8;
-        byte[] curr = new byte[bytesPerRow];
-        byte[] prior = new byte[bytesPerRow];
-
-        if (predictor == 2) {
-			if (bpc == 8) {
-				int numRows = in.length / bytesPerRow;
-				for (int row = 0; row < numRows; row++) {
-					int rowStart = row * bytesPerRow;
-					for (int col = 0 + bytesPerPixel; col < bytesPerRow; col++) {
-						in[rowStart + col] = (byte)(in[rowStart + col] + in[rowStart + col - bytesPerPixel]);
-					}
-				}
-			}
-			return in;
-		}
-
-        DataInputStream dataStream = new DataInputStream(new ByteArrayInputStream(in));
-        ByteArrayOutputStream fout = new ByteArrayOutputStream(in.length);
-
-        // Decode the (sub)image row-by-row
-        while (true) {
-            // Read the filter type byte and a row of data
-            int filter = 0;
-            try {
-                filter = dataStream.read();
-                if (filter < 0) {
-                    return fout.toByteArray();
-                }
-                dataStream.readFully(curr, 0, bytesPerRow);
-            } catch (Exception e) {
-                return fout.toByteArray();
-            }
-
-            switch (filter) {
-                case 0: //PNG_FILTER_NONE
-                    break;
-                case 1: //PNG_FILTER_SUB
-                    for (int i = bytesPerPixel; i < bytesPerRow; i++) {
-                        curr[i] += curr[i - bytesPerPixel];        // TODO: bug?
-                    }
-                    break;
-                case 2: //PNG_FILTER_UP
-                    for (int i = 0; i < bytesPerRow; i++) {
-                        curr[i] += prior[i];
-                    }
-                    break;
-                case 3: //PNG_FILTER_AVERAGE
-                    for (int i = 0; i < bytesPerPixel; i++) {
-                        curr[i] += prior[i] / 2;
-                    }
-                    for (int i = bytesPerPixel; i < bytesPerRow; i++) {
-                        curr[i] += ((curr[i - bytesPerPixel] & 0xff) + (prior[i] & 0xff))/2;
-                    }
-                    break;
-                case 4: //PNG_FILTER_PAETH
-                    for (int i = 0; i < bytesPerPixel; i++) {
-                        curr[i] += prior[i];
-                    }
-
-                    for (int i = bytesPerPixel; i < bytesPerRow; i++) {
-                        int a = curr[i - bytesPerPixel] & 0xff;
-                        int b = prior[i] & 0xff;
-                        int c = prior[i - bytesPerPixel] & 0xff;
-
-                        int p = a + b - c;
-                        int pa = Math.abs(p - a);
-                        int pb = Math.abs(p - b);
-                        int pc = Math.abs(p - c);
-
-                        int ret;
-
-                        if (pa <= pb && pa <= pc) {
-                            ret = a;
-                        } else if (pb <= pc) {
-                            ret = b;
-                        } else {
-                            ret = c;
-                        }
-                        curr[i] += (byte)ret;
-                    }
-                    break;
-                default:
-                    // Error -- unknown filter type
-                    throw new RuntimeException("PNG filter unknown");
-            }
-            try {
-                fout.write(curr);
-            }
-            catch (IOException ioe) {
-                // Never happens
-            }
-
-            // Swap curr and prior
-            byte[] tmp = prior;
-            prior = curr;
-            curr = tmp;
-        }
-    }
-
-    /**
      * @param in_out
      * @param dic
      * @return a new length
      */
-    public static byte[] decodePredictorFast (byte in_out[], final COSDictionary dic, ParsingContext context) {
+    public static byte[] decodePredictor (byte in_out[], final COSDictionary dic, ParsingContext context) {
         int predictor = dic.getInt(COSName.PREDICTOR, -1);
         if (predictor < 0)
             return in_out;
@@ -568,8 +405,7 @@ public class StreamDecoder {
         public byte[] decode(byte[] b, COSName filterName, COSObject decodeParams, COSDictionary streamDictionary, ParsingContext context) throws EParseError {
             b = StreamDecoder.FLATEDecode(b);
             if (decodeParams != null)
-                b = StreamDecoder.decodePredictorFast(b, (COSDictionary)decodeParams, context);
-                //b = StreamDecoder.decodePredictor(b, (COSDictionary)decodeParams);
+                b = StreamDecoder.decodePredictor(b, (COSDictionary)decodeParams, context);
             return b;
         }
     }
@@ -601,8 +437,7 @@ public class StreamDecoder {
         public byte[] decode(byte[] b, COSName filterName, COSObject decodeParams, COSDictionary streamDictionary, ParsingContext context) throws EParseError {
             b = StreamDecoder.LZWDecode(b);
             if (decodeParams != null)
-                b = StreamDecoder.decodePredictorFast(b, (COSDictionary)decodeParams, context);
-                //b = StreamDecoder.decodePredictor(b, (COSDictionary)decodeParams);
+                b = StreamDecoder.decodePredictor(b, (COSDictionary)decodeParams, context);
             return b;
         }
     }

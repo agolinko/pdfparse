@@ -24,13 +24,14 @@ import org.pdfparse.utils.ByteBuffer;
 
 import java.util.Arrays;
 
-public class PDFRawData {
+public final class PDFRawData {
 
     public static final int[] HEX = { // '0'..'f'
         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, -1, -1, -1, -1, -1, -1,
         -1, 10, 11, 12, 13, 14, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1,
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
         -1, 10, 11, 12, 13, 14, 15};
+
     public byte[] src;
     public int pos;
     public int length;
@@ -45,13 +46,13 @@ public class PDFRawData {
         length = src.length;
     }
 
-    public void fromByteBuffer(ByteBuffer bb) {
+    public final void fromByteBuffer(ByteBuffer bb) {
         src = bb.getBuffer();
         pos = 0;
         length = bb.size();
     }
 
-    public void skipWS() {
+    public final void skipWS() {
         byte ch;
         while (pos < length) {
             ch = src[pos];
@@ -65,7 +66,7 @@ public class PDFRawData {
         return ((ch == 0x00) || (ch == 0x09) || (ch == 0x0A) || (ch == 0x0D) || (ch == 0x20));
     }
 
-    public void skipLine() {
+    public final void skipLine() {
         int ch;
         while (pos < length) {
             ch = src[pos];
@@ -84,7 +85,7 @@ public class PDFRawData {
         }
     }
 
-    public void skipCRLForLF() throws EParseError {
+    public final void skipCRLForLF() throws EParseError {
         byte ch;
         ch = src[pos];
         if (ch == 0x0D) {
@@ -106,7 +107,7 @@ public class PDFRawData {
 
 
 
-    public int fetchUInt() throws EParseError {
+    public final int fetchUInt() throws EParseError {
         int prev = pos;
         int res = 0;
         this.skipWS();
@@ -127,52 +128,23 @@ public class PDFRawData {
                     break;
                 default:
                     if (prev == pos) {
-                        throw new EParseError("expected number, but got #" + Integer.toHexString(src[pos]));
+                        throw new EParseError("Expected number, but got #" + Integer.toHexString(src[pos]));
                     }
                     return res;
             } // switch
         } // while
         if (prev == pos) {
-            throw new EParseError("expected number, but got " + Integer.toHexString(src[pos]));
+            throw new EParseError("Expected number, but got " + Integer.toHexString(src[pos]));
         }
         return res;
     }
 
-    // result: -1 -on of stream. -2 -illegal character
-    public int fetchHexHalfValue() {
-        int ch;
-        while (pos < length) {
-            ch = src[pos];
-            // skip spaces
-            if ((ch == 0x20) || (ch == 0x09) || (ch == 0x0A) || (ch == 0x0C) || (ch == 0x0D)) {
-                pos++;
-                continue;
-            }
-            if (ch == 0x3E) {
-                return -1;
-            }
-            if ((ch < 0x30) || (ch > 0x66)) {
-                return -2;
-            }
-            ch = HEX[ch - 0x30];
-            if (ch < 0) {
-                return -2;
-            }
-            pos++;
-            return ch;
-        }
-        return -1;
-    }
-
-    public void writeDecimal(int val) {
-    }
-
-    public byte getByte(int relOffs) {
+    public final byte getByte(int relOffs) {
         return src[pos + relOffs];
     }
 
     // high-order byte first.
-    public int fetchBinaryUInt(int size) throws EParseError {
+    public final int fetchBinaryUInt(int size) throws EParseError {
         if ((size == 0) || (pos + size > length))
             throw new EParseError("Out of range"); // TODO: special exception
 
@@ -200,7 +172,7 @@ public class PDFRawData {
 
     }
 
-    public boolean checkSignature(byte[] sign) {
+    public final boolean checkSignature(byte[] sign) {
         int _to = this.pos + sign.length;
         if (_to > this.length) return false;
         for (int i = this.pos, j=0; i<_to; i++, j++)
@@ -209,7 +181,7 @@ public class PDFRawData {
         return true;
     }
 
-    public boolean checkSignature(int from, byte[] sign) {
+    public final boolean checkSignature(int from, byte[] sign) {
         int _to = from + sign.length;
         if (_to > this.length) return false;
         for (int i = from, j=0; i<_to; i++, j++)
@@ -218,7 +190,7 @@ public class PDFRawData {
         return true;
     }
 
-    public int reverseScan(int from,  byte[] sign, int limit) {
+    public final int reverseScan(int from,  byte[] sign, int limit) {
         pos = from - sign.length;
         if (pos < 0) {
             pos = 0;
@@ -245,7 +217,7 @@ public class PDFRawData {
         return -1;
     }
 
-    public byte[] fetchStream(int stream_len, boolean movePosBeyoundEndObj) throws EParseError {
+    public final byte[] fetchStream(int stream_len, boolean movePosBeyoundEndObj) throws EParseError {
         skipWS();
         if (!checkSignature(PDFKeywords.STREAM))
             throw new EParseError("'stream' keyword not found");

@@ -37,7 +37,7 @@ import java.io.OutputStream;
  * @see		EParseError
  */
 
-public class COSNumber implements COSObject {
+public final class COSNumber implements COSObject {
 
     /**
      * actual value of this <CODE>COSNumber</CODE>, represented as a
