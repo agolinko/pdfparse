@@ -85,8 +85,20 @@ public class COSString implements COSObject {
         }
     }
 
+    private static final int[] HEX2V = { // '0'..'f'
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, -1, -1, -1, -1, -1, -1,
+            -1, 10, 11, 12, 13, 14, 15, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, 10, 11, 12, 13, 14, 15};
+    private static final byte[] V2HEX = { // '0'..'f'
+            0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39,
+            0x61, 0x62, 0x63, 0x64, 0x65, 0x66};
+
+    private static final byte[] EMPTY = {};
+
     protected String value;
     protected byte[] binaryValue;
+    protected boolean forceHexForm;
 
     public COSString(String val) {
         value = val;
@@ -95,6 +107,11 @@ public class COSString implements COSObject {
 
     public COSString(PDFRawData src, ParsingContext context) throws EParseError {
         parse(src, context);
+    }
+
+    public void clear() {
+        value = "";
+        binaryValue = EMPTY;
     }
 
     public String getValue() {
@@ -106,23 +123,62 @@ public class COSString implements COSObject {
         binaryValue = convertToBytes(val, null);
     }
 
-
     public byte[] getBinaryValue() {
         return binaryValue;
     }
 
     public void setBinaryValue(byte[] val) {
-        binaryValue = val;
-        value = convertToString(val);
+        if (val == null)
+            binaryValue = EMPTY;
+        else binaryValue = val;
+
+        value = convertToString(binaryValue);
     }
 
-    @Override
+    /**
+     * Forces the string to be written in literal form instead of hexadecimal form.
+     *
+     * @param v
+     *            if v is true the string will be written in literal form, otherwise it will be written in hexa if
+     *            necessary.
+     */
+
+    public void setForceLiteralForm(boolean v)
+    {
+        forceHexForm = !v;
+    }
+
+    /**
+     * Forces the string to be written in hexadecimal form instead of literal form.
+     *
+     * @param v
+     *            if v is true the string will be written in hexadecimal form otherwise it will be written in literal if
+     *            necessary.
+     */
+
+    public void setForceHexForm(boolean v)
+    {
+        forceHexForm = v;
+    }
+
+        @Override
     public void parse(PDFRawData src, ParsingContext context) throws EParseError {
-        int open_brackets = 0;
+        int nesting_brackets = 0;
         int v;
         byte ch;
         value = "";
+        binaryValue = EMPTY;
 
+        if (src.src[src.pos] == '<') {
+            src.pos++; // Skip the opening bracket '<'
+            byte[] bytes = parseHexStream(src, context);
+            setBinaryValue(bytes);
+            forceHexForm = true;
+            return;
+        }
+
+        // === this is a literal string
+        forceHexForm = false;
         src.pos++; // Skip the opening bracket '('
 
         ByteBuffer buffer = context.tmpBuffer;
@@ -133,7 +189,10 @@ public class COSString implements COSObject {
             switch (ch) {
                 case 0x5C: // '\'
                     src.pos++;
-                    ch = src.src[src.pos]; // TODO: check bounds
+                    if (src.pos >= src.length)
+                        break; // finish. ignore this reverse solidus
+
+                    ch = src.src[src.pos];
                     switch (ch) {
                         case 0x6E: // 'n'
                             buffer.append(0x0A);
@@ -179,7 +238,7 @@ public class COSString implements COSObject {
                             buffer.append(v);
                             break;
                         case 0x0A:
-                            if (src.src[src.pos + 1] == 0x0D) {
+                            if ((src.pos < src.length) &&  (src.src[src.pos + 1] == 0x0D)) {
                                 src.pos++;
                             }
                             break;
@@ -187,19 +246,21 @@ public class COSString implements COSObject {
                             break;
 
                         default:
-                            buffer.append(src.src[src.pos]); //???
-                    }//switch
+                            // If the character following the REVERSE SOLIDUS is not one of those shown in Table 3,
+                            // the REVERSE SOLIDUS shall be ignored.
+                            buffer.append(src.src[src.pos]); //add this char
+                    }//switch after '\'
 
                     src.pos++;
                     break;
                 case 0x28: // '('
-                    open_brackets++;
+                    nesting_brackets++;
                     buffer.append(0x28);
                     src.pos++;
                     break;
                 case 0x29: // ')'
-                    open_brackets--;
-                    if (open_brackets < 0) {
+                    nesting_brackets--;
+                    if (nesting_brackets < 0) {  //found closing bracket. End of string
                         src.pos++;
                         binaryValue = buffer.toByteArray();
                         value = convertToString(binaryValue);
@@ -210,6 +271,10 @@ public class COSString implements COSObject {
                     break;
                 case 0x0D: // '\r':
                 case 0x0A: // '\n':
+                    // An end-of-line marker appearing within a literal string without a preceding REVERSE SOLIDUS shall be treated
+                    // as a byte value of (0Ah), irrespective of whether the end-of-line marker was a CARRIAGE RETURN (0Dh), a
+                    // LINE FEED (0Ah), or both.
+
                     buffer.append(0x0A);
                     src.pos++;
                     break;
@@ -217,19 +282,46 @@ public class COSString implements COSObject {
                     buffer.append(src.src[src.pos]);
                     src.pos++;
             } // switch
-        }
+        } // while ...
+
+        // Reach end-of-file/data?
         if (src.pos < src.length) {
             src.pos++;
         }
+
+        if (nesting_brackets != 0) {
+            if (context.maxVerbosity)
+                throw new EParseError("Unbalanced brackets and illegal nesting while parsing string object");
+        }
+
+        binaryValue = buffer.toByteArray();
+        value = convertToString(binaryValue);
     }
 
     @Override
     public void produce(OutputStream dst, ParsingContext context) throws IOException {
-        int i;
+        int i, j, len;
+        len = binaryValue.length;
+
+        if (forceHexForm) {
+            // === Hexadecimal form
+            int b;
+            // TODO: use context.tmpBuffer
+            byte[] hex = new byte[binaryValue.length * 2];
+            for (i = 0, j = 0; i < len; i++, j += 2) {
+                b = binaryValue[i] & 0xFF;
+                hex[j] = V2HEX[b >> 4];
+                hex[j + 1] = V2HEX[b & 0xF];
+            }
+            dst.write(0x3C); // "<"
+            dst.write(hex);
+            dst.write(0x3E); // ">"
+            return;
+        }
+
+        // === Literal form
         dst.write('(');
-
-
-        for (i = 0; i < binaryValue.length; i++) {
+        for (i = 0; i < len; i++) {
             switch (binaryValue[i]) {
                 case 0x28:
                     dst.write(C28);
@@ -252,7 +344,6 @@ public class COSString implements COSObject {
                     break;
             }
         }
-
         dst.write(')');
     }
 
@@ -432,4 +523,65 @@ public class COSString implements COSObject {
         }
         return true;
     }
+
+
+    public static final byte[] parseHexStream(PDFRawData src, ParsingContext context) throws EParseError {
+        int ch, n, n1 = 0;
+        boolean first = true;
+
+        //src.pos++; // Skip the opening bracket '<'
+
+        ByteBuffer out = context.tmpBuffer;
+        out.reset();
+        for (int i = src.pos; i < src.length; i++) {
+            ch = src.src[i] & 0xFF;
+
+            if (ch == 0x3E) { // '>' - EOD
+                src.pos = i + 1;
+                if (!first)
+                    out.append((byte)(n1 << 4));
+                return out.toByteArray();
+            }
+            // whitespace ?
+            if ((ch == 0x00) || (ch == 0x09) || (ch == 0x0A) || (ch == 0x0C) || (ch == 0x0D) || (ch == 0x20))
+                continue;
+
+            if ((ch < 0x30) || (ch > 0x66))
+                throw new EParseError("Illegal character in hex string");
+
+            n = HEX2V[ch - 0x30];
+            if (n < 0)
+                throw new EParseError("Illegal character in hex string");
+
+            if (first)
+                n1 = n;
+            else
+                out.append((byte)((n1 << 4) + n));
+            first = !first;
+        }
+
+        throw new EParseError("Unterminated hexadecimal string"); // ">"
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (this == obj)
+            return true;
+
+        if (obj instanceof COSString)
+        {
+            COSString strObj = (COSString) obj;
+            return this.getValue().equals(strObj.getValue()) && this.forceHexForm == strObj.forceHexForm;
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        int result = getValue().hashCode();
+        return result += forceHexForm ? 17 : 0;
+    }
+
 }

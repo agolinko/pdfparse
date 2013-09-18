@@ -180,7 +180,6 @@ public class COSDictionary extends LinkedHashMap<COSName, COSObject> implements 
         COSObject obj = this.get(name);
         if (obj == null) return def_value;
         if (obj instanceof COSString) return ((COSString)obj).value;
-//        if (obj instanceof COSHexString) return ((COSHexString)obj).value; //new String (((COSHexString)obj).value, "UTF-16");
         else return def_value;
 
     }
@@ -192,7 +191,6 @@ public class COSDictionary extends LinkedHashMap<COSName, COSObject> implements 
             obj = travel(obj, cache);
         if (obj == null) return def_value;
         if (obj instanceof COSString) return ((COSString)obj).value;
-//        if (obj instanceof COSHexString) return ((COSHexString)obj).value; //new String (((COSHexString)obj).value, "UTF-16");
         return def_value;
     }
     public void setStr(COSName name, String value) {

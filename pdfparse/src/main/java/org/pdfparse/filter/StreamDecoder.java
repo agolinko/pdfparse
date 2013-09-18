@@ -159,7 +159,7 @@ public class StreamDecoder {
         data.length = in.length;
         data.pos = 0;
 
-        return COSHexString.parseHexStream(data, context);
+        return COSString.parseHexStream(data, context);
     }
 
     /** Decodes a stream that has the ASCII85Decode filter.

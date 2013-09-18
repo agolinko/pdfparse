@@ -31,6 +31,7 @@ public class ParsingContext {
 
 
     public int errorHandlingPolicy = EP_THROW_EXCEPTION;
+    public boolean maxVerbosity = false;
     public boolean allowScan = true;
     public int headerLookupRange = 100;
     public int eofLookupRange = 100;

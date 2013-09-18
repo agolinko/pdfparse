@@ -111,7 +111,7 @@ public class ObjectCache implements ParsingGetObject {
         COSStream streamObject = (COSStream)streamObj;
 
 
-        // --- Ok, recetrieved streamObject
+        // --- Ok, received streamObject
         // next, decompress its data, and put in cache
         PDFRawData streamData = decompressedStreams.get(x.containerObjId);
         if (streamData == null) { // is not in cache?
@@ -232,7 +232,7 @@ public class ObjectCache implements ParsingGetObject {
                         return stm;
                     }
                     // this is only Hexadecimal string
-                    return new COSHexString(src, context);
+                    return new COSString(src, context);
                 case 0x5B: // '[' - array
                     return new COSArray(src, context);
 

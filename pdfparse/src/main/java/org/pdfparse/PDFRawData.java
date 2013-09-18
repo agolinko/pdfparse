@@ -20,6 +20,7 @@
 package org.pdfparse;
 
 import org.pdfparse.exception.EParseError;
+import org.pdfparse.utils.ByteBuffer;
 
 import java.util.Arrays;
 
@@ -33,6 +34,22 @@ public class PDFRawData {
     public byte[] src;
     public int pos;
     public int length;
+
+    public PDFRawData() {
+
+    }
+
+    public PDFRawData(byte[] bytearray) {
+        src = bytearray;
+        pos = 0;
+        length = src.length;
+    }
+
+    public void fromByteBuffer(ByteBuffer bb) {
+        src = bb.getBuffer();
+        pos = 0;
+        length = bb.size();
+    }
 
     public void skipWS() {
         byte ch;
