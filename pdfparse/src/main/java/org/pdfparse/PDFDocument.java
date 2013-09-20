@@ -78,6 +78,19 @@ public class PDFDocument implements ParsingEvent {
         open(file);
     }
 
+    public PDFDocument(byte[] buffer) throws EParseError {
+        this();
+
+        this.filename = "internal";
+        this.filepath = "internal";
+
+        data.src = buffer;
+        data.pos = 0;
+        data.length = buffer.length;
+
+        open(data);
+    }
+
     private void open(File file) throws EParseError, IOException {
         this.filename = file.getName();
         this.filepath = file.getParent();

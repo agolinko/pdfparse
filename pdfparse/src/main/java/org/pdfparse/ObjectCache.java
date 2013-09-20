@@ -196,8 +196,15 @@ public class ObjectCache implements ParsingGetObject {
         byte ch;
 
         while(true) {
-            src.skipWS();
-            ch = src.getByte(0);
+            // skip spaces if any
+            int dlen = src.length;
+            ch = src.src[src.pos];
+            while ((src.pos < dlen)&&((ch==0x20)||(ch==0x09)||(ch==0x0A)||(ch==0x0D))) {
+                src.pos++;
+                ch = src.src[src.pos];
+            }
+            //--------------
+            ch = src.src[src.pos];
             switch (ch) {
                 case 0x25: // '%' - comment
                     src.skipLine();
@@ -219,9 +226,10 @@ public class ObjectCache implements ParsingGetObject {
                 case 0x28: // '(' - raw string
                     return new COSString(src, context);
                 case 0x3C: // '<' - hexadecimal string
-                    if (src.getByte(1) == 0x3C) { // '<'
+                    if (src.src[src.pos+1] == 0x3C) { // '<'
                         COSDictionary dict = new COSDictionary(src, context);
                         // check for stream object
+                        // TODO: Merge COSDictionary and COSStream into one object(class)
                         src.skipWS();
                         if (!src.checkSignature(PDFKeywords.STREAM))
                             return dict; // this is COSDictionary only
@@ -257,48 +265,44 @@ public class ObjectCache implements ParsingGetObject {
         int pos = src.pos;
         int len = src.length;
         int ch;
-        String s = "";
-        int obj_id, obj_gen;
+        int obj_id = 0, obj_gen = 0;
 
         // parse int #1 --------------------------------------------
-        while ((pos < len)&&(src.src[pos] >= 0x30)&&(src.src[pos]<=0x39)) {
-            s += (char)(src.src[pos]);
+        ch = src.src[pos];
+        while ((pos < len)&&(ch >= 0x30)&&(ch <= 0x39)) {
+            obj_id = obj_id*10 + (ch - 0x30);
             pos++; // 0..9
+            ch = src.src[pos];
         }
 
         //check if not a whitespace or EOF
-        ch = src.src[pos];
-        if ((pos >= len)||(!((ch==0x00)||(ch==0x09)||(ch==0x0A)||(ch==0x0D)||(ch==0x20))))
+        if ((pos >= len)||(!((ch==0x20)||(ch==0x09)||(ch==0x0A)||(ch==0x0D)||(ch==0x00))))
             return null;
-        pos++; // skip space
+        pos++; // skip this space
 
-        obj_id = Integer.parseInt(s); // Assign parsed obj_id
-        s = "";
-
-        // skip succeded spaces if any
+        // skip succeeded spaces if any
         ch = src.src[pos];
-        while ((pos < len)&&((ch==0x09)||(ch==0x0A)||(ch==0x0D)||(ch==0x20))) {
+        while ((pos < len)&&((ch==0x20)||(ch==0x09)||(ch==0x0A)||(ch==0x0D))) {
             pos++;
             ch = src.src[pos];
         }
 
         // parse int #2 --------------------------------------------
-        while ((pos < len)&&(src.src[pos] >= 0x30)&&(src.src[pos]<=0x39)) {
-            s += (char)(src.src[pos]);
+        while ((pos < len)&&(ch >= 0x30)&&(ch <= 0x39)) {
+            obj_gen = obj_gen*10 + (ch - 0x30);
             pos++;
+            ch = src.src[pos];
         }
 
         //check if not a whitespace or EOF
-        ch = src.src[pos];
-        if ((pos >= len)||(!((ch==0x00)||(ch==0x09)||(ch==0x0A)||(ch==0x0D)||(ch==0x20))))
+        if ((pos >= len)||(!((ch==0x20)||(ch==0x09)||(ch==0x0A)||(ch==0x0D)||(ch==0x00))))
             return null;
         pos++; // skip space
 
-        obj_gen = Integer.parseInt(s); // Assign parsed obj_gen
 
-        // skip succeded spaces if any
+        // skip succeeded spaces if any
         ch = src.src[pos];
-        while ((pos < len)&&((ch==0x09)||(ch==0x0A)||(ch==0x0D)||(ch==0x20))) {
+        while ((pos < len)&&((ch==0x20)||(ch==0x09)||(ch==0x0A)||(ch==0x0D))) {
             pos++;
             ch = src.src[pos];
         }
@@ -307,7 +311,7 @@ public class ObjectCache implements ParsingGetObject {
         if (src.src[pos] != 0x52) // 'R'
             return null;
 
-        src.pos = ++pos; // beyound the 'R'
+        src.pos = ++pos; // beyond the 'R'
 
         return new COSReference(obj_id, obj_gen);
     }
@@ -319,47 +323,44 @@ public class ObjectCache implements ParsingGetObject {
         int len = src.length;
         int ch;
         String s = "";
-        int obj_id, obj_gen;
+        int obj_id = 0, obj_gen = 0;
 
         // parse int #1 --------------------------------------------
-        while ((pos < len)&&(src.src[pos] >= 0x30)&&(src.src[pos]<=0x39)) {
-            s += (char)(src.src[pos]);
+        ch = src.src[pos];
+        while ((pos < len)&&(ch >= 0x30)&&(ch <= 0x39)) {
+            obj_id = obj_id*10 + (ch - 0x30);
             pos++; // 0..9
+            ch = src.src[pos];
         }
 
         //check if not a whitespace or EOF
-        ch = src.src[pos];
-        if ((pos >= len)||(!((ch==0x00)||(ch==0x09)||(ch==0x0A)||(ch==0x0D)||(ch==0x20))))
+        if ((pos >= len)||(!((ch==0x20)||(ch==0x09)||(ch==0x0A)||(ch==0x0D)||(ch==0x00))))
             return null;
-        pos++; // skip space
+        pos++; // skip this space
 
-        obj_id = Integer.parseInt(s); // Assign parsed obj_id
-        s = "";
-
-        // skip succeded spaces if any
+        // skip succeeded spaces if any
         ch = src.src[pos];
-        while ((pos < len)&&((ch==0x09)||(ch==0x0A)||(ch==0x0D)||(ch==0x20))) {
+        while ((pos < len)&&((ch==0x20)||(ch==0x09)||(ch==0x0A)||(ch==0x0D))) {
             pos++;
             ch = src.src[pos];
         }
 
         // parse int #2 --------------------------------------------
-        while ((pos < len)&&(src.src[pos] >= 0x30)&&(src.src[pos]<=0x39)) {
-            s += (char)(src.src[pos]);
+        while ((pos < len)&&(ch >= 0x30)&&(ch <= 0x39)) {
+            obj_gen = obj_gen*10 + (ch - 0x30);
             pos++;
+            ch = src.src[pos];
         }
 
         //check if not a whitespace or EOF
-        ch = src.src[pos];
-        if ((pos >= len)||(!((ch==0x00)||(ch==0x09)||(ch==0x0A)||(ch==0x0D)||(ch==0x20))))
+        if ((pos >= len)||(!((ch==0x20)||(ch==0x09)||(ch==0x0A)||(ch==0x0D)||(ch==0x00))))
             return null;
         pos++; // skip space
 
-        obj_gen = Integer.parseInt(s); // Assign parsed obj_gen
 
-        // skip succeded spaces if any
+        // skip succeeded spaces if any
         ch = src.src[pos];
-        while ((pos < len)&&((ch==0x09)||(ch==0x0A)||(ch==0x0D)||(ch==0x20))) {
+        while ((pos < len)&&((ch==0x20)||(ch==0x09)||(ch==0x0A)||(ch==0x0D))) {
             pos++;
             ch = src.src[pos];
         }
@@ -368,7 +369,7 @@ public class ObjectCache implements ParsingGetObject {
         if (!src.checkSignature(pos, PDFKeywords.OBJ)) // 'obj'
             return null;
 
-        src.pos = pos + 3; // beyound the 'obj'
+        src.pos = pos + 3; // beyond the 'obj'
 
         return new COSReference(obj_id, obj_gen);
     }

@@ -44,7 +44,7 @@ public class COSArray extends ArrayList<COSObject> implements COSObject {
         src.skipWS();
 
         while (src.pos < src.length) {
-            if (src.getByte(0) == 0x5D)
+            if (src.src[src.pos] == 0x5D)
                 break; // ']'
             this.add( ObjectCache.parseObject(src, context) );
             src.skipWS();

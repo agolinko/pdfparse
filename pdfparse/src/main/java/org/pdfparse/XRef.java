@@ -129,7 +129,7 @@ public class XRef {
             obj_off = src.fetchUInt();
             obj_gen = src.fetchUInt();
             src.skipWS();
-            if (src.getByte(0) == 0x6E) obj_use = true; // 'n'
+            if (src.src[src.pos] == 0x6E) obj_use = true; // 'n'
             else obj_use = false;
             src.pos++; // skip flag
             if (!obj_use) continue;
@@ -140,7 +140,7 @@ public class XRef {
             addXref(start+i, obj_gen, obj_off);
         }
         src.skipWS();
-        byte b = src.getByte(0);
+        byte b = src.src[src.pos];
         if ((b < 0x30)||(b > 0x39)) break; // not in [0..9] range
         }// while(1)...
     }

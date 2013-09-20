@@ -56,14 +56,14 @@ public final class PDFRawData {
         byte ch;
         while (pos < length) {
             ch = src[pos];
-            if ((ch != 0x00) && (ch != 0x09) && (ch != 0x0A) && (ch != 0x0D) && (ch != 0x20)) {
+            if ((ch != 0x20) && (ch != 0x09) && (ch != 0x0A) && (ch != 0x0D) && (ch != 0x00)) {
                 break;
             }
             pos++;
         }
     }
     public static final boolean isWhitespace(int ch) {
-        return ((ch == 0x00) || (ch == 0x09) || (ch == 0x0A) || (ch == 0x0D) || (ch == 0x20));
+        return ((ch == 0x20) || (ch == 0x09) || (ch == 0x0A) || (ch == 0x0D) || (ch == 0x00));
     }
 
     public final void skipLine() {
@@ -112,7 +112,8 @@ public final class PDFRawData {
         int res = 0;
         this.skipWS();
         while (pos < length) {
-            switch (src[pos]) {
+            byte b = src[pos];
+            switch (b) {
                 case 0x30:
                 case 0x31:
                 case 0x32:
@@ -123,7 +124,7 @@ public final class PDFRawData {
                 case 0x37:
                 case 0x38:
                 case 0x39: // 5..9
-                    res = res * 10 + (src[pos] - 0x30);
+                    res = res * 10 + (b - 0x30);
                     pos++;
                     break;
                 default:
@@ -139,9 +140,9 @@ public final class PDFRawData {
         return res;
     }
 
-    public final byte getByte(int relOffs) {
-        return src[pos + relOffs];
-    }
+    //public final byte getByte(int relOffs) {
+    //    return src[pos + relOffs];
+    //}
 
     // high-order byte first.
     public final int fetchBinaryUInt(int size) throws EParseError {
@@ -226,6 +227,7 @@ public final class PDFRawData {
         if (pos + stream_len > length)
             throw new EParseError("Unexpected end of file (stream object too large)");
 
+        // TODO: Lazy parse (reference + start + len)
         byte[] res = Arrays.copyOfRange(src, pos, pos + stream_len);
         pos += stream_len;
 

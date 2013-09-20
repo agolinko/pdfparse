@@ -88,6 +88,7 @@ public class COSName implements COSObject {
 
 
     private byte[] value;
+    private int hc;
 
     public COSName(PDFRawData src, ParsingContext context) throws EParseError {
         parse(src, context);
@@ -95,11 +96,11 @@ public class COSName implements COSObject {
 
     public COSName(String val) {
         value = val.getBytes(Charset.defaultCharset());
+        hc = Arrays.hashCode(value);
     }
 
     @Override
     public int hashCode() {
-        int hc = Arrays.hashCode(value);
         return hc;
     }
 
@@ -108,11 +109,14 @@ public class COSName implements COSObject {
         if (obj == null) {
             return false;
         }
+        if (this == obj)
+            return true;
+
         if (getClass() != obj.getClass()) {
             return false;
         }
         final COSName other = (COSName) obj;
-        if (!Arrays.equals(this.value, other.value)) {
+        if ((this.hc != other.hc) || !Arrays.equals(this.value, other.value)) {
             return false;
         }
         return true;
@@ -132,7 +136,7 @@ public class COSName implements COSObject {
         byte b, v1, v2;
         boolean stop = false;
 
-        if (src.getByte(0) != 0x2F)
+        if (src.src[src.pos] != 0x2F)
             throw new EParseError("Expected SOLIDUS sign #2F in name object, but got " + Integer.toHexString(src.src[p]));
 
         p++; // skip '/'
@@ -188,6 +192,7 @@ public class COSName implements COSObject {
             value = new byte[p - src.pos];
             System.arraycopy(src.src, src.pos, value, 0, value.length);
             src.pos = p;
+            hc = Arrays.hashCode(value);
             return;
         }
 
@@ -204,8 +209,7 @@ public class COSName implements COSObject {
         }
 
         src.pos = p;
-
-
+        hc = Arrays.hashCode(value);
     }
 
     @Override
