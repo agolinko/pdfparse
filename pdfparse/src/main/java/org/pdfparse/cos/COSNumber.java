@@ -68,14 +68,29 @@ public final class COSNumber implements COSObject {
     }
 
 
-
-
+    /**
+     * {@inheritDoc}
+     */
+    public boolean equals(Object o)
+    {
+        return o instanceof COSNumber && (((COSNumber)o).value == value);
+    }
 
     /**
-     * Returns the primitive <CODE>int</CODE> value of this object.
-     *
-     * @return The value as <CODE>int</CODE>
+     * {@inheritDoc}
      */
+    public int hashCode()
+    {
+        //taken from java.lang.Long
+        return Float.floatToIntBits((float)value);
+    }
+
+
+        /**
+         * Returns the primitive <CODE>int</CODE> value of this object.
+         *
+         * @return The value as <CODE>int</CODE>
+         */
     public int intValue() {
         return (int) value;
     }

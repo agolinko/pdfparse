@@ -20,16 +20,130 @@
 package org.pdfparse;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.pdfparse.cos.COSNumber;
 import org.pdfparse.exception.EParseError;
 
-public class TestCOSNumber {
+import java.util.Random;
+
+public class TestCOSNumber extends Assert{
+
+    Random rnd;
+
+    @Before
+    public void setup() {
+        rnd = new Random();
+    }
 
     private void setData(PDFRawData data, String value) {
         data.src = value.getBytes();
         data.length = data.src.length;
         data.pos = 0;
+    }
+
+    /**
+     * Tests equals() - ensures that the Object.equals() contract is obeyed. These are tested over
+     * a range of arbitrary values to ensure Consistency, Reflexivity, Symmetry, Transitivity and
+     * non-nullity.
+     */
+    @Test
+    public void testEquals()
+    {
+        // Consistency
+        for (int i = -1000; i < 3000; i += 200)
+        {
+            COSNumber test1 = new COSNumber(i);
+            COSNumber test2 = new COSNumber(i);
+            COSNumber test3 = new COSNumber(i);
+
+            // Reflexive (x == x)
+            assertTrue(test1.equals(test1));
+            // Symmetric is preserved ( x==y then y===x)
+            assertTrue(test2.equals(test1));
+            assertTrue(test1.equals(test2));
+            // Transitive (if x==y && y==z then x===z)
+            assertTrue(test1.equals(test2));
+            assertTrue(test2.equals(test3));
+            assertTrue(test1.equals(test3));
+            // Non-nullity
+            assertFalse(test1.equals(null));
+            assertFalse(test2.equals(null));
+            assertFalse(test3.equals(null));
+
+            COSNumber test4 = new COSNumber(i + 1);
+            assertFalse(test4.equals(test1));
+        }
+
+        // Test float values
+
+        // Consistency
+        for (int i = -100000; i < 300000; i += 20000)
+        {
+            float num = i * rnd.nextFloat();
+            COSNumber test1 = new COSNumber(num);
+            COSNumber test2 = new COSNumber(num);
+            COSNumber test3 = new COSNumber(num);
+            // Reflexive (x == x)
+            assertTrue(test1.equals(test1));
+            // Symmetric is preserved ( x==y then y==x)
+            assertTrue(test2.equals(test1));
+            assertTrue(test1.equals(test2));
+            // Transitive (if x==y && y==z then x==z)
+            assertTrue(test1.equals(test2));
+            assertTrue(test2.equals(test3));
+            assertTrue(test1.equals(test3));
+            // Non-nullity
+            assertFalse(test1.equals(null));
+            assertFalse(test2.equals(null));
+            assertFalse(test3.equals(null));
+
+            float nf = Float.intBitsToFloat(Float.floatToIntBits(num)+1);
+            COSNumber test4 = new COSNumber(nf);
+            assertFalse(test4.equals(test1));
+        }
+    }
+
+    /**
+     * Tests hashCode() - ensures that the Object.hashCode() contract is obeyed over a range of
+     * arbitrary values.
+     */
+    @Test
+    public void testHashCode()
+    {
+        for (int i = -1000; i < 3000; i += 200)
+        {
+            COSNumber test1 = new COSNumber(i);
+            COSNumber test2 = new COSNumber(i);
+            assertEquals(test1.hashCode(), test2.hashCode());
+
+            COSNumber test3 = new COSNumber(i + 1);
+            assertFalse(test3.hashCode() == test1.hashCode());
+        }
+        // Float
+        for (int i = -100000; i < 300000; i += 20000)
+        {
+            float num = i * rnd.nextFloat();
+            COSNumber test1 = new COSNumber(num);
+            COSNumber test2 = new COSNumber(num);
+            assertEquals(test1.hashCode(), test2.hashCode());
+
+            float nf = Float.intBitsToFloat(Float.floatToIntBits(num)+1);
+            COSNumber test3 = new COSNumber(nf);
+            assertFalse(test3.hashCode()==test1.hashCode());
+        }
+    }
+
+    @Test
+    public void testIntValue()
+    {
+        for (int i = -100000; i < 300000; i += 20000)
+        {
+            float num = i * rnd.nextFloat();
+            COSNumber testFloat = new COSNumber(num);
+            assertEquals((int) num, testFloat.intValue());
+        }
+
     }
 
     @Test
