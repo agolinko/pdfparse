@@ -81,4 +81,10 @@ public class COSArray extends ArrayList<COSObject> implements COSObject {
          if (obj instanceof COSNumber) return ((COSNumber)obj).intValue();
          else return 0;
     }
+
+    public float getFloat(int idx) {
+        COSObject obj = get(idx);
+        if (obj instanceof COSNumber) return ((COSNumber)obj).floatValue();
+        else return 0;
+    }
 }

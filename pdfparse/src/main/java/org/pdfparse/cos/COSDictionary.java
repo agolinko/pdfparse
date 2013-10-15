@@ -229,6 +229,15 @@ public class COSDictionary extends LinkedHashMap<COSName, COSObject> implements 
         else return def_value;
     }
 
+    public String getNameAsStr(COSName name, ParsingGetObject cache, String def_value) throws EParseError {
+        COSObject obj = this.get(name);
+        if (obj == null) return def_value;
+        if (obj instanceof COSReference)
+            obj = travel(obj, cache);
+        if (obj instanceof COSName) return ((COSName)obj).asString();
+        else return def_value;
+    }
+
     public void setName(COSName name, COSName value) {
        this.put(name, value);
     }
@@ -285,6 +294,22 @@ public class COSDictionary extends LinkedHashMap<COSName, COSObject> implements 
         if (obj == null) return null;
         if (obj instanceof COSReference) return (COSReference)obj;
         else return null;
+    }
+
+    public PDFRectangle getRectangle(COSName name) {
+        COSObject obj = this.get(name);
+        if (obj == null) return null;
+        if (obj instanceof COSArray) {
+            PDFRectangle rect = new PDFRectangle((COSArray)obj);
+            this.put(name, rect); // override existing COSArray with rectangle
+            return rect;
+        }
+        if (obj instanceof PDFRectangle) return (PDFRectangle)obj;
+        else return null;
+    }
+
+    public void setRectangle(COSName name, PDFRectangle value) {
+        this.put(name, value);
     }
 
 }
