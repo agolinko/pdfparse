@@ -10,6 +10,7 @@
 
     <name>PDFParse, a free Java-PDF parsing library</name>
     <description>PDFParse, a free Java-PDF parsing library</description>
+    <packaging>pom</packaging>
 
     <developers>
         <developer>

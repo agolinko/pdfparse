@@ -1,11 +1,22 @@
-pdfparse
-========
+/*
+ * Copyright (c) 2013 Anton Golinko
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA
+ */
 
-The PDFParse library is a free, an open source, sand-alone Java tool for working with PDF documents.
-
-Example:
-
-```java
 package org.pdfparse.examples;
 
 import org.pdfparse.PDFDocCatalog;
@@ -40,6 +51,7 @@ public class PDFInfo {
         System.out.printf("Pages count: %d\r\n", cat.getPagesCount());
         System.out.printf("Version: %s\r\n", cat.getVersion());
         System.out.printf("Language: %s\r\n", cat.getLanguage());
+        System.out.printf("PageLayout: %s\r\n", cat.getPageLayout().toString());
 
     }
 
@@ -47,5 +59,3 @@ public class PDFInfo {
         System.err.println( "Usage: java org.pdfparse.examples.PDFInfo <pdf-file-name>" );
     }
 }
-
-```
