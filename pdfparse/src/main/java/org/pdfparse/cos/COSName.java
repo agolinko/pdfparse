@@ -74,9 +74,48 @@ public class COSName implements COSObject {
     public static final COSName CREATION_DATE = new COSName("/CreationDate");
     public static final COSName MOD_DATE = new COSName("/ModDate");
     public static final COSName TRAPPED = new COSName("/Trapped");
+
     public static final COSName PAGES = new COSName("/Pages");
     public static final COSName METADATA = new COSName("/Metadata");
     public static final COSName COUNT = new COSName("/Count");
+    public static final COSName CATALOG = new COSName("/Catalog");
+    public static final COSName VERSION = new COSName("/Version");
+    public static final COSName LANG = new COSName("/Lang");
+    public static final COSName PAGELAYOUT = new COSName("/PageLayout");
+    public static final COSName PAGEMODE = new COSName("/PageMode");
+
+    // A name object specifying the page layout shall be used when the document is opened:
+    public static final COSName PL_SINGLE_PAGE = new COSName("/SinglePage");
+    public static final COSName PL_ONECOLUMN = new COSName("/OneColumn");
+    public static final COSName PL_TWOCOLUMNLEFT = new COSName("/TwoColumnLeft");
+    public static final COSName PL_TWOCOLUMNRIGHT = new COSName("/TwoColumnRight");
+    public static final COSName PL_TWOPAGELEFT = new COSName("/TwoPageLeft");
+    public static final COSName PL_TWOPAGERIGHT = new COSName("/TwoPageRight");
+
+    // A name object specifying how the document shall be displayed when opened:
+    public static final COSName PM_NONE = new COSName("/UseNone");                 // Neither document outline nor thumbnail images visible
+    public static final COSName PM_OUTLINES = new COSName("/UseOutlines");         // Document outline visible
+    public static final COSName PM_THUMBS = new COSName("/UseThumbs");             // Thumbnail images visible
+    public static final COSName PM_FULLSCREEN = new COSName("/FullScreen");        // Full-screen mode, with no menu bar, window controls, or any other window visible
+    public static final COSName PM_OC = new COSName("/UseOC");                     // (PDF 1.5) Optional content group panel visible
+    public static final COSName PM_ATTACHMENTS = new COSName("/UseAttachments");   // (PDF 1.6) Attachments panel visible
+
+
+    public static final COSName PARENT = new COSName("/PARENT");
+    public static final COSName PAGE = new COSName("/PAGE");
+    public static final COSName MEDIABOX = new COSName("/MediaBox");
+    public static final COSName CROPBOX = new COSName("CropBox");
+
+
+
+
+
+
+
+
+
+
+
 
     public static final COSName FIRST = new COSName("/First");
     public static final COSName N = new COSName("/N");
@@ -97,6 +136,10 @@ public class COSName implements COSObject {
     public COSName(String val) {
         value = val.getBytes(Charset.defaultCharset());
         hc = Arrays.hashCode(value);
+    }
+
+    public String asString() {
+        return new String(value, Charset.defaultCharset());
     }
 
     @Override

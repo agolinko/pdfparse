@@ -32,13 +32,13 @@ public class COSStream extends COSDictionary {
     public COSStream(COSDictionary dict, PDFRawData src, ParsingContext context) throws EParseError {
         super(dict, context);
 
-        data = src.fetchStream(this.getUInt(COSName.LENGTH, context.findObject, 0), true);
+        data = src.fetchStream(this.getUInt(COSName.LENGTH, context.objectCache, 0), true);
     }
 
     @Override
     public void parse(PDFRawData src, ParsingContext context) throws EParseError {
         super.parse(src, context);
-        data = src.fetchStream(this.getUInt(COSName.LENGTH, context.findObject,0), true);
+        data = src.fetchStream(this.getUInt(COSName.LENGTH, context.objectCache,0), true);
     }
     @Override
     public void produce(OutputStream dst, ParsingContext context) throws IOException {

@@ -19,9 +19,11 @@
 
 package org.pdfparse;
 
-import org.pdfparse.cos.COSObject;
-import org.pdfparse.cos.COSReference;
+import org.pdfparse.cos.*;
 
 public interface ParsingGetObject {
     public COSObject getObject (COSReference ref);
+    public COSDictionary getDictionary(COSReference ref);
+    public COSStream getStream(COSReference ref);
+
 }

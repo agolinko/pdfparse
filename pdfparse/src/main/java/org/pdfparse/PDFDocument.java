@@ -48,6 +48,7 @@ public class PDFDocument implements ParsingEvent {
     private COSDictionary dictRoot = null;
 
     private PDFDocInfo documentInfo = null;
+    private PDFDocCatalog documentCatalog = null;
     private byte[][] documentId = {null,null};
     private boolean documentIsEncrypted = false;
     private float documentVersion = 0.0f;
@@ -58,13 +59,13 @@ public class PDFDocument implements ParsingEvent {
        xref = new XRef(context);
        cache = new ObjectCache(xref, data, context);
 
-       context.findObject = cache;
+       context.objectCache = cache;
     }
 
     public void done() {
         cache.done();
         xref.done();
-        context.findObject = null;
+        context.objectCache = null;
     }
 
     public PDFDocument(String filename) throws EParseError, IOException {
@@ -214,34 +215,19 @@ public class PDFDocument implements ParsingEvent {
     }
 
     /**
-     * Return the total page count of the PDF document.
+     * This will get the document CATALOG. This is guaranteed to not return null.
      *
-     * @return The total number of pages in the PDF document.
+     * @return The documents /Root dictionary
      */
-    public int getPagesCount() throws EParseError {
-        if (rootID == null)
-            return 0;
-        if (dictRoot == null)
-          dictRoot = cache.getDictionary(rootID.id, rootID.gen, true);
+    public PDFDocCatalog getDocumentCatalog() throws EParseError {
+        if (documentCatalog == null)
+        {
+            COSDictionary dictRoot;
+            dictRoot = cache.getDictionary(rootID, true);
 
-        if (dictRoot == null) return 0;
-
-        COSReference refRootPages = dictRoot.getReference(COSName.PAGES);
-        COSDictionary dictRootPages = cache.getDictionary(refRootPages, true);
-        return dictRootPages.getUInt(COSName.COUNT, cache, -1);
-    }
-
-    public byte[] getXMLMetadata() throws EParseError {
-        if (dictRoot == null)
-          dictRoot = cache.getDictionary(rootID.id, rootID.gen, true);
-
-        COSReference refMetadata = dictRoot.getReference(COSName.METADATA);
-        if (refMetadata == null)
-            return null;
-        COSStream dictMetadata = cache.getStream(refMetadata, false);
-        if (dictMetadata == null)
-            return null;
-        return dictMetadata.getData();
+            documentCatalog = new PDFDocCatalog(context, dictRoot);
+        }
+        return documentCatalog;
     }
 
     @Override

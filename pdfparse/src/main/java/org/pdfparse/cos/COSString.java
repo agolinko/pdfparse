@@ -290,8 +290,8 @@ public final class COSString implements COSObject {
         }
 
         if (nesting_brackets != 0) {
-            if (context.maxVerbosity)
-                throw new EParseError("Unbalanced brackets and illegal nesting while parsing string object");
+            if (context.checkSyntaxCompliance)
+                context.verbosityLog(ParsingContext.SV_BAD_SYNTAX, "Unbalanced brackets and illegal nesting while parsing string object");
         }
 
         binaryValue = buffer.toByteArray();

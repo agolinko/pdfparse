@@ -166,6 +166,16 @@ public class ObjectCache implements ParsingGetObject {
         }
     }
 
+    @Override
+    public COSDictionary getDictionary(COSReference ref) {
+        return getDictionary(ref.id, ref.gen, true);
+    }
+
+    @Override
+    public COSStream getStream(COSReference ref) {
+        return getStream(ref.id, ref.gen, true);
+    }
+
     public COSDictionary getDictionary(int id, int gen, boolean strict) throws EParseError {
         COSObject obj = this.get(id, gen);
         if (obj instanceof COSDictionary) return (COSDictionary)obj;
