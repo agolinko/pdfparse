@@ -2,6 +2,7 @@ pdfparse
 ========
 
 The PDFParse library is a free, an open source, sand-alone Java tool for working with PDF documents.
+PDFParse currently not supports encrypted files. Yet.
 
 Example:
 
