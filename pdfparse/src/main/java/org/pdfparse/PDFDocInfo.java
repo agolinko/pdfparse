@@ -31,7 +31,7 @@ import java.util.Calendar;
 
 public class PDFDocInfo {
     private COSDictionary info;
-    private ObjectCache cache;
+    private XRef xref;
     private boolean owned;
 
 
@@ -39,9 +39,9 @@ public class PDFDocInfo {
      * Constructor that is used for a preexisting dictionary.
      *
      * @param dic The underlying dictionary.
-     * @param cache Reference to the document cache.
+     * @param xref Reference to the document XRef object.
      */
-    public PDFDocInfo( COSDictionary dic, ObjectCache cache )
+    public PDFDocInfo( COSDictionary dic, XRef xref )
     {
         if (dic == null) {
             dic = new COSDictionary();
@@ -49,7 +49,7 @@ public class PDFDocInfo {
         } else owned = false;
 
         this.info = dic;
-        this.cache = cache;
+        this.xref = xref;
     }
 
     /**
@@ -70,7 +70,7 @@ public class PDFDocInfo {
      */
     public String getTitle() throws EParseError
     {
-        return info.getStr(COSName.TITLE, cache, "");
+        return info.getStr(COSName.TITLE, xref, "");
     }
 
     /**
@@ -91,7 +91,7 @@ public class PDFDocInfo {
      */
     public String getAuthor() throws EParseError
     {
-        return info.getStr( COSName.AUTHOR, cache, "" );
+        return info.getStr( COSName.AUTHOR, xref, "" );
     }
 
     /**
@@ -112,7 +112,7 @@ public class PDFDocInfo {
      */
     public String getSubject() throws EParseError
     {
-        return info.getStr( COSName.SUBJECT, cache, "" );
+        return info.getStr( COSName.SUBJECT, xref, "" );
     }
 
     /**
@@ -133,7 +133,7 @@ public class PDFDocInfo {
      */
     public String getKeywords() throws EParseError
     {
-        return info.getStr( COSName.KEYWORDS, cache, "" );
+        return info.getStr( COSName.KEYWORDS, xref, "" );
     }
 
     /**
@@ -154,7 +154,7 @@ public class PDFDocInfo {
      */
     public String getCreator() throws EParseError
     {
-        return info.getStr( COSName.CREATOR, cache, "" );
+        return info.getStr( COSName.CREATOR, xref, "" );
     }
 
     /**
@@ -175,7 +175,7 @@ public class PDFDocInfo {
      */
     public String getProducer() throws EParseError
     {
-        return info.getStr( COSName.PRODUCER, cache, "" );
+        return info.getStr( COSName.PRODUCER, xref, "" );
     }
 
     /**
@@ -197,7 +197,7 @@ public class PDFDocInfo {
      */
     public Calendar getCreationDate() throws EParseError
     {
-        return info.getDate( COSName.CREATION_DATE, cache, null );
+        return info.getDate( COSName.CREATION_DATE, xref, null );
     }
 
     /**
@@ -219,7 +219,7 @@ public class PDFDocInfo {
      */
     public Calendar getModificationDate() throws EParseError
     {
-        return info.getDate( COSName.MOD_DATE, cache, null );
+        return info.getDate( COSName.MOD_DATE, xref, null );
     }
 
     /**

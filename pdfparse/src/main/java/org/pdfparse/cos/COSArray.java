@@ -46,7 +46,7 @@ public class COSArray extends ArrayList<COSObject> implements COSObject {
         while (src.pos < src.length) {
             if (src.src[src.pos] == 0x5D)
                 break; // ']'
-            this.add( ObjectCache.parseObject(src, context) );
+            this.add( XRef.parseObject(src, context) );
             src.skipWS();
         }
         if (src.pos == src.length)

@@ -34,8 +34,8 @@ import java.nio.channels.FileChannel;
 public class PDFDocument implements ParsingEvent {
     private String filename;
     private String filepath;
+    private boolean loaded;
 
-    private ObjectCache cache;
     private ParsingContext context;
     private XRef xref;
     private PDFRawData data;
@@ -45,7 +45,6 @@ public class PDFDocument implements ParsingEvent {
     private COSReference infoID = null;
 
     private COSDictionary encryption = null;
-    private COSDictionary dictRoot = null;
 
     private PDFDocInfo documentInfo = null;
     private PDFDocCatalog documentCatalog = null;
@@ -56,16 +55,15 @@ public class PDFDocument implements ParsingEvent {
     public PDFDocument() {
        data = new PDFRawData();
        context = new ParsingContext();
-       xref = new XRef(context);
-       cache = new ObjectCache(xref, data, context);
+       xref = new XRef(data, context);
 
-       context.objectCache = cache;
+       context.objectCache = xref;
     }
 
-    public void done() {
-        cache.done();
+    public void close() {
         xref.done();
-        context.objectCache = null;
+        data.src = null;
+        loaded = false;
     }
 
     public PDFDocument(String filename) throws EParseError, IOException {
@@ -203,14 +201,14 @@ public class PDFDocument implements ParsingEvent {
 
         COSDictionary dictInfo;
         try {
-            dictInfo = cache.getDictionary(infoID.id, infoID.gen, false);
+            dictInfo = xref.getDictionary(infoID.id, infoID.gen, false);
         } catch (EParseError e) {
             if (context.errorHandlingPolicy == ParsingContext.EP_THROW_EXCEPTION)
                 throw e;
             dictInfo = null;
         }
 
-        documentInfo = new PDFDocInfo(dictInfo, cache);
+        documentInfo = new PDFDocInfo(dictInfo, xref);
         return documentInfo;
     }
 
@@ -223,7 +221,7 @@ public class PDFDocument implements ParsingEvent {
         if (documentCatalog == null)
         {
             COSDictionary dictRoot;
-            dictRoot = cache.getDictionary(rootID, true);
+            dictRoot = xref.getDictionary(rootID, true);
 
             documentCatalog = new PDFDocCatalog(context, dictRoot);
         }
@@ -274,7 +272,7 @@ public class PDFDocument implements ParsingEvent {
 
     public void dbgDump() {
         //xref.dbgPrintAll();
-        cache.dbgCacheAll();
+        xref.parseAndCacheAll();
         //cache.dbgSaveAllStreams(filepath + File.separator + "[" + filename + "]" );
         //cache.dbgSaveAllObjects(filepath + File.separator + "[" + filename + "]" );
 

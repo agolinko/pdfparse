@@ -63,7 +63,7 @@ public class COSDictionary extends LinkedHashMap<COSName, COSObject> implements 
             src.skipWS();
             COSName name = new COSName(src, context);
             //if ((name.length == 0)||(name[0]!=0x2F)) throw new Error('This token is not a name: ' + name.toString()); // '/'
-            COSObject obj = ObjectCache.parseObject(src, context);
+            COSObject obj = XRef.parseObject(src, context);
             this.put(name, obj);
         }
         throw new EParseError("Reach end of file while parsing dictionary");

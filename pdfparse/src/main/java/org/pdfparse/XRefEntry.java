@@ -19,6 +19,9 @@
 
 package org.pdfparse;
 
+import org.pdfparse.cos.COSObject;
+import org.pdfparse.cos.COSStream;
+
 public class XRefEntry {
     public int id;
     public int gen;
@@ -27,6 +30,9 @@ public class XRefEntry {
     public int indexWithinContainer;
 
     public boolean isCompressed;
+
+    public COSObject cachedObject;
+    public PDFRawData decompressedStreamData;
 
     @Override
     public String toString() {
