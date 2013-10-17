@@ -1,7 +1,7 @@
 pdfparse
 ========
 
-The PDFParse library is a free, an open source, sand-alone Java tool for working with PDF documents.
+The PDFParse library is a free, an open source, lightweight and stand-alone Java tool for working with PDF documents.
 PDFParse currently not supports encrypted files. Yet.
 
 Example:
@@ -41,6 +41,8 @@ public class PDFInfo {
         System.out.printf("Pages count: %d\r\n", cat.getPagesCount());
         System.out.printf("Version: %s\r\n", cat.getVersion());
         System.out.printf("Language: %s\r\n", cat.getLanguage());
+
+        doc.close();
 
     }
 
