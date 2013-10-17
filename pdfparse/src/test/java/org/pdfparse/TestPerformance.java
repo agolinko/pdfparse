@@ -33,7 +33,7 @@ public class TestPerformance {
         PDFDocument pdf;
         pdf = new PDFDocument( data );
         pdf.dbgDump();
-        pdf.done();
+        pdf.close();
     }
 
     public static void main(String[] args)  throws URISyntaxException, IOException {
