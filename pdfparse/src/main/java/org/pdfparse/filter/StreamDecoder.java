@@ -21,6 +21,7 @@
 package org.pdfparse.filter;
 
 
+import org.pdfparse.exception.EDecoderException;
 import org.pdfparse.parser.PDFRawData;
 import org.pdfparse.parser.ParsingContext;
 import org.pdfparse.cos.*;
@@ -81,7 +82,7 @@ public class StreamDecoder {
             }
         } catch (DataFormatException e) {
           decompressor.end();
-          throw new RuntimeException(e);
+          throw new EDecoderException("FlateDecode error", e);
         }
         decompressor.end();
 
@@ -135,7 +136,7 @@ public class StreamDecoder {
                 continue;
             }
             if (ch < '!' || ch > 'u')
-                throw new RuntimeException("Illegal character in ascii85decode");
+                throw new EDecoderException("Illegal character in ascii85decode (#%d)", ch);
             chn[state] = ch - '!';
             ++state;
             if (state == 5) {
@@ -300,7 +301,7 @@ public class StreamDecoder {
                 break;
             default:
                 // Error -- unknown filter type
-                throw new RuntimeException("PNG filter unknown");
+                throw new EDecoderException("PNG filter unknown (%d)", filter);
         }
         curr_in_idx += bytesPerRow;
         curr_out_idx += bytesPerRow;
@@ -379,7 +380,7 @@ public class StreamDecoder {
                     break;
                 default:
                     // Error -- unknown filter type
-                    throw new RuntimeException("PNG filter unknown");
+                    throw new EDecoderException("PNG filter unknown (%d)", filter);
             }
 
             // Swap curr and prior

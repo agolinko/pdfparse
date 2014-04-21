@@ -98,7 +98,7 @@ public class COSDictionary extends LinkedHashMap<COSName, COSObject> implements 
 
     @Override
     public String toString() {
-        return "<< " + String.valueOf(this.size()) + " >>";
+        return String.format("<< %d >>", this.size());
     }
 
     private COSObject travel(COSObject obj, ParsingGetObject cache) throws EParseError {

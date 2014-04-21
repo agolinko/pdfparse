@@ -35,15 +35,15 @@ public class XRefEntry {
 
     @Override
     public String toString() {
-        String s = "#"+String.valueOf(id) + " " +String.valueOf(gen);
+        String s = String.format("#%d %d", id, gen);
 
-        if (isCompressed) s += " [" + String.valueOf(containerObjId) + " + " + String.valueOf(indexWithinContainer) + "]";
-        else s += " [" + String.valueOf(fileOffset) + "]";
+        if (isCompressed) s += String.format(" [%d + %d]", containerObjId, indexWithinContainer);
+        else s += String.format(" [%d]", fileOffset);
         return s;
     }
 
     public byte[] getTextRef() {
-        String s = String.valueOf(id) + " " + String.valueOf(gen) + " R";
+        String s = String.format("%d %d R", id, gen);
         return s.getBytes();
     }
 }

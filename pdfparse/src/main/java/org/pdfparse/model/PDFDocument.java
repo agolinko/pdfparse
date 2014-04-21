@@ -141,7 +141,7 @@ public class PDFDocument implements ParsingEvent {
             throw new EParseError("PDF version is not supported");
         }
 
-        documentVersion = (data.src[data.pos + 5] - '0') + (data.src[data.pos + 7] - '0')*0.1f;
+        documentVersion = (data.src[data.pos + 5] - '0') + (data.src[data.pos + 7] - '0') / 10;
 
 
         // Scan for EOF -----------------------------------------

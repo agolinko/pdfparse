@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2013 Anton Golinko
+ * Copyright (c) 2014 Anton Golinko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,29 +20,26 @@
 
 package org.pdfparse.exception;
 
-import org.pdfparse.exception.EParseError;
+public class EDecoderException extends EParseError {
 
-public class EDateConvertError extends EParseError {
-
-    /**
-     * Creates a new instance of
-     * <code>EParseError</code> without detail message.
-     */
-    public EDateConvertError() {
+    public EDecoderException() {
+        super();
     }
 
-    /**
-     * Constructs an instance of
-     * <code>EParseError</code> with the specified detail message.
-     *
-     * @param msg the detail message.
-     */
-    public EDateConvertError(String msg) {
-        super(msg);
+    public EDecoderException(String message) {
+        super(message);
     }
 
-    public EDateConvertError(String msg, Object... args) {
+    public EDecoderException(Throwable cause) {
+        super(cause);
+    }
+
+    public EDecoderException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public EDecoderException(String msg, Object... args) {
         super(String.format(msg, args));
     }
-}
 
+}

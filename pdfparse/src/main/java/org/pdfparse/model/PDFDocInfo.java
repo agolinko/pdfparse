@@ -296,8 +296,7 @@ public class PDFDocInfo {
                 !value.equals( "False" ) &&
                 !value.equals( "Unknown" ) )
         {
-            throw new RuntimeException( "Valid values for trapped are " +
-                    "'True', 'False', or 'Unknown'" );
+            throw new IllegalArgumentException( "Valid values for trapped are 'True', 'False', or 'Unknown'" );
         }
 
         info.setStr(COSName.TRAPPED, value);

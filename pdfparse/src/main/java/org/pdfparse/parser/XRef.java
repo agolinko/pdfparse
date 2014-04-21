@@ -197,10 +197,11 @@ public class XRef implements ParsingGetObject {
 
     public COSDictionary getDictionary(int id, int gen, boolean strict) throws EParseError {
         COSObject obj = this.getCOSObject(id, gen);
-        if (obj instanceof COSDictionary) return (COSDictionary)obj;
+        if (obj instanceof COSDictionary)
+            return (COSDictionary)obj;
 
         if (strict)
-            throw new EParseError("Dictionary expected for " + String.valueOf(id) + " " + String.valueOf(gen) + " R. But retrieved object is " + obj.getClass().getName());
+            throw new EParseError("Dictionary expected for %d %d R. But retrieved object is %s", id, gen, obj.getClass().getName());
         else return null;
     }
     public COSDictionary getDictionary(COSReference ref, boolean strict) throws EParseError {
@@ -209,10 +210,11 @@ public class XRef implements ParsingGetObject {
 
     public COSStream getStream(int id, int gen, boolean strict) throws EParseError {
         COSObject obj = this.getCOSObject(id, gen);
-        if (obj instanceof COSStream) return (COSStream)obj;
+        if (obj instanceof COSStream)
+            return (COSStream)obj;
 
         if (strict)
-            throw new EParseError("Dictionary expected for " + String.valueOf(id) + " " + String.valueOf(gen) + " R. But retrieved object is " + obj.getClass().getName());
+            throw new EParseError("Stream expected for %d %d R. But retrieved object is %s", id, gen, obj.getClass().getName());
         else return null;
     }
     public COSStream getStream(COSReference ref, boolean strict) throws EParseError {
@@ -282,8 +284,8 @@ public class XRef implements ParsingGetObject {
                     return new COSNumber(src, context);
                 default:
                     if (PDFDefines.DEBUG)
-                        System.out.println("Bytes before error occurs: " + src.dbgPrintBytes());
-                    throw new EParseError("Unknown value token at " + String.valueOf(src.pos));
+                        System.out.printf("Bytes before error occurs: %s\r\n", src.dbgPrintBytes());
+                    throw new EParseError("Unknown value token at %d", src.pos);
             } // switch
         } // while
     }
@@ -358,7 +360,7 @@ public class XRef implements ParsingGetObject {
         int pos = src.pos;
         int len = src.length;
         int ch;
-        String s = "";
+
         int obj_id = 0, obj_gen = 0;
 
         if (pos >= len) return null;
@@ -427,7 +429,7 @@ public class XRef implements ParsingGetObject {
             return;
         }
         if (offs < 0)
-            throw new EParseError(String.format("Negative offset for object id=%d", id));
+            throw new EParseError("Negative offset for object id=%d", id);
 
         XRefEntry obj = new XRefEntry();
         obj.id = id;
@@ -604,7 +606,7 @@ public class XRef implements ParsingGetObject {
                 index.add(new COSNumber(size));
             }
 
-            int row_len = w[0] + w[1] + w[2];
+            //int row_len = w[0] + w[1] + w[2];
 
             //byte[] bstream =  // TODO: implement max verbosity mode
             //    src.fetchStream(curr_trailer.getUInt(COSName.LENGTH, 0), false);
@@ -643,7 +645,7 @@ public class XRef implements ParsingGetObject {
                     default:
                         //throw new EParseError("Invalid iType entry in xref stream");
                         if (PDFDefines.DEBUG)
-                            System.out.println("Invalid iType entry in xref stream: " + String.valueOf(itype) );
+                            System.out.printf("Invalid iType entry in xref stream: %d\r\n", itype );
                         continue;
                     }// switch
                 }// for
@@ -652,7 +654,7 @@ public class XRef implements ParsingGetObject {
             prev = curr_trailer.getInt(COSName.PREV, 0);
             if (prev != 0) {
                 if ((prev < 0) || (prev > src.length))
-                    throw new EParseError("Invalid trailer offset");
+                    throw new EParseError("Invalid trailer offset (%d)", prev);
                 src.pos = prev;
                 trailer_ordering++;
                 continue;

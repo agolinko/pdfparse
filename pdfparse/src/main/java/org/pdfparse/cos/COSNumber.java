@@ -75,6 +75,8 @@ public final class COSNumber implements COSObject {
     public boolean equals(Object o)
     {
         return o instanceof COSNumber && (((COSNumber)o).value == value);
+        // TODO: make decision about precision
+        // return o instanceof COSNumber && (Math.abs(((COSNumber)o).value - value) < 0.000001);
     }
 
     /**

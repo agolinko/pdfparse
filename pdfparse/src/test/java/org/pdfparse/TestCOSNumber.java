@@ -102,7 +102,7 @@ public class TestCOSNumber extends Assert{
 
             float nf = Float.intBitsToFloat(Float.floatToIntBits(num)+1);
             COSNumber test4 = new COSNumber(nf);
-            assertFalse(test4.equals(test1));
+            assertFalse(String.format("%e and %e", num, nf), test4.equals(test1));
         }
     }
 

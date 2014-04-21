@@ -75,7 +75,7 @@ public class COSArray extends ArrayList<COSObject> implements COSObject {
 
     @Override
     public String toString() {
-        return "[ " + String.valueOf(this.size()) + " ]";
+        return String.format("[ %d ]", this.size());
     }
 
     public int getInt(int idx) {

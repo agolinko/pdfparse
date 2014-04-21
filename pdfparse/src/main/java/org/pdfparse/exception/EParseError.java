@@ -27,6 +27,7 @@ public class EParseError extends RuntimeException {
      * <code>EParseError</code> without detail message.
      */
     public EParseError() {
+        super();
     }
 
     /**
@@ -38,4 +39,18 @@ public class EParseError extends RuntimeException {
     public EParseError(String msg) {
         super(msg);
     }
+
+    public EParseError(Throwable cause) {
+        super(cause);
+    }
+
+    public EParseError(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public EParseError(String msg, Object... args) {
+        super(String.format(msg, args));
+    }
+
+
 }

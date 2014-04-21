@@ -39,6 +39,8 @@ import org.pdfparse.exception.*;
  * @author <a href="mailto:ben@benlitchfield.com">Ben Litchfield</a>
  * @version $Revision: 1.14 $
  */
+
+// TODO: rewrite parsing method
 public class DateConverter
 {
     //The Date format is supposed to be the PDF_DATE_FORMAT, but not all PDF documents
@@ -272,7 +274,7 @@ public class DateConverter
                 }
 
                 retval.set(year, month-1, day, hour, minute, second );
-                // PDFBOX-598: PDF dates are only accurate up to a second
+                // PDF dates are only accurate up to a second
                 retval.set(Calendar.MILLISECOND, 0);
             }
             catch( NumberFormatException e )
@@ -292,8 +294,8 @@ public class DateConverter
                 }
                 if( retval == null )
                 {
-                    //we didn't find a valid date format so throw an exception
-                    throw new EDateConvertError( "Error converting date:" + date );
+                    // we didn't find a valid date format so throw an exception
+                    throw new EDateConvertError( "Error converting date: %s", date );
                 }
             }
         }

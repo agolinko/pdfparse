@@ -37,7 +37,7 @@ public class PDFDocCatalog {
 
         if (context.checkSyntaxCompliance) {
             if (!COSName.CATALOG.equals(dic.getName(COSName.TYPE, null)) )
-                context.verbosityLog(ParsingContext.SV_BAD_SYNTAX, "Document catalog sholuld be /Catalog type");
+                context.verbosityLog(ParsingContext.SV_BAD_SYNTAX, "Document catalog should be /Catalog type");
         }
     }
 
