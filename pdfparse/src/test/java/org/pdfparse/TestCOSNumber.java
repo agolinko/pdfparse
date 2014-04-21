@@ -24,6 +24,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.pdfparse.cos.COSNumber;
 import org.pdfparse.exception.EParseError;
+import org.pdfparse.parser.PDFRawData;
+import org.pdfparse.parser.ParsingContext;
 
 import java.util.Random;
 

@@ -21,17 +21,12 @@
 package org.pdfparse.filter;
 
 
-import org.pdfparse.PDFRawData;
-import org.pdfparse.ParsingContext;
+import org.pdfparse.parser.PDFRawData;
+import org.pdfparse.parser.ParsingContext;
 import org.pdfparse.cos.*;
-import org.pdfparse.exception.ENotSupported;
 import org.pdfparse.exception.EParseError;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;

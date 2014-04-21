@@ -19,8 +19,9 @@
 
 package org.pdfparse.cos;
 
-import org.pdfparse.*;
 import org.pdfparse.exception.EParseError;
+import org.pdfparse.parser.PDFRawData;
+import org.pdfparse.parser.ParsingContext;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -33,6 +34,11 @@ public class COSReference implements COSObject {
     public int gen;
 
     public COSReference(int id, int gen) {
+        this.id = id;
+        this.gen = gen;
+    }
+
+    public void set(int id, int gen) {
         this.id = id;
         this.gen = gen;
     }

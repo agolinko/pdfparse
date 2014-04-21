@@ -3,20 +3,20 @@ package org.pdfparse;
 import org.junit.Test;
 import org.junit.Assert;
 import org.pdfparse.exception.EParseError;
+import org.pdfparse.model.PDFDocument;
 
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 
 
 public class FileHandlingTest extends Assert
 {
     @Test(expected=java.io.FileNotFoundException.class)
     public void checkNonExistentFileParse() throws EParseError, IOException, URISyntaxException {
-        URI uri = this.getClass().getResource("/testfiles/").toURI();
+        URI uri = this.getClass().getResource("/malformed_pdfs/").toURI();
         File dir = new File(uri);
 
         PDFDocument pp = new PDFDocument(dir.getAbsolutePath() + "\\nonexistent.pdf");
@@ -28,16 +28,6 @@ public class FileHandlingTest extends Assert
         File file = new File(uri);
 
         PDFDocument pp = new PDFDocument(file);
-    }
-
-
-    @Test
-    public void checkSingleFileParse2() throws EParseError, IOException, URISyntaxException {
-        URI uri = this.getClass().getResource("/testfiles3/source11.pdf").toURI();
-        File file = new File(uri);
-
-        PDFDocument pp = new PDFDocument(file);
-        pp.dbgDump();
     }
 
     @Test
@@ -67,7 +57,16 @@ public class FileHandlingTest extends Assert
         }
     }
 
-    @Test
+    //@Test
+    public void checkSingleFileParse2() throws EParseError, IOException, URISyntaxException {
+        URI uri = this.getClass().getResource("/testfiles3/source11.pdf").toURI();
+        File file = new File(uri);
+
+        PDFDocument pp = new PDFDocument(file);
+        pp.dbgDump();
+    }
+
+    //@Test
     public void checkMassiveOpeningForCrash() throws IOException, URISyntaxException {
         PDFDocument pp;
 
@@ -90,7 +89,7 @@ public class FileHandlingTest extends Assert
         }
     }
 
-    @Test
+   // @Test
     public void checkMassiveOpeningForCrash2() throws EParseError, IOException, URISyntaxException {
         PDFDocument pp;
 

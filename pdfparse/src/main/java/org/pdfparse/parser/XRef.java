@@ -17,20 +17,21 @@
  * USA
  */
 
-package org.pdfparse;
+package org.pdfparse.parser;
 
 
+import org.pdfparse.PDFDefines;
 import org.pdfparse.cos.*;
 import org.pdfparse.exception.EParseError;
 import org.pdfparse.filter.StreamDecoder;
-
-import java.util.*;
+import org.pdfparse.utils.IntObjHashtable;
 
 
 public class XRef implements ParsingGetObject {
     private ParsingContext pContext;
     private PDFRawData pData;
-    private HashMap<Integer, XRefEntry> by_id;
+    //private HashMap<Integer, XRefEntry> by_id;
+    private IntObjHashtable<XRefEntry> by_id;
 
     private int max_id = 0;
     private int max_gen = 0;
@@ -42,7 +43,7 @@ public class XRef implements ParsingGetObject {
     public XRef(PDFRawData pData, ParsingContext pContext) {
         this.pContext = pContext;
         this.pData = pData;
-        by_id = new HashMap<Integer, XRefEntry>();
+        by_id = new IntObjHashtable<XRefEntry>();
     }
 
     public void done() {
@@ -74,9 +75,9 @@ public class XRef implements ParsingGetObject {
         return by_id.get(id);
     }
 
-    public Set<Integer> getIdSet() {
-        return by_id.keySet();
-    }
+//    public Set<Integer> getIdSet() {
+//        return by_id.keySet();
+//    }
 
     public COSObject getCOSObject(int id, int gen) throws EParseError {
         COSReference header;
@@ -97,7 +98,8 @@ public class XRef implements ParsingGetObject {
         if (!x.isCompressed) {
             pData.pos = x.fileOffset;
             //-----
-            header = this.tryFetchIndirectObjHeader(pData);
+
+            header = this.tryFetchIndirectObjHeader(pData, pContext.tmpReference);
             if (header == null)
                 throw new EParseError(String.format("Invalid indirect object header (expected '%d %d obj' @ %d)", id, gen, pData.pos));
             if ((header.id != id)||(header.gen != gen))
@@ -116,7 +118,7 @@ public class XRef implements ParsingGetObject {
         if (cx.cachedObject == null) { // Extract compressed block (stream object)
             pData.pos = cx.fileOffset;
             //-----
-            header = this.tryFetchIndirectObjHeader(pData);
+            header = this.tryFetchIndirectObjHeader(pData, pContext.tmpReference);
             if (header == null)
                 throw new EParseError("Invalid indirect object header");
             if ((header.id != x.containerObjId)||(header.gen != 0))
@@ -352,7 +354,7 @@ public class XRef implements ParsingGetObject {
 
     // if next token is not a object header, function return null (without position changes)
     // else it fetches token and change stream position
-    public static COSReference tryFetchIndirectObjHeader(PDFRawData src) {
+    private static COSReference tryFetchIndirectObjHeader(PDFRawData src, COSReference outHeader) {
         int pos = src.pos;
         int len = src.length;
         int ch;
@@ -412,7 +414,9 @@ public class XRef implements ParsingGetObject {
 
         src.pos = pos + 3; // beyond the 'obj'
 
-        return new COSReference(obj_id, obj_gen);
+        outHeader.set(obj_id, obj_gen);
+
+        return outHeader;
     }
 
     private void addXref(int id, int gen, int offs) throws EParseError {
@@ -565,7 +569,7 @@ public class XRef implements ParsingGetObject {
         while (true) {
             src.skipWS();
 
-            COSReference x = XRef.tryFetchIndirectObjHeader(src);
+            COSReference x = XRef.tryFetchIndirectObjHeader(src, pContext.tmpReference);
             if (x == null)
                 throw new EParseError("Invalid indirect object header");
 
@@ -618,7 +622,8 @@ public class XRef implements ParsingGetObject {
                 start = index.getInt(index_idx++);
                 count = index.getInt(index_idx++);
 
-                for (int i = 0; i < count;) {
+                int i = 0;
+                while (i < count) {
                     if (w[0] != 0) itype = bstream.fetchBinaryUInt(w[0]); else itype = 1; // default value (see specs)
                     if (w[1] != 0) i2 = bstream.fetchBinaryUInt(w[1]); else i2 = 0;
                     if (w[2] != 0) i3 = bstream.fetchBinaryUInt(w[2]); else i3 = 0;
@@ -666,10 +671,15 @@ public class XRef implements ParsingGetObject {
         System.out.printf("Compressed max stream offs: %d\r\n", compressed_max_stream_offs);
 
         XRefEntry xref;
-        for (Integer id : by_id.keySet()) {
-           xref = by_id.get(id);
-           System.out.printf("%d %s\r\n", id.intValue(), xref.toString());
+        int[] keys = by_id.getKeys();
+        for (int i = 0; i<keys.length; i++) {
+            xref = by_id.get(keys[i]);
+            System.out.printf("%d %s\r\n", keys[i], xref.toString());
         }
+//        for (Integer id : by_id.keySet()) {
+//           xref = by_id.get(id);
+//           System.out.printf("%d %s\r\n", id.intValue(), xref.toString());
+//        }
 
     }
 
@@ -737,10 +747,16 @@ public class XRef implements ParsingGetObject {
     public void parseAndCacheAll() {
         XRefEntry xre;
 
-        for (Integer id : this.getIdSet()) {
-            xre = this.getXRefEntry(id);
-            this.getCOSObject(id, xre.gen);
+        int[] keys = by_id.getKeys();
+        for (int i=0; i<keys.length; i++) {
+            xre = this.getXRefEntry(keys[i]);
+            this.getCOSObject(xre.id, xre.gen);
+
         }
+//        for (Integer id : this.getIdSet()) {
+//            xre = this.getXRefEntry(id);
+//            this.getCOSObject(id, xre.gen);
+//        }
     }
 
 }

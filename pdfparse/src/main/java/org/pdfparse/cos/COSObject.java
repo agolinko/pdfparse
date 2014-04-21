@@ -20,8 +20,8 @@
 package org.pdfparse.cos;
 
 import org.pdfparse.exception.EParseError;
-import org.pdfparse.PDFRawData;
-import org.pdfparse.ParsingContext;
+import org.pdfparse.parser.PDFRawData;
+import org.pdfparse.parser.ParsingContext;
 
 import java.io.OutputStream;
 import java.io.IOException;

@@ -27,6 +27,8 @@ import java.io.IOException;
 import java.util.Random;
 
 import org.pdfparse.cos.COSString;
+import org.pdfparse.parser.PDFRawData;
+import org.pdfparse.parser.ParsingContext;
 import org.pdfparse.utils.ByteBuffer;
 
 public class TestCOSString extends Assert {

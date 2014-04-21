@@ -17,13 +17,17 @@
  * USA
  */
 
-package org.pdfparse;
+package org.pdfparse.parser;
 
-import org.pdfparse.cos.*;
+import org.pdfparse.cos.COSDictionary;
 
-public interface ParsingGetObject {
-    public COSObject getObject (COSReference ref);
-    public COSDictionary getDictionary(COSReference ref);
-    public COSStream getStream(COSReference ref);
+public interface ParsingEvent {
+    public final static int CONTINUE = 1;
+    public final static int ABORT_PARSING = 2;
+    public final static int MARK_OBJ = 3;
+
+    public int onTrailerFound(COSDictionary trailer, int ordering);
+    public int onEncryptionDictFound(COSDictionary enc, int ordering);
+    public int onNotSupported(String msg);
 
 }

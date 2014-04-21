@@ -20,6 +20,11 @@
 package org.pdfparse.cos;
 
 import org.pdfparse.*;
+import org.pdfparse.cds.PDFRectangle;
+import org.pdfparse.parser.PDFRawData;
+import org.pdfparse.parser.ParsingContext;
+import org.pdfparse.parser.ParsingGetObject;
+import org.pdfparse.parser.XRef;
 import org.pdfparse.utils.DateConverter;
 import org.pdfparse.exception.EParseError;
 

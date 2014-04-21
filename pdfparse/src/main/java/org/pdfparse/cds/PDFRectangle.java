@@ -17,8 +17,10 @@
  * USA
  */
 
-package org.pdfparse;
+package org.pdfparse.cds;
 
+import org.pdfparse.parser.PDFRawData;
+import org.pdfparse.parser.ParsingContext;
 import org.pdfparse.cos.COSArray;
 import org.pdfparse.cos.COSObject;
 import org.pdfparse.exception.EParseError;

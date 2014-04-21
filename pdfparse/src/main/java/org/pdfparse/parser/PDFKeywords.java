@@ -17,7 +17,7 @@
  * USA
  */
 
-package org.pdfparse;
+package org.pdfparse.parser;
 
 
 public class PDFKeywords {

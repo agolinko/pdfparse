@@ -17,8 +17,9 @@
  * USA
  */
 
-package org.pdfparse;
+package org.pdfparse.model;
 
+import org.pdfparse.cds.PDFRectangle;
 import org.pdfparse.cos.COSDictionary;
 import org.pdfparse.cos.COSName;
 
@@ -31,7 +32,7 @@ import org.pdfparse.cos.COSName;
  * This object is described in the 'Portable Document Format Reference Manual version 1.3'
  * section 6.4 (page 73-81)
  *
- * @see		PDFPageNode
+ * @see        PDFPageNode
  */
 
 public class PDFPage {

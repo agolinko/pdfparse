@@ -19,8 +19,9 @@
 
 package org.pdfparse.cos;
 
-import org.pdfparse.*;
 import org.pdfparse.exception.*;
+import org.pdfparse.parser.PDFRawData;
+import org.pdfparse.parser.ParsingContext;
 
 import java.io.IOException;
 import java.io.OutputStream;

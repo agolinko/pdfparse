@@ -17,8 +17,9 @@
  * USA
  */
 
-package org.pdfparse;
+package org.pdfparse.model;
 
+import org.pdfparse.parser.XRef;
 import org.pdfparse.cos.*;
 import org.pdfparse.exception.EParseError;
 import java.util.Calendar;

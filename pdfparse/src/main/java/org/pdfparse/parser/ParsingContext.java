@@ -17,11 +17,10 @@
  * USA
  */
 
-package org.pdfparse;
+package org.pdfparse.parser;
 
+import org.pdfparse.cos.COSReference;
 import org.pdfparse.utils.ByteBuffer;
-
-import java.io.ByteArrayOutputStream;
 
 
 public class ParsingContext {
@@ -44,12 +43,13 @@ public class ParsingContext {
     public int eofLookupRange = 100;
 
     public ByteBuffer tmpBuffer = new ByteBuffer(1024);
+    public COSReference tmpReference = new COSReference(0, 0);
 
     public ParsingGetObject objectCache;
     public boolean useEncryption;
     public byte[] encryptionKey;
 
-    ParsingContext() {
+    public ParsingContext() {
 
     }
 

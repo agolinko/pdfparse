@@ -17,10 +17,12 @@
  * USA
  */
 
-package org.pdfparse;
+package org.pdfparse.model;
 
 import org.pdfparse.cos.*;
-import org.pdfparse.exception.EParseError;
+import org.pdfparse.exception.*;
+import org.pdfparse.parser.*;
+import org.pdfparse.parser.ParsingContext;
 
 import java.io.File;
 import java.io.FileInputStream;

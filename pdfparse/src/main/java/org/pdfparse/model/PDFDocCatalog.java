@@ -17,9 +17,10 @@
  * USA
  */
 
-package org.pdfparse;
+package org.pdfparse.model;
 
 
+import org.pdfparse.parser.ParsingContext;
 import org.pdfparse.cos.COSDictionary;
 import org.pdfparse.cos.COSName;
 import org.pdfparse.cos.COSReference;

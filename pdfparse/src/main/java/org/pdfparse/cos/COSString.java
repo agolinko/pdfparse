@@ -19,10 +19,11 @@
 
 package org.pdfparse.cos;
 
-import org.pdfparse.*;
 import org.pdfparse.exception.EParseError;
+import org.pdfparse.parser.PDFRawData;
+import org.pdfparse.parser.ParsingContext;
 import org.pdfparse.utils.ByteBuffer;
-import org.pdfparse.utils.IntHashtable;
+import org.pdfparse.utils.IntIntHashtable;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -52,7 +53,7 @@ public final class COSString implements COSObject {
         208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223,
         224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239,
         240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255};
-    static final IntHashtable winansi = new IntHashtable();
+    static final IntIntHashtable winansi = new IntIntHashtable();
 
     static final char pdfEncodingByteToChar[] = {
         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
@@ -71,7 +72,7 @@ public final class COSString implements COSObject {
         208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223,
         224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239,
         240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255};
-    static final IntHashtable pdfEncoding = new IntHashtable();
+    static final IntIntHashtable pdfEncoding = new IntIntHashtable();
     static {
         for (int k = 128; k < 161; ++k) {
             char c = winansiByteToChar[k];
@@ -378,7 +379,7 @@ public final class COSString implements COSObject {
             if (b != null)
                 return b;
          }
-        IntHashtable hash = null;
+        IntIntHashtable hash = null;
         if (encoding.equals(BaseFont.WINANSI))
             hash = winansi;
         else if (encoding.equals(PdfObject.TEXT_PDFDOCENCODING))

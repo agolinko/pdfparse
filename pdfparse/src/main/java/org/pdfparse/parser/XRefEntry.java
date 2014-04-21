@@ -17,10 +17,9 @@
  * USA
  */
 
-package org.pdfparse;
+package org.pdfparse.parser;
 
 import org.pdfparse.cos.COSObject;
-import org.pdfparse.cos.COSStream;
 
 public class XRefEntry {
     public int id;

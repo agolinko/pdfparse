@@ -17,8 +17,9 @@
  * USA
  */
 
-package org.pdfparse;
+package org.pdfparse.parser;
 
+import org.pdfparse.PDFDefines;
 import org.pdfparse.exception.EParseError;
 import org.pdfparse.utils.ByteBuffer;
 

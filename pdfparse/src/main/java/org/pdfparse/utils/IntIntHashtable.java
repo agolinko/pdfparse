@@ -47,7 +47,7 @@ import java.util.NoSuchElementException;
  * @author Bruno Lowagie (change Objects as keys into int values)
  * @author Paulo Soares (added extra methods)
  */
-public class IntHashtable implements Cloneable {
+public class IntIntHashtable implements Cloneable {
 
     /***
      * The hash table data.
@@ -78,7 +78,7 @@ public class IntHashtable implements Cloneable {
      * <p>Constructs a new, empty hashtable with a default capacity and load
      * factor, which is <code>20</code> and <code>0.75</code> respectively.</p>
      */
-    public IntHashtable() {
+    public IntIntHashtable() {
         this(150, 0.75f);
     }
 
@@ -90,7 +90,7 @@ public class IntHashtable implements Cloneable {
      * @throws IllegalArgumentException if the initial capacity is less
      *   than zero.
      */
-    public IntHashtable(int initialCapacity) {
+    public IntIntHashtable(int initialCapacity) {
         this(initialCapacity, 0.75f);
     }
 
@@ -103,7 +103,7 @@ public class IntHashtable implements Cloneable {
      * @throws IllegalArgumentException  if the initial capacity is less
      *             than zero, or if the load factor is nonpositive.
      */
-    public IntHashtable(int initialCapacity, float loadFactor) {
+    public IntIntHashtable(int initialCapacity, float loadFactor) {
         super();
         if (initialCapacity < 0) {
             throw new IllegalArgumentException(String.format("Illegal capacity %d", initialCapacity));
@@ -465,7 +465,7 @@ public class IntHashtable implements Cloneable {
     @Override
     public Object clone() {
     	try {
-    		IntHashtable t = (IntHashtable)super.clone();
+            IntIntHashtable t = (IntIntHashtable)super.clone();
     		t.table = new Entry[table.length];
     		for (int i = table.length ; i-- > 0 ; ) {
     			t.table[i] = table[i] != null
