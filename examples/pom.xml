@@ -2,17 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <artifactId>pdfparse</artifactId>
-        <groupId>org.pdfparse</groupId>
-        <version>1.0-SNAPSHOT</version>
-        <relativePath>../pdfparse/pom.xml</relativePath>
-    </parent>
     <modelVersion>4.0.0</modelVersion>
-
-    <artifactId>pdfparse-examples</artifactId>
-
-    <packaging>pom</packaging>
+    
+    <groupId>org.pdfparse</groupId>
+    <artifactId>examples</artifactId>
+    <version>1.0</version>
+    
     <name>PDFParse examples</name>
     <description>
         The PDFParse library is an open source Java tool for working with PDF documents.
@@ -23,7 +18,7 @@
     <dependencies>
         <dependency>
             <groupId>org.pdfparse</groupId>
-            <artifactId>pdfparse</artifactId>
+            <artifactId>pdfparse-lib</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

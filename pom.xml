@@ -5,12 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.pdfparse</groupId>
-    <artifactId>pdfparse-lib</artifactId>
+    <artifactId>pdfparse</artifactId>
     <version>1.0</version>
 
     <name>PDFParse</name>
     <description>PDFParse, a free Java-PDF parsing library</description>
-
+    
+    <packaging>pom</packaging>
 
     <developers>
         <developer>
@@ -19,6 +20,11 @@
             <email>anton.golinko@gmail.com</email>
         </developer>
     </developers>
+
+    <modules>
+        <module>pdfparse-lib</module>
+        <module>examples</module>
+    </modules>
 
     <dependencies>
         <dependency>

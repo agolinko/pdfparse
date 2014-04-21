@@ -1,5 +1,6 @@
 /.idea
 /pdfparse/target
 /pdfparse/*.iml
+/examples/*.iml
 
 *.class
