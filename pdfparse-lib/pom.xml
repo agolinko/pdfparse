@@ -8,7 +8,7 @@
     <artifactId>pdfparse-lib</artifactId>
     <version>1.0</version>
 
-    <name>PDFParse</name>
+    <name>PDFParse-lib</name>
     <description>PDFParse, a free Java-PDF parsing library</description>
 
 
