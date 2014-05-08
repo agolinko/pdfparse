@@ -30,6 +30,8 @@ import java.util.Arrays;
 
 
 public class COSName implements COSObject {
+    public static final COSName EMPTY = new COSName("/");
+
     public static final COSName PREV = new COSName("/Prev");
     public static final COSName XREFSTM = new COSName("/XRefStm");
     public static final COSName LENGTH = new COSName("/Length");
@@ -106,6 +108,8 @@ public class COSName implements COSObject {
     public static final COSName PAGE = new COSName("/PAGE");
     public static final COSName MEDIABOX = new COSName("/MediaBox");
     public static final COSName CROPBOX = new COSName("CropBox");
+    public static final COSName KIDS = new COSName("Kids");
+
 
 
 
@@ -187,11 +191,7 @@ public class COSName implements COSObject {
 
         while ((p <= len) && !stop) {
             b = src.src[p];
-
-            if (b < 0) {
-                if (context.errorHandlingPolicy == ParsingContext.EP_THROW_EXCEPTION)
-                    throw new EParseError("Illegal character in name token");
-            }
+            context.softAssertFormatError(b >= 0, "Illegal character in name token");
 
             switch (b) {
                 // Whitespace

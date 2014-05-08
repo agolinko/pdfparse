@@ -169,16 +169,6 @@ public class PDFDocument implements ParsingEvent {
 
     }
 
-    public void setErrorHandlingPolicy(int policy) {
-        if ((policy < 0) || (policy > 3))
-            throw new IllegalArgumentException("Policy should be between 0 and 3");
-
-        context.errorHandlingPolicy = policy;
-    }
-    public int getErrorHandlingPolicy() {
-        return context.errorHandlingPolicy;
-    }
-
     /**
      * Tell if this document is encrypted or not.
      *
@@ -244,15 +234,16 @@ public class PDFDocument implements ParsingEvent {
 
             if (Ids != null) {
                 if (Ids.size() != 2) {
-                    if ((context.errorHandlingPolicy == ParsingContext.EP_THROW_EXCEPTION) || documentIsEncrypted)
+                    if (documentIsEncrypted)
                         throw new EParseError("Invalid document ID array size (should be 2)");
+                    context.softAssertSyntaxComliance(false, "Invalid document ID array size (should be 2)");
+
                     Ids = null;
                 } else {
                     if ((Ids.get(0) instanceof COSString) && (Ids.get(1) instanceof COSString)) {
                         documentId[0] = ((COSString)Ids.get(0)).getBinaryValue();
                         documentId[1] = ((COSString)Ids.get(1)).getBinaryValue();
-                    } else if (context.errorHandlingPolicy == ParsingContext.EP_THROW_EXCEPTION)
-                        throw new EParseError("Invalid document ID");
+                    } else context.softAssertSyntaxComliance(false, "Invalid document ID");
                 }
             } // Ids != null
         }

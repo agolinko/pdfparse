@@ -20,23 +20,17 @@
 package org.pdfparse.parser;
 
 import org.pdfparse.cos.COSReference;
+import org.pdfparse.exception.EParseError;
 import org.pdfparse.utils.ByteBuffer;
-
 
 public class ParsingContext {
     public final static int EP_THROW_EXCEPTION = 0;
-    public final static int EP_TRY_RECOVER = 1;
-
-    public final static int SV_BAD_SYNTAX = 0;
-    public final static int SV_WARNING = 10;
-    public final static int SV_ERROR = 20;
-
-
     public int errorHandlingPolicy = EP_THROW_EXCEPTION;
 
-    public boolean checkSyntaxCompliance = false;
-    public boolean tryRecoverErrors = false;
-    public boolean ignoreErrors = false;
+    private boolean checkSyntaxCompliance = false;
+    private boolean ignoreErrors = false;
+    private boolean ignoreBasicSyntaxErrors = false;
+
 
     public boolean allowScan = true;
     public int headerLookupRange = 100;
@@ -53,8 +47,28 @@ public class ParsingContext {
 
     }
 
-    public void verbosityLog(int severity, String message) {
-        System.out.println(message);
+    public void checkAndLog(boolean canContinue, String message) {
+       if (canContinue)
+           System.err.println(message);
+       else
+           throw new EParseError(message);
     }
 
+    public boolean softAssertSyntaxComliance(boolean condition, String message) {
+        if (!condition)
+            checkAndLog(checkSyntaxCompliance, message);
+        return condition;
+    }
+
+    public boolean softAssertFormatError(boolean condition, String message) {
+        if (!condition)
+            checkAndLog(ignoreBasicSyntaxErrors, message);
+        return condition;
+    }
+
+    public boolean softAssertStructure(boolean condition, String message) {
+        if (!condition)
+            checkAndLog(ignoreErrors, message);
+        return condition;
+    }
 }

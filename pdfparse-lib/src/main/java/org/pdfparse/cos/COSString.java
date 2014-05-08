@@ -290,10 +290,7 @@ public final class COSString implements COSObject {
             src.pos++;
         }
 
-        if (nesting_brackets != 0) {
-            if (context.checkSyntaxCompliance)
-                context.verbosityLog(ParsingContext.SV_BAD_SYNTAX, "Unbalanced brackets and illegal nesting while parsing string object");
-        }
+        context.softAssertSyntaxComliance(nesting_brackets == 0, "Unbalanced brackets and illegal nesting while parsing string object");
 
         binaryValue = buffer.toByteArray();
         value = convertToString(binaryValue);

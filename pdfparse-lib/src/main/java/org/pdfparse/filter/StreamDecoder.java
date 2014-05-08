@@ -264,9 +264,7 @@ public class StreamDecoder {
             return in_out;
         }
 
-        if (in_out.length < bytesPerPixel + 1) {
-            if (context.errorHandlingPolicy == ParsingContext.EP_THROW_EXCEPTION)
-                throw new EParseError("Data to small for decoding PNG prediction");
+        if (!context.softAssertFormatError(in_out.length > bytesPerPixel, "Data to small for decoding PNG prediction") ) {
             return in_out;
         }
 

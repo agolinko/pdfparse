@@ -500,8 +500,7 @@ public class XRef implements ParsingGetObject {
             obj_off = src.fetchUInt();
             obj_gen = src.fetchUInt();
             src.skipWS();
-            if (src.src[src.pos] == 0x6E) obj_use = true; // 'n'
-            else obj_use = false;
+            obj_use = (src.src[src.pos] == 0x6E);   // 'n'
             src.pos++; // skip flag
             if (!obj_use) continue;
 

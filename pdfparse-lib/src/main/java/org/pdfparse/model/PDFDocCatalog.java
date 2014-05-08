@@ -20,25 +20,21 @@
 package org.pdfparse.model;
 
 
+import org.pdfparse.cos.*;
 import org.pdfparse.parser.ParsingContext;
-import org.pdfparse.cos.COSDictionary;
-import org.pdfparse.cos.COSName;
-import org.pdfparse.cos.COSReference;
-import org.pdfparse.cos.COSStream;
+import java.util.ArrayList;
 
 public class PDFDocCatalog {
     private COSDictionary dRoot;
     private COSDictionary dPages;
     private ParsingContext context;
+    private ArrayList<PDFPage> pages;
 
     public PDFDocCatalog(ParsingContext context, COSDictionary dic) {
         dRoot = dic;
         this.context = context;
 
-        if (context.checkSyntaxCompliance) {
-            if (!COSName.CATALOG.equals(dic.getName(COSName.TYPE, null)) )
-                context.verbosityLog(ParsingContext.SV_BAD_SYNTAX, "Document catalog should be /Catalog type");
-        }
+        context.softAssertSyntaxComliance(COSName.CATALOG.equals(dic.getName(COSName.TYPE, null)), "Document catalog should be /Catalog type");
     }
 
 
@@ -52,9 +48,55 @@ public class PDFDocCatalog {
      * @return The total number of pages in the PDF document.
      */
     public int getPagesCount() {
-        COSReference refRootPages = dRoot.getReference(COSName.PAGES);
-        dPages = context.objectCache.getDictionary(refRootPages);
-        return dPages.getUInt(COSName.COUNT, context.objectCache, -1);
+        if (pages == null) {
+            COSReference refRootPages = dRoot.getReference(COSName.PAGES);
+            dPages = context.objectCache.getDictionary(refRootPages);
+            return dPages.getUInt(COSName.COUNT, context.objectCache, -1);
+        };
+
+        return pages.size();
+    }
+    private void loadPage(COSReference cosReference) {
+        COSDictionary dict = context.objectCache.getDictionary(cosReference);
+        if (dict.getName(COSName.TYPE, COSName.EMPTY).equals(COSName.PAGES)) {
+            loadPages(dict); // This is a page node
+            return;
+        }
+
+        this.pages.add( new PDFPage(dict) );
+    }
+
+    private void loadPages(COSDictionary pages) {
+        context.softAssertStructure(
+                pages.getName(COSName.TYPE, COSName.EMPTY).equals(COSName.PAGES),
+                "This dictionary should be /Type = /Pages");
+
+
+        COSArray kids = pages.getArray(COSName.KIDS, context.objectCache, null);
+        if (!context.softAssertStructure(kids != null, "Required entry '/Kids' not found")) {
+            return; // will be zero pages
+        }
+
+        for (int i=0; i<kids.size(); i++) {
+            COSObject ref = kids.get(i);
+
+            if (context.softAssertStructure(ref instanceof COSReference, "/Kids element should be a reference"))
+                loadPage((COSReference)ref);
+        }
+    }
+
+    public ArrayList<PDFPage> getPages() {
+        if (pages != null)
+            return pages;
+
+        getPagesCount();
+        loadPages(dPages);
+
+        if (pages == null) {
+
+        }
+
+        return pages;
     }
 
     /**

@@ -38,7 +38,6 @@ public class PDFPageNode {
 
     private COSDictionary dPageNode;
 
-
     /**
      * Creates a new instance of PDPage.
      */
