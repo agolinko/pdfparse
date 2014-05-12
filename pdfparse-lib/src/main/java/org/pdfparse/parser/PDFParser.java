@@ -114,8 +114,8 @@ public class PDFParser implements ParsingGetObject {
             throw new EParseError("PDF version is not supported");
         }
 
-        float documentVersion = (src.src[src.pos + 5] - '0') + (src.src[src.pos + 7] - '0') / 10;
-        parsingEvent.onDocumentVersionFound(documentVersion);
+        double documentVersion = (src.src[src.pos + 5] - '0') + (src.src[src.pos + 7] - '0') / 10.0;
+        parsingEvent.onDocumentVersionFound((float)documentVersion);
 
 
         // Scan for EOF -----------------------------------------

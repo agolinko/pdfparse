@@ -31,6 +31,9 @@ import java.util.Arrays;
 
 public class COSName implements COSObject {
     public static final COSName EMPTY = new COSName("/");
+    public  static final COSName UNKNOWN = new COSName("/Unknown");
+    public  static final COSName TRUE = new COSName("/True");
+    public  static final COSName FALSE = new COSName("/False");
 
     public static final COSName PREV = new COSName("/Prev");
     public static final COSName XREFSTM = new COSName("/XRefStm");

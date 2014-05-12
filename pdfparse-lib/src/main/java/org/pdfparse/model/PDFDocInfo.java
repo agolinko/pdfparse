@@ -235,13 +235,13 @@ public class PDFDocInfo {
 
     /**
      * This will get the trapped value for the document.
-     * This will return null if one is not found.
+     * This will return COSName.UNKNOWN if one is not found.
      *
      * @return The trapped value for the document.
      */
-    public String getTrapped()
+    public COSName getTrapped()
     {
-        return info.getStr( COSName.TRAPPED, null );
+        return info.getName(COSName.TRAPPED, COSName.UNKNOWN);
     }
 
     /**

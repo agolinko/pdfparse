@@ -148,6 +148,10 @@ public class PDFDocument implements ParsingEvent {
         return documentCatalog;
     }
 
+    public float getDocumentVersion() {
+        return documentVersion;
+    }
+
     @Override
     public int onTrailerFound(COSDictionary trailer, int ordering) {
         if (ordering == 0) {
