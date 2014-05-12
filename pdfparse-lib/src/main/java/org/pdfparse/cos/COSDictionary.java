@@ -21,10 +21,10 @@ package org.pdfparse.cos;
 
 import org.pdfparse.*;
 import org.pdfparse.cds.PDFRectangle;
+import org.pdfparse.parser.PDFParser;
 import org.pdfparse.parser.PDFRawData;
 import org.pdfparse.parser.ParsingContext;
 import org.pdfparse.parser.ParsingGetObject;
-import org.pdfparse.parser.XRef;
 import org.pdfparse.utils.DateConverter;
 import org.pdfparse.exception.EParseError;
 
@@ -68,7 +68,7 @@ public class COSDictionary extends LinkedHashMap<COSName, COSObject> implements 
             src.skipWS();
             COSName name = new COSName(src, context);
             //if ((name.length == 0)||(name[0]!=0x2F)) throw new Error('This token is not a name: ' + name.toString()); // '/'
-            COSObject obj = XRef.parseObject(src, context);
+            COSObject obj = PDFParser.parseObject(src, context);
             this.put(name, obj);
         }
         throw new EParseError("Reach end of file while parsing dictionary");

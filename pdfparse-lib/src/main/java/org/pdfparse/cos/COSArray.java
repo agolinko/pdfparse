@@ -22,7 +22,7 @@ package org.pdfparse.cos;
 import org.pdfparse.exception.EParseError;
 import org.pdfparse.parser.PDFRawData;
 import org.pdfparse.parser.ParsingContext;
-import org.pdfparse.parser.XRef;
+import org.pdfparse.parser.PDFParser;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -48,7 +48,7 @@ public class COSArray extends ArrayList<COSObject> implements COSObject {
         while (src.pos < src.length) {
             if (src.src[src.pos] == 0x5D)
                 break; // ']'
-            this.add( XRef.parseObject(src, context) );
+            this.add( PDFParser.parseObject(src, context) );
             src.skipWS();
         }
         if (src.pos == src.length)

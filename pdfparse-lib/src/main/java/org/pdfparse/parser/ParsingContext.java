@@ -24,9 +24,6 @@ import org.pdfparse.exception.EParseError;
 import org.pdfparse.utils.ByteBuffer;
 
 public class ParsingContext {
-    public final static int EP_THROW_EXCEPTION = 0;
-    public int errorHandlingPolicy = EP_THROW_EXCEPTION;
-
     private boolean checkSyntaxCompliance = false;
     private boolean ignoreErrors = false;
     private boolean ignoreBasicSyntaxErrors = false;

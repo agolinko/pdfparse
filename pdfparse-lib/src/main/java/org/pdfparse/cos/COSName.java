@@ -112,22 +112,14 @@ public class COSName implements COSObject {
 
 
 
-
-
-
-
-
-
-
-
-
-
     public static final COSName FIRST = new COSName("/First");
     public static final COSName N = new COSName("/N");
 
-
-
-
+    private static final int[] HEX = { // '0'..'f'
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, -1, -1, -1, -1, -1, -1,
+            -1, 10, 11, 12, 13, 14, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, 10, 11, 12, 13, 14, 15};
 
 
 
@@ -244,8 +236,8 @@ public class COSName implements COSObject {
         cnt = 0;
         for (i=src.pos; i<p; i++) {
             if (src.src[i] == 0x23) {
-                v1 = (byte)PDFRawData.HEX[src.src[i+1] - 0x30];
-                v2 = (byte)PDFRawData.HEX[src.src[i+2] - 0x30];
+                v1 = (byte)HEX[src.src[i+1] - 0x30];
+                v2 = (byte)HEX[src.src[i+2] - 0x30];
                 value[cnt++] = (byte) ((v1<<4)&(v2&0xF));
                 i +=2; //agh!!!!!
             } else

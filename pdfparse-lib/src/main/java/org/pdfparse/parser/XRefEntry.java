@@ -22,10 +22,6 @@ package org.pdfparse.parser;
 import org.pdfparse.cos.COSObject;
 
 public class XRefEntry {
-    public enum ElementKind { OTHER, ATOMIC,
-        DOCUMENT_CATALOG, DOCUMENT_INFO, ENCRYPTION_DIC, XREF_STRM, OBJECT_STRM,
-        PAGE_NODE, PAGE, CONTENT_STRM};
-
     public int id;
     public int gen;
     public int fileOffset;
@@ -37,15 +33,16 @@ public class XRefEntry {
     public COSObject cachedObject;
     public PDFRawData decompressedStreamData;
 
-    public ElementKind kind = ElementKind.OTHER;
-
     @Override
     public String toString() {
-        String s;
+        String s, name = "";
+        if (cachedObject != null)
+            name = cachedObject.getClass().getName();
+
         if (isCompressed) {
-            s = String.format("%d %d R)/%s @ [%d + %d]", id, gen, kind.name(), containerObjId, indexWithinContainer);
+            s = String.format("(%d %d R)/%s @ [%d + %d]", id, gen, name, containerObjId, indexWithinContainer);
         } else {
-            s = String.format("%d %d R)/%s @ %d", id, gen, kind.name(), fileOffset);
+            s = String.format("(%d %d R)/%s @ %d", id, gen, name, fileOffset);
         };
         return s;
     }

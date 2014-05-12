@@ -22,6 +22,7 @@ package org.pdfparse.filter;
 
 
 import org.pdfparse.exception.EDecoderException;
+import org.pdfparse.parser.PDFParser;
 import org.pdfparse.parser.PDFRawData;
 import org.pdfparse.parser.ParsingContext;
 import org.pdfparse.cos.*;
@@ -224,7 +225,7 @@ public class StreamDecoder {
 
     public static PDFRawData decodeStream(PDFRawData src, COSDictionary dic, ParsingContext context) throws EParseError {
         byte[] bstream =  // TODO: implement max verbosity mode
-            src.fetchStream(dic.getUInt(COSName.LENGTH, 0), false);
+            PDFParser.fetchStream(src, dic.getUInt(COSName.LENGTH, 0), false);
         return decodeStream(bstream, dic, context);
 
     }

@@ -39,9 +39,7 @@ public class PDFDocument implements ParsingEvent {
     private boolean loaded;
 
     private ParsingContext context;
-    private XRef xref;
-    private PDFRawData data;
-
+    private PDFParser pdfParser;
 
     private COSReference rootID = null;
     private COSReference infoID = null;
@@ -55,16 +53,11 @@ public class PDFDocument implements ParsingEvent {
     private float documentVersion = 0.0f;
 
     public PDFDocument() {
-       data = new PDFRawData();
        context = new ParsingContext();
-       xref = new XRef(data, context);
-
-       context.objectCache = xref;
     }
 
     public void close() {
-        xref.done();
-        data.src = null;
+        pdfParser.done();
         loaded = false;
     }
 
@@ -85,88 +78,28 @@ public class PDFDocument implements ParsingEvent {
         this.filename = "internal";
         this.filepath = "internal";
 
-        data.src = buffer;
-        data.pos = 0;
-        data.length = buffer.length;
-
-        open(data);
+        open(buffer);
     }
 
     private void open(File file) throws EParseError, IOException {
         this.filename = file.getName();
         this.filepath = file.getParent();
 
-
         FileInputStream fin = new FileInputStream(file);
         FileChannel channel = fin.getChannel();
 
-        data.src = new byte[(int) file.length()];
-        data.pos = 0;
-        data.length = (int) file.length();
-
-        ByteBuffer bb = ByteBuffer.wrap(data.src);
+        byte[] barray = new byte[(int) file.length()];
+        ByteBuffer bb = ByteBuffer.wrap(barray);
         bb.order(ByteOrder.BIG_ENDIAN);
         channel.read(bb);
 
-
-        open(data);
-
+        open(barray);
     }
 
-    private void open(PDFRawData data) throws EParseError {
-
-
-        if (data.length < 10) {
-            throw new EParseError("This is not a valid PDF file");
-        }
-
-        // Check the PDF header & version -----------------------
-        data.pos = 0;
-        if (  !( data.checkSignature(PDFKeywords.PDF_HEADER) || data.checkSignature(PDFKeywords.FDF_HEADER) ) ) {
-            if (!context.allowScan)
-                throw new EParseError("This is not a PDF file");
-
-            while ( !(data.checkSignature(PDFKeywords.PDF_HEADER) || data.checkSignature(PDFKeywords.FDF_HEADER))
-                    && (data.pos < context.headerLookupRange) && (data.pos < data.length) ) data.pos++;
-
-            if (  !(data.checkSignature(PDFKeywords.PDF_HEADER) || data.checkSignature(PDFKeywords.FDF_HEADER)) )
-                throw new EParseError("This is not a PDF file (PDF header not found)");
-        }
-
-        if (data.length - data.pos < 10)
-            throw new EParseError("This is not a valid PDF file");
-
-
-        if ((data.src[data.pos + 5] != '1') || (data.src[data.pos + 7] < '1') || (data.src[data.pos + 7] > '8')) {
-            throw new EParseError("PDF version is not supported");
-        }
-
-        documentVersion = (data.src[data.pos + 5] - '0') + (data.src[data.pos + 7] - '0') / 10;
-
-
-        // Scan for EOF -----------------------------------------
-        if (data.reverseScan(data.length, PDFKeywords.EOF, context.eofLookupRange) < 0)
-            throw new EParseError("Missing end of file marker");
-
-        // Scan for 'startxref' marker --------------------------
-        if (data.reverseScan(data.pos, PDFKeywords.STARTXREF, 100) < 0)
-            throw new EParseError("Missing 'startxref' marker");
-
-
-        // Fetch XREF offset ------------------------------------
-        data.pos += 10;
-        data.skipWS();
-
-        int xref_offset = COSNumber.readInteger(data);
-
-        if ((xref_offset == 0) || (xref_offset >= data.length)) {
-            throw new EParseError("Invalid xref offset");
-        }
-
-        data.pos = xref_offset;
-        xref.parse(data, this);
-
-
+    public void open(byte[] buffer) throws EParseError {
+        PDFRawData data = new PDFRawData(buffer);
+        pdfParser = new PDFParser(data, context, this);
+        loaded = true;
     }
 
     /**
@@ -191,16 +124,11 @@ public class PDFDocument implements ParsingEvent {
         if (documentInfo != null)
             return documentInfo;
 
-        COSDictionary dictInfo;
-        try {
-            dictInfo = xref.getDictionary(infoID.id, infoID.gen, false);
-        } catch (EParseError e) {
-            if (context.errorHandlingPolicy == ParsingContext.EP_THROW_EXCEPTION)
-                throw e;
-            dictInfo = null;
-        }
+        COSDictionary dictInfo = null;
+        if (infoID != null)
+            dictInfo = pdfParser.getDictionary(infoID.id, infoID.gen, false);
 
-        documentInfo = new PDFDocInfo(dictInfo, xref);
+        documentInfo = new PDFDocInfo(dictInfo, pdfParser);
         return documentInfo;
     }
 
@@ -213,7 +141,7 @@ public class PDFDocument implements ParsingEvent {
         if (documentCatalog == null)
         {
             COSDictionary dictRoot;
-            dictRoot = xref.getDictionary(rootID, true);
+            dictRoot = pdfParser.getDictionary(rootID, true);
 
             documentCatalog = new PDFDocCatalog(context, dictRoot);
         }
@@ -263,9 +191,14 @@ public class PDFDocument implements ParsingEvent {
         return ParsingEvent.CONTINUE;
     }
 
+    @Override
+    public void onDocumentVersionFound(float version) {
+        this.documentVersion = version;
+    }
+
     public void dbgDump() {
         //xref.dbgPrintAll();
-        xref.parseAndCacheAll();
+        pdfParser.parseAndCacheAll();
         //cache.dbgSaveAllStreams(filepath + File.separator + "[" + filename + "]" );
         //cache.dbgSaveAllObjects(filepath + File.separator + "[" + filename + "]" );
 

@@ -19,20 +19,11 @@
 
 package org.pdfparse.parser;
 
-import org.pdfparse.PDFDefines;
 import org.pdfparse.exception.EParseError;
 import org.pdfparse.utils.ByteBuffer;
 
-import java.util.Arrays;
 
 public final class PDFRawData {
-
-    public static final int[] HEX = { // '0'..'f'
-        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, -1, -1, -1, -1, -1, -1,
-        -1, 10, 11, 12, 13, 14, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        -1, 10, 11, 12, 13, 14, 15};
-
     public byte[] src;
     public int pos;
     public int length;
@@ -217,36 +208,6 @@ public final class PDFRawData {
         }
         pos = scanto;
         return -1;
-    }
-
-    public final byte[] fetchStream(int stream_len, boolean movePosBeyoundEndObj) throws EParseError {
-        skipWS();
-        if (!checkSignature(PDFKeywords.STREAM))
-            throw new EParseError("'stream' keyword not found");
-        pos += PDFKeywords.STREAM.length;
-        skipCRLForLF();
-        if (pos + stream_len > length)
-            throw new EParseError("Unexpected end of file (stream object too large)");
-
-        // TODO: Lazy parse (reference + start + len)
-        byte[] res = Arrays.copyOfRange(src, pos, pos + stream_len);
-        pos += stream_len;
-
-        if (movePosBeyoundEndObj) {
-            byte firstbyte = PDFKeywords.ENDOBJ[0];
-            int max_pos = length - PDFKeywords.ENDOBJ.length;
-            if (max_pos - pos > PDFDefines.MAX_SCAN_RANGE)
-                max_pos = pos + PDFDefines.MAX_SCAN_RANGE;
-            for (int i = pos; i < max_pos; i++)
-                if ((src[i] == firstbyte)&&checkSignature(i, PDFKeywords.ENDOBJ)) {
-                    pos = i + PDFKeywords.ENDOBJ.length;
-                    return res;
-                }
-
-            throw new EParseError("'endobj' tag not found");
-        }
-
-        return res;
     }
 
     public String dbgPrintBytes() {

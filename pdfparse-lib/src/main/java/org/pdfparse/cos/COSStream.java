@@ -20,6 +20,7 @@
 package org.pdfparse.cos;
 
 import org.pdfparse.exception.EParseError;
+import org.pdfparse.parser.PDFParser;
 import org.pdfparse.parser.PDFRawData;
 import org.pdfparse.parser.ParsingContext;
 
@@ -33,13 +34,13 @@ public class COSStream extends COSDictionary {
     public COSStream(COSDictionary dict, PDFRawData src, ParsingContext context) throws EParseError {
         super(dict, context);
 
-        data = src.fetchStream(this.getUInt(COSName.LENGTH, context.objectCache, 0), true);
+        data = PDFParser.fetchStream(src, this.getUInt(COSName.LENGTH, context.objectCache, 0), true);
     }
 
     @Override
     public void parse(PDFRawData src, ParsingContext context) throws EParseError {
         super.parse(src, context);
-        data = src.fetchStream(this.getUInt(COSName.LENGTH, context.objectCache,0), true);
+        data = PDFParser.fetchStream(src, this.getUInt(COSName.LENGTH, context.objectCache,0), true);
     }
     @Override
     public void produce(OutputStream dst, ParsingContext context) throws IOException {
