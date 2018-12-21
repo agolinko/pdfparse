@@ -48,7 +48,7 @@ public class FileHandlingTest extends Assert
             System.out.printf("---- Parsing file: %s ... ", filename);
 
             try {
-                pp = new PDFDocument(dir.getAbsolutePath() + "\\" + filename);
+                pp = new PDFDocument(new File(uri.resolve(filename)));
                 pp.dbgDump();
                 Assert.fail();
             } catch (EParseError e) {
