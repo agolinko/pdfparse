@@ -9,9 +9,9 @@ Example:
 ```java
 package org.pdfparse.examples;
 
-import org.pdfparse.PDFDocCatalog;
-import org.pdfparse.PDFDocInfo;
-import org.pdfparse.PDFDocument;
+import org.pdfparse.model.PDFDocCatalog;
+import org.pdfparse.model.PDFDocInfo;
+import org.pdfparse.model.PDFDocument;
 
 public class PDFInfo {
     public static void main(String[] args) {
