@@ -19,8 +19,6 @@
 
 package org.pdfparse;
 
-import org.pdfparse.model.PDFDocument;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -31,11 +29,10 @@ import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 
 public class TestPerformance {
-    private static void parseFile(byte[] data) throws IOException {
-        PDFDocument pdf;
-        pdf = new PDFDocument( data );
+    private static void parseFile(byte[] data) {
+        PDFLoader pdf;
+        pdf = new PDFLoader( data );
         pdf.dbgDump();
-        pdf.close();
     }
 
     public static void main(String[] args)  throws URISyntaxException, IOException {

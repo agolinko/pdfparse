@@ -4,14 +4,11 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.pdfparse.cos.COSName;
 import org.pdfparse.exception.EParseError;
-import org.pdfparse.model.PDFDocument;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Calendar;
 
 public class ComplexTest extends Assert
 {
@@ -20,7 +17,7 @@ public class ComplexTest extends Assert
         URI uri = this.getClass().getResource("/Creativecommons-what-is-creative-commons_eng.pdf").toURI();
         File file = new File(uri);
 
-        PDFDocument pp = new PDFDocument(file);
+        PDFLoader pp = new PDFLoader(file);
 
         Assert.assertFalse("Is encrypted", pp.isEncrypted());
 
@@ -35,7 +32,8 @@ public class ComplexTest extends Assert
         //Assert.assertEquals("Modified", "", pp.getDocumentInfo().getAuthor());
         Assert.assertEquals("Trapped", COSName.FALSE, pp.getDocumentInfo().getTrapped());
 
-        Assert.assertEquals("Version",  1.4, pp.getDocumentVersion(), 0.01);
+        Assert.assertEquals("MajorVersion",  1, pp.getDocumentMajorVersion());
+        Assert.assertEquals("MinorVersion",  4, pp.getDocumentMinorVersion());
         //Assert.assertEquals("Version2",  1.4, pp.getDocumentCatalog().getVersion(), 0.01);
         Assert.assertEquals("Page count", 1, pp.getDocumentCatalog().getPagesCount());
 
@@ -50,7 +48,7 @@ public class ComplexTest extends Assert
         URI uri = this.getClass().getResource("/loremipsum2.pdf").toURI();
         File file = new File(uri);
 
-        PDFDocument pp = new PDFDocument(file);
+        PDFLoader pp = new PDFLoader(file);
 
         Assert.assertFalse("Is encrypted", pp.isEncrypted());
 
@@ -65,7 +63,8 @@ public class ComplexTest extends Assert
         //Assert.assertEquals("Modified", "", pp.getDocumentInfo().getAuthor());
         Assert.assertEquals("Trapped", COSName.UNKNOWN, pp.getDocumentInfo().getTrapped());
 
-        Assert.assertEquals("Version",  1.5, pp.getDocumentVersion(), 0.01);
+        Assert.assertEquals("MajorVersion",  1, pp.getDocumentMajorVersion());
+        Assert.assertEquals("MinorVersion",  5, pp.getDocumentMinorVersion());
         //Assert.assertEquals("Version2",  1.4, pp.getDocumentCatalog().getVersion(), 0.01);
         Assert.assertEquals("Page count", 3, pp.getDocumentCatalog().getPagesCount());
 

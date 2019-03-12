@@ -77,6 +77,31 @@ public final class PDFRawData {
         }
     }
 
+    /**
+     * Read a line of text -- it reads character by character until a '\n' is
+     * encountered.  If a '\r' is encountered, it is discarded.
+     */
+    public final String readLine() {
+        StringBuilder sb = new StringBuilder();
+
+        while (pos < length) {
+            char ch = (char) src[pos++];
+
+            if (ch == '\r') {
+                if (pos < length && ((char) src[pos] == '\n')) {
+                    pos++;
+                }
+                break;
+            } else if (ch == '\n') {
+                break;
+            }
+
+            sb.append(ch);
+        }
+
+        return sb.toString();
+    }
+
     public final void skipCRLForLF() throws EParseError {
         byte ch;
         ch = src[pos];
@@ -141,7 +166,7 @@ public final class PDFRawData {
         if ((size == 0) || (pos + size > length))
             throw new EParseError("Out of range"); // TODO: special exception
 
-        int r = 0;
+        int r;
         int b;
 
         b = src[pos++];

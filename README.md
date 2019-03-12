@@ -11,7 +11,7 @@ package org.pdfparse.examples;
 
 import org.pdfparse.model.PDFDocCatalog;
 import org.pdfparse.model.PDFDocInfo;
-import org.pdfparse.model.PDFDocument;
+import org.pdfparse.PDFLoader;
 
 public class PDFInfo {
     public static void main(String[] args) {
@@ -22,7 +22,7 @@ public class PDFInfo {
 
         try {
             // Create document object. Open file
-            PDFDocument doc = new PDFDocument(args[0]);
+            PDFLoader doc = new PDFLoader(args[0]);
 
             // Get document structure elements
             PDFDocInfo info = doc.getDocumentInfo();
@@ -49,7 +49,7 @@ public class PDFInfo {
 
     }
 
-    public static void usage() {
+    private static void usage() {
         System.err.println( "Usage: java org.pdfparse.examples.PDFInfo <pdf-file-name>" );
     }
 }

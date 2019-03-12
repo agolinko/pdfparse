@@ -19,9 +19,9 @@
 
 package org.pdfparse.examples;
 
+import org.pdfparse.PDFLoader;
 import org.pdfparse.model.PDFDocCatalog;
 import org.pdfparse.model.PDFDocInfo;
-import org.pdfparse.model.PDFDocument;
 
 public class PDFInfo {
     public static void main(String[] args) {
@@ -32,7 +32,7 @@ public class PDFInfo {
 
         try {
             // Create document object. Open file
-            PDFDocument doc = new PDFDocument(args[0]);
+            PDFLoader doc = new PDFLoader(args[0]);
 
             // Get document structure elements
             PDFDocInfo info = doc.getDocumentInfo();
