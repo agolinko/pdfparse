@@ -20,36 +20,33 @@
 package org.pdfparse.cos;
 
 import org.pdfparse.exception.EParseError;
+import org.pdfparse.parser.PDFParser;
 import org.pdfparse.parser.PDFRawData;
-import org.pdfparse.parser.ParsingContext;
+import org.pdfparse.parser.Token;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 
 
-public class COSReference implements COSObject {
-
-    public int id;
-    public int gen;
-
+public class COSReference extends COSId implements COSObject {
     public COSReference(int id, int gen) {
-        this.id = id;
-        this.gen = gen;
+        super(id, gen);
     }
 
-    public void set(int id, int gen) {
-        this.id = id;
-        this.gen = gen;
-    }
-
-    @Override
-    public void parse(PDFRawData src, ParsingContext context) throws EParseError {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public COSReference(IdGenPair from) {
+        super(from.id, from.gen);
     }
 
     @Override
-    public void produce(OutputStream dst, ParsingContext context) throws IOException {
+    public void parse(PDFRawData src, PDFParser pdfFile) throws EParseError {
+        if (!tryReadId(src, this, Token.R)) {
+            throw new EParseError("Failed to read object reference");
+        }
+    }
+
+    @Override
+    public void produce(OutputStream dst, PDFParser pdfFile) throws IOException {
         String s = String.format("%d %d R", id, gen);
         dst.write(s.getBytes(Charset.defaultCharset()));
     }

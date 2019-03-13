@@ -19,9 +19,9 @@
 
 package org.pdfparse.cos;
 
-import org.pdfparse.exception.*;
+import org.pdfparse.exception.EParseError;
+import org.pdfparse.parser.PDFParser;
 import org.pdfparse.parser.PDFRawData;
-import org.pdfparse.parser.ParsingContext;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -64,8 +64,8 @@ public final class COSNumber implements COSObject {
         isInteger = true;
     }
 
-    public COSNumber(PDFRawData src, ParsingContext context) {
-        parse(src, context);
+    public COSNumber(PDFRawData src, PDFParser pdfFile) {
+        parse(src, pdfFile);
     }
 
 
@@ -127,7 +127,7 @@ public final class COSNumber implements COSObject {
 
 
     @Override
-    public void parse(PDFRawData src, ParsingContext context) throws EParseError {
+    public void parse(PDFRawData src, PDFParser pdfFile) throws EParseError {
         int prev = src.pos;
         float sign = 1;
         float divider = 10;
@@ -201,7 +201,7 @@ public final class COSNumber implements COSObject {
     }
 
     @Override
-    public void produce(OutputStream dst, ParsingContext context) throws IOException {
+    public void produce(OutputStream dst, PDFParser pdfFile) throws IOException {
         dst.write(this.toString().getBytes());
     }
 

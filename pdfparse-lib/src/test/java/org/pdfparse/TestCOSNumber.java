@@ -24,8 +24,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.pdfparse.cos.COSNumber;
 import org.pdfparse.exception.EParseError;
+import org.pdfparse.parser.PDFParser;
 import org.pdfparse.parser.PDFRawData;
-import org.pdfparse.parser.ParsingContext;
 
 import java.util.Random;
 
@@ -152,38 +152,38 @@ public class TestCOSNumber extends Assert{
     public void checkIntStringParse() throws EParseError {
         COSNumber i = new COSNumber(0);
         PDFRawData data = new PDFRawData();
-        ParsingContext context = new ParsingContext();
+        PDFParser pdfFile = new PDFParser(data);
 
         setData(data, "-1");
-        i.parse(data, context);
+        i.parse(data, pdfFile);
         Assert.assertEquals(-1, i.intValue());
 
         setData(data, "0");
-        i.parse(data, context);
+        i.parse(data, pdfFile);
         Assert.assertEquals(0, i.intValue());
 
         setData(data, "-0000");
-        i.parse(data, context);
+        i.parse(data, pdfFile);
         Assert.assertEquals(0, i.intValue());
 
         setData(data, "+1");
-        i.parse(data, context);
+        i.parse(data, pdfFile);
         Assert.assertEquals(+1, i.intValue());
 
         setData(data, "1234567890");
-        i.parse(data, context);
+        i.parse(data, pdfFile);
         Assert.assertEquals(1234567890, i.intValue());
 
         setData(data, "-1234567890");
-        i.parse(data, context);
+        i.parse(data, pdfFile);
         Assert.assertEquals(-1234567890, i.intValue());
 
         setData(data, "+1234567890/");
-        i.parse(data, context);
+        i.parse(data, pdfFile);
         Assert.assertEquals(1234567890, i.intValue());
 
         setData(data, "-123/4567890");
-        i.parse(data, context);
+        i.parse(data, pdfFile);
         Assert.assertEquals(-123, i.intValue());
     }
 
@@ -191,38 +191,38 @@ public class TestCOSNumber extends Assert{
     public void checkFloatStringParse() throws EParseError {
         COSNumber i = new COSNumber(0);
         PDFRawData data = new PDFRawData();
-        ParsingContext context = new ParsingContext();
+        PDFParser pdfFile = new PDFParser(data);
 
         setData(data, "34.5");
-        i.parse(data, context);
+        i.parse(data, pdfFile);
         Assert.assertEquals(34.5, i.floatValue(), 0.01);
 
         setData(data, "-3.62");
-        i.parse(data, context);
+        i.parse(data, pdfFile);
         Assert.assertEquals(-3.62, i.floatValue(), 0.01);
 
         setData(data, "+123.6");
-        i.parse(data, context);
+        i.parse(data, pdfFile);
         Assert.assertEquals(+123.6, i.floatValue(), 0.01);
 
         setData(data, "4.");
-        i.parse(data, context);
+        i.parse(data, pdfFile);
         Assert.assertEquals(4, i.floatValue(), 0.01);
 
         setData(data, "-.002");
-        i.parse(data, context);
+        i.parse(data, pdfFile);
         Assert.assertEquals(-0.002, i.floatValue(), 0.001);
 
         setData(data, "0.0");
-        i.parse(data, context);
+        i.parse(data, pdfFile);
         Assert.assertEquals(0, i.floatValue(), 0.01);
 
         setData(data, "+.002/");
-        i.parse(data, context);
+        i.parse(data, pdfFile);
         Assert.assertEquals(+0.002, i.floatValue(), 0.001);
 
         setData(data, ".001");
-        i.parse(data, context);
+        i.parse(data, pdfFile);
         Assert.assertEquals(0.001, i.floatValue(), 0.001);
     }
 
@@ -230,46 +230,46 @@ public class TestCOSNumber extends Assert{
     public void checkParseWithSeparators() throws EParseError {
         COSNumber i = new COSNumber(0);
         PDFRawData data = new PDFRawData();
-        ParsingContext context = new ParsingContext();
+        PDFParser pdfFile = new PDFParser(data);
 
         setData(data, "-1/");
-        i.parse(data, context);
+        i.parse(data, pdfFile);
         Assert.assertEquals(-1, i.intValue());
 
         setData(data, "-1 [");
-        i.parse(data, context);
+        i.parse(data, pdfFile);
         Assert.assertEquals(-1, i.intValue());
 
         setData(data, "-1]");
-        i.parse(data, context);
+        i.parse(data, pdfFile);
         Assert.assertEquals(-1, i.intValue());
 
         setData(data, "-1{{{");
-        i.parse(data, context);
+        i.parse(data, pdfFile);
         Assert.assertEquals(-1, i.intValue());
 
         setData(data, "-1}}}");
-        i.parse(data, context);
+        i.parse(data, pdfFile);
         Assert.assertEquals(-1, i.intValue());
 
         setData(data, "-1()-33");
-        i.parse(data, context);
+        i.parse(data, pdfFile);
         Assert.assertEquals(-1, i.intValue());
 
         setData(data, "-1))");
-        i.parse(data, context);
+        i.parse(data, pdfFile);
         Assert.assertEquals(-1, i.intValue());
 
         setData(data, "-1<");
-        i.parse(data, context);
+        i.parse(data, pdfFile);
         Assert.assertEquals(-1, i.intValue());
 
         setData(data, "-1>");
-        i.parse(data, context);
+        i.parse(data, pdfFile);
         Assert.assertEquals(-1, i.intValue());
 
         setData(data, "-1%");
-        i.parse(data, context);
+        i.parse(data, pdfFile);
         Assert.assertEquals(-1, i.intValue());
     }
 }

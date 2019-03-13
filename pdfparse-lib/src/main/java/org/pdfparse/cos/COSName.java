@@ -20,8 +20,8 @@
 package org.pdfparse.cos;
 
 import org.pdfparse.exception.EParseError;
+import org.pdfparse.parser.PDFParser;
 import org.pdfparse.parser.PDFRawData;
-import org.pdfparse.parser.ParsingContext;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -129,8 +129,8 @@ public class COSName implements COSObject {
     private byte[] value;
     private int hc;
 
-    public COSName(PDFRawData src, ParsingContext context) throws EParseError {
-        parse(src, context);
+    public COSName(PDFRawData src, PDFParser pdfFile) throws EParseError {
+        parse(src, pdfFile);
     }
 
     public COSName(String val) {
@@ -171,7 +171,7 @@ public class COSName implements COSObject {
     }
 
     @Override
-    public void parse(PDFRawData src, ParsingContext context) throws EParseError {
+    public void parse(PDFRawData src, PDFParser pdfFile) throws EParseError {
         src.skipWS();
         int p = src.pos;
         int len = src.length;
@@ -180,13 +180,13 @@ public class COSName implements COSObject {
         boolean stop = false;
 
         if (src.src[src.pos] != 0x2F)
-            throw new EParseError("Expected SOLIDUS sign #2F in name object, but got " + Integer.toHexString(src.src[p]));
+            throw new EParseError("Expected SOLIDUS sign #2F in name object, but got x" + Integer.toHexString(src.src[p]));
 
         p++; // skip '/'
 
         while ((p <= len) && !stop) {
             b = src.src[p];
-            context.softAssertFormatError(b >= 0, "Illegal character in name token");
+            pdfFile.settings.softAssertFormatError(b >= 0, "Illegal character in name token");
 
             switch (b) {
                 // Whitespace
@@ -252,7 +252,7 @@ public class COSName implements COSObject {
     }
 
     @Override
-    public void produce(OutputStream dst, ParsingContext context) throws IOException {
+    public void produce(OutputStream dst, PDFParser pdfFile) throws IOException {
         int cnt = 0;
         int i;
         for (i=0; i<value.length; i++)

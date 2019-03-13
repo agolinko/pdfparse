@@ -19,8 +19,8 @@
 
 package org.pdfparse.cos;
 
+import org.pdfparse.parser.PDFParser;
 import org.pdfparse.parser.PDFRawData;
-import org.pdfparse.parser.ParsingContext;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -36,12 +36,12 @@ public class COSBool implements COSObject {
     }
 
     @Override
-    public void parse(PDFRawData src, ParsingContext context) {
+    public void parse(PDFRawData src, PDFParser pdfFile) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public void produce(OutputStream dst, ParsingContext context) throws IOException {
+    public void produce(OutputStream dst, PDFParser pdfFile) throws IOException {
         if (value) {
             dst.write(TRUE);
         } else {

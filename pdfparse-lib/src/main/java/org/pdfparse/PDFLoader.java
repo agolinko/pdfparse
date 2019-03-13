@@ -25,7 +25,6 @@ import org.pdfparse.model.PDFDocCatalog;
 import org.pdfparse.model.PDFDocInfo;
 import org.pdfparse.parser.PDFParser;
 import org.pdfparse.parser.PDFRawData;
-import org.pdfparse.parser.ParsingContext;
 import org.pdfparse.parser.ParsingEvent;
 
 import java.io.File;
@@ -33,7 +32,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 public class PDFLoader implements ParsingEvent {
-    private ParsingContext context;
     private PDFParser pdfParser;
 
     private COSReference rootRef = null;
@@ -70,9 +68,8 @@ public class PDFLoader implements ParsingEvent {
     }
 
     private void open(byte[] buffer) throws EParseError {
-        context = new ParsingContext();
         PDFRawData data = new PDFRawData(buffer);
-        pdfParser = new PDFParser(data, context, this);
+        pdfParser = new PDFParser(data, this);
     }
 
     /**
@@ -116,7 +113,7 @@ public class PDFLoader implements ParsingEvent {
             COSDictionary dictRoot;
             dictRoot = pdfParser.getDictionary(rootRef);
 
-            documentCatalog = new PDFDocCatalog(context, dictRoot);
+            documentCatalog = new PDFDocCatalog(pdfParser, dictRoot);
         }
         return documentCatalog;
     }
@@ -143,7 +140,7 @@ public class PDFLoader implements ParsingEvent {
 
     public void dbgDump() {
         //xref.dbgPrintAll();
-        pdfParser.parseAndCacheAll();
+        pdfParser.parseAndDecodeAllObjects();
         //cache.dbgSaveAllStreams(filepath + File.separator + "[" + filename + "]" );
         //cache.dbgSaveAllObjects(filepath + File.separator + "[" + filename + "]" );
 

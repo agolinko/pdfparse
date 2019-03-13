@@ -19,36 +19,14 @@
 
 package org.pdfparse.parser;
 
-
-import org.pdfparse.PDFDefines;
 import org.pdfparse.cos.*;
 import org.pdfparse.exception.EParseError;
 import org.pdfparse.filter.StreamDecoder;
-import org.pdfparse.utils.IntObjHashtable;
 
 import java.util.Arrays;
 import java.util.StringTokenizer;
 
 public class PDFParser implements ParsingGetObject {
-    private static final byte[] OBJ = {0x6F, 0x62, 0x6A};
-    private static final byte[] ENDOBJ = {0x65, 0x6E, 0x64, 0x6F, 0x62, 0x6A};
-
-    private static final byte[] STREAM = {0x73, 0x74, 0x72, 0x65, 0x61, 0x6D};
-    private static final byte[] ENDSTREAM = {0x65, 0x6E, 0x64, 0x73, 0x74, 0x72, 0x65, 0x61, 0x6D};
-
-    private static final byte[] PDF_HEADER = {0x25, 0x50, 0x44, 0x46, 0x2D}; // "%PDF-";
-    private static final byte[] FDF_HEADER = {0x25, 0x46, 0x44, 0x46, 0x2D}; // "%FDF-";
-
-    private static final byte[] EOF = {0x25, 0x25, 0x45, 0x4F, 0x46}; // "%%EOF"
-    private static final byte[] STARTXREF = {0x73, 0x74, 0x61, 0x72, 0x74, 0x78, 0x72, 0x65, 0x66}; // "startxref"
-
-    private static final byte[] XREF = {0x78, 0x72, 0x65, 0x66};
-    private static final byte[] TRAILER = {0x74, 0x72, 0x61, 0x69, 0x6C, 0x65, 0x72};
-
-    private static final int MIN_PDF_RAW_CONTENT_LENGTH = 10;
-    private boolean failFast = true;
-
-    private ParsingContext pContext;
     private PDFRawData pdfData;
     private ParsingEvent parsingEvent;
 
@@ -57,61 +35,58 @@ public class PDFParser implements ParsingGetObject {
     private COSReference encryptID = null;
     private byte[][] documentId = {null,null};
 
-    private IntObjHashtable<XRefEntry> by_id;
+    private XRefTable xref;
 
-    public PDFParser(PDFRawData pData, ParsingContext pContext, ParsingEvent evt) {
-        this.pContext = pContext;
+    public ParseSettings settings;
+
+    public PDFParser(PDFRawData pData) {
+        this.settings = new ParseSettings();
         this.pdfData = pData;
-        this.pContext.objectCache = this;
+        this.xref = new XRefTable(this.settings);
+    }
+    public PDFParser(PDFRawData pData, ParsingEvent evt) {
+        this.settings = new ParseSettings();
+        this.pdfData = pData;
         this.parsingEvent = evt;
-        by_id = new IntObjHashtable<XRefEntry>();
+        this.xref = new XRefTable(this.settings);
+
         parse();
         evt.onDocumentLoaded(rootID, infoID, encryptID);
     }
 
-    public void done() {
-        pContext = null;
-        by_id.clear();
-    }
-
-    public void clear() {
-        by_id.clear();
-    }
-
-
     private void parse() {
         PDFRawData src = pdfData;
 
-        if (src.length < MIN_PDF_RAW_CONTENT_LENGTH) {
+        if (src.length < settings.MIN_PDF_RAW_CONTENT_LENGTH) {
             throw new EParseError("This is not a valid PDF file");
         }
 
         // Check the PDF header & version -----------------------
         src.pos = 0;
-        if (  !( src.checkSignature(PDF_HEADER) || src.checkSignature(FDF_HEADER) ) ) {
-            if (!pContext.allowScan)
+        if (  !( src.checkSignature(Token.PDF_HEADER) || src.checkSignature(Token.FDF_HEADER) ) ) {
+            if (!settings.allowScan)
                 throw new EParseError("This is not a PDF file");
 
             // Scan until found PDF header signature
-            while ( !(src.checkSignature(PDF_HEADER) || src.checkSignature(FDF_HEADER))
-                    && (src.pos < pContext.headerLookupRange) && (src.pos < src.length) ) src.pos++;
+            while ( !(src.checkSignature(Token.PDF_HEADER) || src.checkSignature(Token.FDF_HEADER))
+                    && (src.pos < settings.headerLookupRange) && (src.pos < src.length) ) src.pos++;
 
-            if (  !(src.checkSignature(PDF_HEADER) || src.checkSignature(FDF_HEADER)) )
+            if (  !(src.checkSignature(Token.PDF_HEADER) || src.checkSignature(Token.FDF_HEADER)) )
                 throw new EParseError("This is not a PDF file (PDF header not found)");
         }
 
-        if (src.length - src.pos < MIN_PDF_RAW_CONTENT_LENGTH)
+        if (src.length - src.pos < settings.MIN_PDF_RAW_CONTENT_LENGTH)
             throw new EParseError("This is not a valid PDF file");
 
         String versionLine = src.readLine();
-        processVersion(versionLine.substring(PDF_HEADER.length));
+        processVersion(versionLine.substring(Token.PDF_HEADER.length));
 
         // Scan for EOF -----------------------------------------
-        if (src.reverseScan(src.length, EOF, pContext.eofLookupRange) < 0)
+        if (src.reverseScan(src.length, Token.EOF, settings.eofLookupRange) < 0)
             throw new EParseError("Missing end of file marker");
 
         // Scan for 'startxref' marker --------------------------
-        if (src.reverseScan(src.pos, STARTXREF, 100) < 0)
+        if (src.reverseScan(src.pos, Token.STARTXREF, 100) < 0)
             throw new EParseError("Missing 'startxref' marker");
 
 
@@ -128,7 +103,7 @@ public class PDFParser implements ParsingGetObject {
         src.pos = xref_offset;
 
         src.skipWS();
-        if (src.checkSignature(XREF)) {
+        if (src.checkSignature(Token.XREF)) {
             parseTableAndTrailer(src, parsingEvent);
         } else {
             parseXRefStream(src);
@@ -143,81 +118,86 @@ public class PDFParser implements ParsingGetObject {
             majorVersion = Integer.parseInt(tokens.nextToken());
             minorVersion = Integer.parseInt(tokens.nextToken());
         } catch (Exception e) {
-            if (failFast)
-                throw new EParseError("Failed to parse PDF version");
+            settings.softAssertSyntaxComliance(false, "Failed to parse PDF version");
         }
-        if (failFast) {
-            if (majorVersion != 1 && (minorVersion < 1 || minorVersion > 8))
-                throw new EParseError("PDF version is not supported");
-        }
+
+        settings.softAssertSupportedFeatures(
+                majorVersion == 1 && (minorVersion >= 1 && minorVersion <= 8),
+                "PDF version is not supported");
 
         parsingEvent.onDocumentVersionFound(majorVersion, minorVersion);
     }
 
-    public XRefEntry getXRefEntry(int id) {
-        return by_id.get(id);
+    @Override
+    public COSObject getObject(COSReference ref) {
+        int savepos = pdfData.pos;
+        try {
+            return getCOSObject(ref.id, ref.gen);
+        } finally {
+            pdfData.pos = savepos;
+        }
     }
+    private COSObject getCOSObject(int id, int gen) throws EParseError {
+        XRefEntry x = xref.get(id);
 
-    public COSObject getCOSObject(int id, int gen) throws EParseError {
-        COSReference header;
-
-        XRefEntry x = by_id.get(id);
-
-        if (x == null)
+        if (x == null) {
+            settings.debugMessage("No XRef entry for object %d %d R. Used COSNull instead", id, gen);
             return new COSNull();
+        }
 
         if (x.cachedObject != null)
             return x.cachedObject;
 
         if (x.gen != gen) {
-            if (PDFDefines.DEBUG)
-                System.out.printf("Object with generation %d not found. But there is %d generation number", gen, x.gen);
+            settings.debugMessage("Object with generation %d not found. But there is %d generation number", gen, x.gen);
         }
 
         if (!x.isCompressed) {
             pdfData.pos = x.fileOffset;
             //-----
 
-            header = this.tryFetchIndirectObjHeader(pdfData, pContext.tmpReference);
-            if (header == null)
+
+            if (!IdGenPair.tryReadId(pdfData, pdfData.tmpIdGenPair, Token.OBJ))
                 throw new EParseError(String.format("Invalid indirect object header (expected '%d %d obj' @ %d)", id, gen, pdfData.pos));
-            if ((header.id != id)||(header.gen != gen))
+
+            if ((pdfData.tmpIdGenPair.id != id)||(pdfData.tmpIdGenPair.gen != gen))
                 throw new EParseError(String.format("Object header not correspond data specified in reference (expected '%d %d obj' @ %d)", id, gen, pdfData.pos));
             pdfData.skipWS();
             //-----
-            x.cachedObject = this.parseObject(pdfData, pContext);
+            x.cachedObject = this.parseObject(pdfData);
             return x.cachedObject;
         }
 
         // Compressed ----------------------------------------------------
-        XRefEntry cx = by_id.get(x.containerObjId);
-        if (cx == null)
+        XRefEntry containerXRef = xref.get(x.containerObjId);
+        if (containerXRef == null) {
+            settings.debugMessage("No XRef entry for compressed stream %d 0 R referenced by %d %d R. Used COSNull instead", x.containerObjId, id, gen);
             return new COSNull();
+        }
 
-        if (cx.cachedObject == null) { // Extract compressed block (stream object)
-            pdfData.pos = cx.fileOffset;
+        if (containerXRef.cachedObject == null) { // Extract compressed block (stream object)
+            pdfData.pos = containerXRef.fileOffset;
             //-----
-            header = this.tryFetchIndirectObjHeader(pdfData, pContext.tmpReference);
-            if (header == null)
+            if (!IdGenPair.tryReadId(pdfData, pdfData.tmpIdGenPair, Token.OBJ))
                 throw new EParseError("Invalid indirect object header");
-            if ((header.id != x.containerObjId)||(header.gen != 0))
+            if ((pdfData.tmpIdGenPair.id != x.containerObjId)||(pdfData.tmpIdGenPair.gen != 0))
                 throw new EParseError("Object header not correspond data specified in reference");
             pdfData.skipWS();
             //-----
-            cx.cachedObject = this.parseObject(pdfData, pContext);
+            containerXRef.cachedObject = this.parseObject(pdfData);
 
-            if (! (cx.cachedObject instanceof COSStream))
+            if (! (containerXRef.cachedObject instanceof COSStream))
                 throw new EParseError("Referenced object-container is not stream object");
         }
 
-        COSStream streamObject = (COSStream)cx.cachedObject;
+        COSStream streamObject = (COSStream)containerXRef.cachedObject;
 
         // --- Ok, received streamObject
         // next, decompress its data, and put in cache
-        if (cx.decompressedStreamData == null) {
-            cx.decompressedStreamData = StreamDecoder.decodeStream(streamObject.getData(), streamObject, pContext);
+        if (containerXRef.decompressedStreamData == null) {
+            containerXRef.decompressedStreamData = StreamDecoder.decodeStream(streamObject.getData(), streamObject, this.settings);
         }
-        PDFRawData streamData = cx.decompressedStreamData;
+        PDFRawData streamData = containerXRef.decompressedStreamData;
 
         // -- OK, retrieved from cache decompressed data
         // Parse stream index & content
@@ -232,7 +212,7 @@ public class PDFParser implements ParsingGetObject {
             idxOffset = streamData.fetchUInt();
 
             // check if it is free object
-            idxXRefEntry = this.getXRefEntry(idxId);
+            idxXRefEntry = xref.get(idxId);
             if (idxXRefEntry == null)
                 continue; // this is a free object. skip it
 
@@ -242,7 +222,7 @@ public class PDFParser implements ParsingGetObject {
             savepos = streamData.pos;
 
             streamData.pos = first + idxOffset;
-            idxXRefEntry.cachedObject = this.parseObject(streamData, pContext);
+            idxXRefEntry.cachedObject = this.parseObject(streamData);
             if (idxId == id)
                 obj = idxXRefEntry.cachedObject; // found it
 
@@ -253,28 +233,10 @@ public class PDFParser implements ParsingGetObject {
     }
 
     @Override
-    public COSObject getObject(COSReference ref) {
-        try {
-            int savepos = pdfData.pos;
-            COSObject obj = getCOSObject(ref.id, ref.gen);
-            pdfData.pos = savepos;
-            return obj;
-        } catch (EParseError ex) {
-            return null;
-        }
-    }
-
-    @Override
     public COSDictionary getDictionary(COSReference ref) {
         return getDictionary(ref.id, ref.gen, true);
     }
-
-    @Override
-    public COSStream getStream(COSReference ref) {
-        return getStream(ref.id, ref.gen, true);
-    }
-
-    public COSDictionary getDictionary(int id, int gen, boolean strict) throws EParseError {
+    private COSDictionary getDictionary(int id, int gen, boolean strict) throws EParseError {
         COSObject obj = this.getCOSObject(id, gen);
         if (obj instanceof COSDictionary)
             return (COSDictionary)obj;
@@ -284,7 +246,11 @@ public class PDFParser implements ParsingGetObject {
         else return null;
     }
 
-    public COSStream getStream(int id, int gen, boolean strict) throws EParseError {
+    @Override
+    public COSStream getStream(COSReference ref) {
+        return getStream(ref.id, ref.gen, true);
+    }
+    private COSStream getStream(int id, int gen, boolean strict) throws EParseError {
         COSObject obj = this.getCOSObject(id, gen);
         if (obj instanceof COSStream)
             return (COSStream)obj;
@@ -294,7 +260,7 @@ public class PDFParser implements ParsingGetObject {
         else return null;
     }
 
-    public static COSObject parseObject(PDFRawData src, ParsingContext context) throws EParseError {
+    public COSObject parseObject(PDFRawData src) throws EParseError {
         byte ch;
 
         while(true) {
@@ -312,7 +278,7 @@ public class PDFParser implements ParsingGetObject {
                     src.skipLine();
                     break;
                 case 0x2F: // '/' - name
-                    return new COSName(src, context);
+                    return new COSName(src, this);
                 case 0x74: // 't' - true
                     //assert(StrLComp(pCurr, 'true', 4) = 0, 'It is not a "true"');
                     src.pos += 4;
@@ -326,177 +292,46 @@ public class PDFParser implements ParsingGetObject {
                     src.pos += 4;
                     return new COSNull();
                 case 0x28: // '(' - raw string
-                    return new COSString(src, context);
+                    return new COSString(src, this);
                 case 0x3C: // '<' - hexadecimal string
                     if (src.src[src.pos+1] == 0x3C) { // '<'
-                        COSDictionary dict = new COSDictionary(src, context);
+                        COSDictionary dict = new COSDictionary(src, this);
                         // check for stream object
-                        // TODO: Merge COSDictionary and COSStream into one object(class)
                         src.skipWS();
-                        if (!src.checkSignature(STREAM))
+                        if (!src.checkSignature(Token.STREAM))
                             return dict; // this is COSDictionary only
                         // this is stream object
-                        COSStream stm = new COSStream(dict, src, context);
+                        COSStream stm = new COSStream(dict, src, this);
                         dict.clear();
                         dict = null;
                         return stm;
                     }
                     // this is only Hexadecimal string
-                    return new COSString(src, context);
+                    return new COSString(src, this);
                 case 0x5B: // '[' - array
-                    return new COSArray(src, context);
+                    return new COSArray(src, this);
 
                 case 0x30: case 0x31: case 0x32: case 0x33: case 0x34: // 0..4
                 case 0x35: case 0x36: case 0x37: case 0x38: case 0x39: // 5..9
                 case 0x2B: case 0x2D: case 0x2E: // '+', '-', '.'
-                    COSReference ref = tryFetchReference(src);
-                    if (ref != null)
-                        return ref; // this is a valid reference
-                    return new COSNumber(src, context);
+                    if (IdGenPair.tryReadId(src, src.tmpIdGenPair, Token.R)) {
+                        // this is a valid reference
+                        return new COSReference(src.tmpIdGenPair);
+                    }
+
+                    return new COSNumber(src, this);
                 default:
-                    if (PDFDefines.DEBUG)
-                        System.out.printf("Bytes before error occurs: %s\r\n", src.dbgPrintBytes());
+                    settings.debugMessage("Bytes before error occurs: %s", src.dbgPrintBytes());
                     throw new EParseError("Unknown value token at %d", src.pos);
             } // switch
         } // while
     }
 
-    // if next token is not a reference, function return null (without position changes)
-    // else it fetches token and change stream position
-    private static COSReference tryFetchReference(PDFRawData src) {
-        int pos = src.pos;
-        int len = src.length;
-        int ch;
-        int obj_id = 0, obj_gen = 0;
-
-        if (pos >= len) return null;
-
-        // parse int #1 --------------------------------------------
-        ch = src.src[pos];
-        while ((ch >= 0x30)&&(ch <= 0x39)) {
-            obj_id = obj_id*10 + (ch - 0x30);
-            pos++; // 0..9
-            if (pos >= len) return null;
-            ch = src.src[pos];
-        }
-
-        //check if not a whitespace or EOF
-        if (!((ch==0x20)||(ch==0x09)||(ch==0x0A)||(ch==0x0D)||(ch==0x00)))
-            return null;
-        pos++; // skip this space
-        if (pos >= len) return null;
-
-        // skip succeeded spaces if any
-        ch = src.src[pos];
-        while ((ch==0x20)||(ch==0x09)||(ch==0x0A)||(ch==0x0D)) {
-            pos++;
-            if (pos >= len) return null;
-            ch = src.src[pos];
-        }
-
-        // parse int #2 --------------------------------------------
-        while ((ch >= 0x30)&&(ch <= 0x39)) {
-            obj_gen = obj_gen*10 + (ch - 0x30);
-            pos++;
-            if (pos >= len) return null;
-            ch = src.src[pos];
-        }
-
-        //check if not a whitespace or EOF
-        if (!((ch==0x20)||(ch==0x09)||(ch==0x0A)||(ch==0x0D)||(ch==0x00)))
-            return null;
-        pos++; // skip space
-        if (pos >= len) return null;
-
-        // skip succeeded spaces if any
-        ch = src.src[pos];
-        while ((ch==0x20)||(ch==0x09)||(ch==0x0A)||(ch==0x0D)) {
-            pos++;
-            if (pos >= len) return null;
-            ch = src.src[pos];
-        }
-
-        // check if next char is R ---------------------------------
-        if (src.src[pos] != 0x52) // 'R'
-            return null;
-
-        src.pos = ++pos; // beyond the 'R'
-
-        return new COSReference(obj_id, obj_gen);
-    }
-
-    // if next token is not a object header, function return null (without position changes)
-    // else it fetches token and change stream position
-    private static COSReference tryFetchIndirectObjHeader(PDFRawData src, COSReference outHeader) {
-        int pos = src.pos;
-        int len = src.length;
-        int ch;
-
-        int obj_id = 0, obj_gen = 0;
-
-        if (pos >= len) return null;
-
-        // parse int #1 --------------------------------------------
-        ch = src.src[pos];
-        while ((ch >= 0x30)&&(ch <= 0x39)) {
-            obj_id = obj_id*10 + (ch - 0x30);
-            pos++; // 0..9
-            if (pos >= len) return null;
-            ch = src.src[pos];
-        }
-
-        //check if not a whitespace or EOF
-        if ((!((ch==0x20)||(ch==0x09)||(ch==0x0A)||(ch==0x0D)||(ch==0x00))))
-            return null;
-        pos++; // skip this space
-        if (pos >= len) return null;
-
-        // skip succeeded spaces if any
-        ch = src.src[pos];
-        while ((ch==0x20)||(ch==0x09)||(ch==0x0A)||(ch==0x0D)) {
-            pos++;
-            if (pos >= len) return null;
-            ch = src.src[pos];
-        }
-
-        // parse int #2 --------------------------------------------
-        while ((ch >= 0x30)&&(ch <= 0x39)) {
-            obj_gen = obj_gen*10 + (ch - 0x30);
-            pos++;
-            if (pos >= len) return null;
-            ch = src.src[pos];
-        }
-
-        //check if not a whitespace or EOF
-        if ((!((ch==0x20)||(ch==0x09)||(ch==0x0A)||(ch==0x0D)||(ch==0x00))))
-            return null;
-        pos++; // skip space
-        if (pos >= len) return null;
-
-        // skip succeeded spaces if any
-        ch = src.src[pos];
-        while ((ch==0x20)||(ch==0x09)||(ch==0x0A)||(ch==0x0D)) {
-            pos++;
-            if (pos >= len) return null;
-            ch = src.src[pos];
-        }
-
-        // check if next char is obj ---------------------------------
-        if (!src.checkSignature(pos, OBJ)) // 'obj'
-            return null;
-
-        src.pos = pos + 3; // beyond the 'obj'
-
-        outHeader.set(obj_id, obj_gen);
-
-        return outHeader;
-    }
-
     public static final byte[] fetchStream(PDFRawData src, int stream_len, boolean movePosBeyoundEndObj) throws EParseError {
         src.skipWS();
-        if (!src.checkSignature(STREAM))
+        if (!src.checkSignature(Token.STREAM))
             throw new EParseError("'stream' keyword not found");
-        src.pos += STREAM.length;
+        src.pos += Token.STREAM.length;
         src.skipCRLForLF();
         if (src.pos + stream_len > src.length)
             throw new EParseError("Unexpected end of file (stream object too large)");
@@ -506,13 +341,13 @@ public class PDFParser implements ParsingGetObject {
         src.pos += stream_len;
 
         if (movePosBeyoundEndObj) {
-            byte firstbyte = ENDOBJ[0];
-            int max_pos = src.length - ENDOBJ.length;
-            if (max_pos - src.pos > PDFDefines.MAX_SCAN_RANGE)
-                max_pos = src.pos + PDFDefines.MAX_SCAN_RANGE;
+            byte firstbyte = Token.ENDOBJ[0];
+            int max_pos = src.length - Token.ENDOBJ.length;
+            if (max_pos - src.pos > ParseSettings.MAX_SCAN_RANGE)
+                max_pos = src.pos + ParseSettings.MAX_SCAN_RANGE;
             for (int i = src.pos; i < max_pos; i++)
-                if ((src.src[i] == firstbyte)&&src.checkSignature(i, ENDOBJ)) {
-                    src.pos = i + ENDOBJ.length;
+                if ((src.src[i] == firstbyte)&&src.checkSignature(i, Token.ENDOBJ)) {
+                    src.pos = i + Token.ENDOBJ.length;
                     return res;
                 }
 
@@ -520,36 +355,6 @@ public class PDFParser implements ParsingGetObject {
         }
 
         return res;
-    }
-
-    private void addXref(int id, int gen, int offs) throws EParseError {
-        // Skip invalid or not-used objects (assumed that they are free objects)
-        if (offs == 0) {
-            if (PDFDefines.DEBUG)
-                System.out.printf("XREF: Got object with zero offset. Assumed that this was a free object(%d %d R)\r\n", id, gen);
-            return;
-        }
-
-        XRefEntry xref = new XRefEntry(id, gen, offs, false);
-        XRefEntry old_obj = by_id.get(id);
-
-        if (old_obj == null) {
-            by_id.put(id, xref);
-        } else if (old_obj.gen < gen) {
-            // override only if greater Generation
-            by_id.put(id, xref);
-        }
-    }
-
-    private void addXrefCompressed(int id, int containerId, int indexWithinContainer) throws EParseError {
-        // Skip invalid or not-used objects (assumed that they are free objects)
-        if (containerId > 0) {
-            XRefEntry xref = new XRefEntry(id, containerId, indexWithinContainer, true);
-            by_id.put(id, xref);
-        } else {
-            if (PDFDefines.DEBUG)
-                System.out.printf("XREF: Got containerId which is zero. Assumed that this was a free object (%d 0 R)\r\n", id);
-        }
     }
 
     private void parseTableOnly(PDFRawData src) throws EParseError {
@@ -582,7 +387,7 @@ public class PDFParser implements ParsingGetObject {
             src.pos++; // skip flag
             if (!obj_use) continue;
 
-            addXref(start+n, obj_gen, obj_off);
+            xref.add(start+n, obj_gen, obj_off);
         }
         src.skipWS();
         byte b = src.src[src.pos];
@@ -599,19 +404,19 @@ public class PDFParser implements ParsingGetObject {
         while (prevOffset != 0) {
             src.pos = prevOffset;
             // Parse XREF ---------------------
-            if (!src.checkSignature(XREF))
+            if (!src.checkSignature(Token.XREF))
                 throw new EParseError("This is not an 'xref' table");
-            src.pos += XREF.length;
+            src.pos += Token.XREF.length;
 
             parseTableOnly(src);
             // Parse Trailer ------------------
             src.skipWS();
-            if (!src.checkSignature(TRAILER))
+            if (!src.checkSignature(Token.TRAILER))
                 throw new EParseError("Cannot find 'trailer' tag");
-            src.pos += TRAILER.length;
+            src.pos += Token.TRAILER.length;
             src.skipWS();
 
-            COSDictionary trailer = new COSDictionary(src, pContext);
+            COSDictionary trailer = new COSDictionary(src, this);
             prevOffset = trailer.getInt(COSName.PREV, 0);
 
             if (rootID == null) {
@@ -654,15 +459,14 @@ public class PDFParser implements ParsingGetObject {
         while (true) {
             src.skipWS();
 
-            COSReference x = PDFParser.tryFetchIndirectObjHeader(src, pContext.tmpReference);
-            if (x == null)
+            if (!IdGenPair.tryReadId(src, src.tmpIdGenPair, Token.OBJ))
                 throw new EParseError("Invalid indirect object header");
 
             src.skipWS();
 
 
             //addXRef(65530, 0, trailerOffset);
-            curr_trailer = new COSDictionary(src, pContext);
+            curr_trailer = new COSDictionary(src, this);
 
             // TODO: Mark 'encrypt' objects for removing
 
@@ -689,7 +493,7 @@ public class PDFParser implements ParsingGetObject {
             //    src.fetchStream(curr_trailer.getUInt(COSName.LENGTH, 0), false);
 
             PDFRawData bstream;
-            bstream = StreamDecoder.decodeStream(src, curr_trailer, pContext);
+            bstream = StreamDecoder.decodeStream(src, curr_trailer, this.settings);
 
             int start;
             int count;
@@ -712,17 +516,16 @@ public class PDFParser implements ParsingGetObject {
                         i++; //TODO: mark as free (delete if exist)
                         continue;
                     case 1: // objects that are in use but are not compressed (corresponding to n entries in a cross-reference table).
-                        addXref((start+i), i3, i2);
+                        xref.add((start+i), i3, i2);
                         i++;
                         continue;
                     case 2: // compressed objects.
-                        addXrefCompressed(start+i, i2, i3);
+                        xref.addCompressed(start+i, i2, i3);
                         i++;
                         continue;
                     default:
                         //throw new EParseError("Invalid iType entry in xref stream");
-                        if (PDFDefines.DEBUG)
-                            System.out.printf("Invalid iType entry in xref stream: %d\r\n", itype );
+                        settings.debugMessage("Invalid iType entry in xref stream: %d", itype );
                         continue;
                     }// switch
                 }// for
@@ -745,12 +548,12 @@ public class PDFParser implements ParsingGetObject {
 //        System.out.printf("Compressed max stream id: %d\r\n", compressed_max_stream_id);
 //        System.out.printf("Compressed max stream offs: %d\r\n", compressed_max_stream_offs);
 
-        XRefEntry xref;
-        int[] keys = by_id.getKeys();
-        for (int i = 0; i<keys.length; i++) {
-            xref = by_id.get(keys[i]);
-            System.out.printf("%d %s\r\n", keys[i], xref.toString());
-        }
+//        XRefEntry xref;
+//        int[] keys = by_id.getKeys();
+//        for (int i = 0; i<keys.length; i++) {
+//            xref = by_id.get(keys[i]);
+//            System.out.printf("%d %s\r\n", keys[i], xref.toString());
+//        }
 //        for (Integer id : by_id.keySet()) {
 //           xref = by_id.get(id);
 //           System.out.printf("%d %s\r\n", id.intValue(), xref.toString());
@@ -819,19 +622,11 @@ public class PDFParser implements ParsingGetObject {
 //        }
 //    }
 
-    public void parseAndCacheAll() {
-        XRefEntry xre;
-
-        int[] keys = by_id.getKeys();
-        for (int i=0; i<keys.length; i++) {
-            xre = this.getXRefEntry(keys[i]);
-            this.getCOSObject(xre.id, xre.gen);
-
+    public void parseAndDecodeAllObjects() {
+        for (int key : xref.getKeys()) {
+            XRefEntry entry = xref.get(key);
+            this.getCOSObject(entry.id, entry.gen);
         }
-//        for (Integer id : this.getIdSet()) {
-//            xre = this.getXRefEntry(id);
-//            this.getCOSObject(id, xre.gen);
-//        }
     }
 
 }

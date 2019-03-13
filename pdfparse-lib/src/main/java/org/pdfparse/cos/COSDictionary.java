@@ -19,15 +19,12 @@
 
 package org.pdfparse.cos;
 
-import org.pdfparse.*;
 import org.pdfparse.cds.PDFRectangle;
+import org.pdfparse.exception.EParseError;
 import org.pdfparse.parser.PDFParser;
 import org.pdfparse.parser.PDFRawData;
-import org.pdfparse.parser.ParsingContext;
 import org.pdfparse.parser.ParsingGetObject;
 import org.pdfparse.utils.DateConverter;
-import org.pdfparse.exception.EParseError;
-
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -46,16 +43,16 @@ public class COSDictionary extends LinkedHashMap<COSName, COSObject> implements 
         super();
     }
 
-    public COSDictionary(COSDictionary src, ParsingContext context) {
+    public COSDictionary(COSDictionary src, PDFParser pdfFile) {
         super.putAll(src);
     }
 
-    public COSDictionary(PDFRawData src, ParsingContext context) throws EParseError {
-        parse(src, context);
+    public COSDictionary(PDFRawData src, PDFParser pdfFile) throws EParseError {
+        parse(src, pdfFile);
     }
 
     @Override
-    public void parse(PDFRawData src, ParsingContext context) throws EParseError {
+    public void parse(PDFRawData src, PDFParser pdfFile) throws EParseError {
         //throw new UnsupportedOperationException("Not supported yet.");
         src.pos +=2;
 
@@ -66,30 +63,30 @@ public class COSDictionary extends LinkedHashMap<COSName, COSObject> implements 
             }
 
             src.skipWS();
-            COSName name = new COSName(src, context);
+            COSName name = new COSName(src, pdfFile);
             //if ((name.length == 0)||(name[0]!=0x2F)) throw new Error('This token is not a name: ' + name.toString()); // '/'
-            COSObject obj = PDFParser.parseObject(src, context);
+            COSObject obj = pdfFile.parseObject(src);
             this.put(name, obj);
         }
         throw new EParseError("Reach end of file while parsing dictionary");
     }
 
     @Override
-    public void produce(OutputStream dst, ParsingContext context) throws IOException {
+    public void produce(OutputStream dst, PDFParser pdfFile) throws IOException {
         COSObject obj;
-        if (PDFDefines.PRETTY_PRINT)
+        if (pdfFile.settings.PRETTY_PRINT)
             dst.write(S_OPEN_PP); // "<<\n"
         else dst.write(S_OPEN); // "<<"
 
         for(COSName key: this.keySet()) {
-            key.produce(dst, context);
+            key.produce(dst, pdfFile);
             dst.write(0x20);
             obj = this.get(key);
             if (obj == null)
                 dst.write(S_NULL);
             else
-                obj.produce(dst, context);
-            if (PDFDefines.PRETTY_PRINT)
+                obj.produce(dst, pdfFile);
+            if (pdfFile.settings.PRETTY_PRINT)
                 dst.write(0xA);
         }
 
@@ -101,7 +98,7 @@ public class COSDictionary extends LinkedHashMap<COSName, COSObject> implements 
         return String.format("<< %d >>", this.size());
     }
 
-    private COSObject travel(COSObject obj, ParsingGetObject cache) throws EParseError {
+    private COSObject dereference(COSObject obj, ParsingGetObject cache) throws EParseError {
         int counter = 5;
         while (obj instanceof COSReference) {
             obj = cache.getObject((COSReference)obj);
@@ -141,7 +138,7 @@ public class COSDictionary extends LinkedHashMap<COSName, COSObject> implements 
         COSObject obj = this.get(name);
         if (obj == null) return def_value;
         if (obj instanceof COSReference)
-            obj = travel(obj, cache);
+            obj = dereference(obj, cache);
         if (obj instanceof COSBool) return ((COSBool)obj).value;
         else return def_value;
     }
@@ -161,7 +158,7 @@ public class COSDictionary extends LinkedHashMap<COSName, COSObject> implements 
         COSObject obj = this.get(name);
         if (obj == null) return def_value;
         if (obj instanceof COSReference)
-            obj = travel(obj, cache);
+            obj = dereference(obj, cache);
         if (obj instanceof COSNumber) return ((COSNumber)obj).intValue();
         else return def_value;
     }
@@ -193,7 +190,7 @@ public class COSDictionary extends LinkedHashMap<COSName, COSObject> implements 
         COSObject obj = this.get(name);
         if (obj == null) return def_value;
         if (obj instanceof COSReference)
-            obj = travel(obj, cache);
+            obj = dereference(obj, cache);
         if (obj == null) return def_value;
         if (obj instanceof COSString) return ((COSString)obj).getValue();
         return def_value;
@@ -229,7 +226,7 @@ public class COSDictionary extends LinkedHashMap<COSName, COSObject> implements 
         COSObject obj = this.get(name);
         if (obj == null) return def_value;
         if (obj instanceof COSReference)
-            obj = travel(obj, cache);
+            obj = dereference(obj, cache);
         if (obj instanceof COSName) return (COSName)obj;
         else return def_value;
     }
@@ -238,7 +235,7 @@ public class COSDictionary extends LinkedHashMap<COSName, COSObject> implements 
         COSObject obj = this.get(name);
         if (obj == null) return def_value;
         if (obj instanceof COSReference)
-            obj = travel(obj, cache);
+            obj = dereference(obj, cache);
         if (obj instanceof COSName) return ((COSName)obj).asString();
         else return def_value;
     }
@@ -257,7 +254,7 @@ public class COSDictionary extends LinkedHashMap<COSName, COSObject> implements 
         COSObject obj = this.get(name);
         if (obj == null) return def_value;
         if (obj instanceof COSReference)
-            obj = travel(obj, cache);
+            obj = dereference(obj, cache);
         if (obj instanceof COSArray) return (COSArray)obj;
         else return def_value;
     }
@@ -272,7 +269,7 @@ public class COSDictionary extends LinkedHashMap<COSName, COSObject> implements 
         COSObject obj = this.get(name);
         if (obj == null) return def_value;
         if (obj instanceof COSReference)
-            obj = travel(obj, cache);
+            obj = dereference(obj, cache);
         if (obj instanceof COSDictionary) return (COSDictionary)obj;
         else return def_value;
     }

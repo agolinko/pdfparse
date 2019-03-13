@@ -21,12 +21,11 @@
 package org.pdfparse.filter;
 
 
-import org.pdfparse.exception.EDecoderException;
-import org.pdfparse.parser.PDFParser;
-import org.pdfparse.parser.PDFRawData;
-import org.pdfparse.parser.ParsingContext;
 import org.pdfparse.cos.*;
+import org.pdfparse.exception.EDecoderException;
 import org.pdfparse.exception.EParseError;
+import org.pdfparse.parser.PDFRawData;
+import org.pdfparse.parser.ParseSettings;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Collections;
@@ -38,7 +37,7 @@ import java.util.zip.Inflater;
 public class StreamDecoder {
 
     public static interface FilterHandler{
-        public byte[] decode(byte[] b, COSName filterName, COSObject decodeParams, final COSDictionary streamDictionary, ParsingContext context) throws EParseError;
+        public byte[] decode(byte[] b, COSName filterName, COSObject decodeParams, final COSDictionary streamDictionary, ParseSettings settings) throws EParseError;
     }
 
     private static final Map<COSName, FilterHandler> defaults;
@@ -105,13 +104,13 @@ public class StreamDecoder {
      * @param in the input data
      * @return the decoded data
      */
-    public static byte[] ASCIIHexDecode(final byte in[], ParsingContext context) throws EParseError {
+    public static byte[] ASCIIHexDecode(final byte in[], ParseSettings settings) throws EParseError {
         PDFRawData data = new PDFRawData();
         data.src = in;
         data.length = in.length;
         data.pos = 0;
 
-        return COSString.parseHexStream(data, context);
+        return COSString.parseHexStream(data);
     }
 
     /** Decodes a stream that has the ASCII85Decode filter.
@@ -173,7 +172,7 @@ public class StreamDecoder {
         return out.toByteArray();
     }
 
-    public static PDFRawData decodeStream(byte[] src, COSDictionary dic, ParsingContext context) throws EParseError {
+    public static PDFRawData decodeStream(byte[] src, COSDictionary dic, ParseSettings settings) throws EParseError {
         // Decompress stream
         COSObject objFilter = dic.get(COSName.FILTER);
         if (objFilter != null) {
@@ -190,19 +189,12 @@ public class StreamDecoder {
                 if (fhandler == null)
                     throw new EParseError("Stream filter not supported: " + currFilterName.toString());
 
-                bytes = fhandler.decode(bytes, currFilterName, dic.get(COSName.DECODEPARMS), dic, context);
+                bytes = fhandler.decode(bytes, currFilterName, dic.get(COSName.DECODEPARMS), dic, settings);
             }
-            PDFRawData pd = new PDFRawData();
-            pd.length = bytes.length;
-            pd.pos = 0;
-            pd.src = bytes;
-            return pd;
+            return new PDFRawData(bytes);
         }
-        PDFRawData pd = new PDFRawData();
-        pd.length = src.length;
-        pd.pos = 0;
-        pd.src = src;
-        return pd;
+
+        return new PDFRawData(src);
 
 //            if (filter.equals(COSName.FLATEDECODE)) {
 //               src = FLATEDecode(src);
@@ -223,11 +215,10 @@ public class StreamDecoder {
 //        return pd;
     }
 
-    public static PDFRawData decodeStream(PDFRawData src, COSDictionary dic, ParsingContext context) throws EParseError {
+    public static PDFRawData decodeStream(PDFRawData src, COSDictionary dic, ParseSettings settings) throws EParseError {
         byte[] bstream =  // TODO: implement max verbosity mode
-            PDFParser.fetchStream(src, dic.getUInt(COSName.LENGTH, 0), false);
-        return decodeStream(bstream, dic, context);
-
+                src.readStream(dic.getUInt(COSName.LENGTH, 0), false);
+        return decodeStream(bstream, dic, settings);
     }
 
 
@@ -236,7 +227,7 @@ public class StreamDecoder {
      * @param dic
      * @return a new length
      */
-    public static byte[] decodePredictor (byte in_out[], final COSDictionary dic, ParsingContext context) {
+    public static byte[] decodePredictor (byte in_out[], final COSDictionary dic, ParseSettings settings) {
         int predictor = dic.getInt(COSName.PREDICTOR, -1);
         if (predictor < 0)
             return in_out;
@@ -265,7 +256,7 @@ public class StreamDecoder {
             return in_out;
         }
 
-        if (!context.softAssertFormatError(in_out.length > bytesPerPixel, "Data to small for decoding PNG prediction") ) {
+        if (!settings.softAssertFormatError(in_out.length > bytesPerPixel, "Data to small for decoding PNG prediction") ) {
             return in_out;
         }
 
@@ -397,10 +388,10 @@ public class StreamDecoder {
      * Handles FLATEDECODE filter
      */
     private static class Filter_FLATEDECODE implements FilterHandler{
-        public byte[] decode(byte[] b, COSName filterName, COSObject decodeParams, COSDictionary streamDictionary, ParsingContext context) throws EParseError {
+        public byte[] decode(byte[] b, COSName filterName, COSObject decodeParams, COSDictionary streamDictionary, ParseSettings settings) throws EParseError {
             b = StreamDecoder.FLATEDecode(b);
             if (decodeParams != null)
-                b = StreamDecoder.decodePredictor(b, (COSDictionary)decodeParams, context);
+                b = StreamDecoder.decodePredictor(b, (COSDictionary)decodeParams, settings);
             return b;
         }
     }
@@ -409,8 +400,8 @@ public class StreamDecoder {
      * Handles ASCIIHEXDECODE filter
      */
     private static class Filter_ASCIIHEXDECODE implements FilterHandler{
-        public byte[] decode(byte[] b, COSName filterName, COSObject decodeParams, COSDictionary streamDictionary, ParsingContext context) throws EParseError {
-            b = StreamDecoder.ASCIIHexDecode(b, context);
+        public byte[] decode(byte[] b, COSName filterName, COSObject decodeParams, COSDictionary streamDictionary, ParseSettings settings) throws EParseError {
+            b = StreamDecoder.ASCIIHexDecode(b, settings);
             return b;
         }
     }
@@ -419,7 +410,7 @@ public class StreamDecoder {
      * Handles ASCIIHEXDECODE filter
      */
     private static class Filter_ASCII85DECODE implements FilterHandler{
-        public byte[] decode(byte[] b, COSName filterName, COSObject decodeParams, COSDictionary streamDictionary, ParsingContext context) throws EParseError {
+        public byte[] decode(byte[] b, COSName filterName, COSObject decodeParams, COSDictionary streamDictionary, ParseSettings settings) throws EParseError {
             b = StreamDecoder.ASCII85Decode(b);
             return b;
         }
@@ -429,10 +420,10 @@ public class StreamDecoder {
      * Handles LZWDECODE filter
      */
     private static class Filter_LZWDECODE implements FilterHandler{
-        public byte[] decode(byte[] b, COSName filterName, COSObject decodeParams, COSDictionary streamDictionary, ParsingContext context) throws EParseError {
+        public byte[] decode(byte[] b, COSName filterName, COSObject decodeParams, COSDictionary streamDictionary, ParseSettings settings) throws EParseError {
             b = StreamDecoder.LZWDecode(b);
             if (decodeParams != null)
-                b = StreamDecoder.decodePredictor(b, (COSDictionary)decodeParams, context);
+                b = StreamDecoder.decodePredictor(b, (COSDictionary)decodeParams, settings);
             return b;
         }
     }
@@ -442,7 +433,7 @@ public class StreamDecoder {
      * A filter that doesn't modify the stream at all
      */
     private static class Filter_DoNothing implements FilterHandler{
-        public byte[] decode(byte[] b, COSName filterName, COSObject decodeParams, COSDictionary streamDictionary, ParsingContext context) throws EParseError {
+        public byte[] decode(byte[] b, COSName filterName, COSObject decodeParams, COSDictionary streamDictionary, ParseSettings settings) throws EParseError {
             return b;
         }
     }
@@ -452,7 +443,7 @@ public class StreamDecoder {
      */
     private static class Filter_RUNLENGTHDECODE implements FilterHandler{
 
-        public byte[] decode(byte[] b, COSName filterName, COSObject decodeParams, COSDictionary streamDictionary, ParsingContext context) throws EParseError {
+        public byte[] decode(byte[] b, COSName filterName, COSObject decodeParams, COSDictionary streamDictionary, ParseSettings settings) throws EParseError {
          // allocate the output buffer
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             byte dupCount = -1;

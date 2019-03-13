@@ -20,9 +20,8 @@
 package org.pdfparse.cos;
 
 import org.pdfparse.exception.EParseError;
-import org.pdfparse.parser.PDFRawData;
-import org.pdfparse.parser.ParsingContext;
 import org.pdfparse.parser.PDFParser;
+import org.pdfparse.parser.PDFRawData;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -35,20 +34,20 @@ public class COSArray extends ArrayList<COSObject> implements COSObject {
         super();
     }
 
-    public COSArray(PDFRawData src, ParsingContext context) throws EParseError {
+    public COSArray(PDFRawData src, PDFParser pdfFile) throws EParseError {
         super();
-        parse(src, context);
+        parse(src, pdfFile);
     }
 
     @Override
-    public void parse(PDFRawData src, ParsingContext context) throws EParseError {
+    public void parse(PDFRawData src, PDFParser pdfFile) throws EParseError {
         src.pos++; // Skip '['
         src.skipWS();
 
         while (src.pos < src.length) {
             if (src.src[src.pos] == 0x5D)
                 break; // ']'
-            this.add( PDFParser.parseObject(src, context) );
+            this.add( pdfFile.parseObject(src) );
             src.skipWS();
         }
         if (src.pos == src.length)
@@ -58,7 +57,7 @@ public class COSArray extends ArrayList<COSObject> implements COSObject {
     }
 
     @Override
-    public void produce(OutputStream dst, ParsingContext context) throws IOException {
+    public void produce(OutputStream dst, PDFParser pdfFile) throws IOException {
         dst.write(0x5B); // "["
         for (int i = 0; i < this.size(); i++) {
             if (i != 0) {
@@ -68,7 +67,7 @@ public class COSArray extends ArrayList<COSObject> implements COSObject {
                     dst.write(0x20); // " ";
                 }
             }
-            this.get(i).produce(dst, context);
+            this.get(i).produce(dst, pdfFile);
         }
         dst.write(0x5D); // "]";
     }

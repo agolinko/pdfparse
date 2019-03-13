@@ -22,7 +22,6 @@ package org.pdfparse.cos;
 import org.pdfparse.exception.EParseError;
 import org.pdfparse.parser.PDFParser;
 import org.pdfparse.parser.PDFRawData;
-import org.pdfparse.parser.ParsingContext;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -31,21 +30,21 @@ import java.io.OutputStream;
 public class COSStream extends COSDictionary {
     private byte[] data = null;
 
-    public COSStream(COSDictionary dict, PDFRawData src, ParsingContext context) throws EParseError {
-        super(dict, context);
+    public COSStream(COSDictionary dict, PDFRawData src, PDFParser pdfFile) throws EParseError {
+        super(dict, pdfFile);
 
-        data = PDFParser.fetchStream(src, this.getUInt(COSName.LENGTH, context.objectCache, 0), true);
+        data = src.readStream(this.getUInt(COSName.LENGTH, pdfFile, 0), true);
     }
 
     @Override
-    public void parse(PDFRawData src, ParsingContext context) throws EParseError {
-        super.parse(src, context);
-        data = PDFParser.fetchStream(src, this.getUInt(COSName.LENGTH, context.objectCache,0), true);
+    public void parse(PDFRawData src, PDFParser pdfFile) throws EParseError {
+        super.parse(src, pdfFile);
+        data = src.readStream(this.getUInt(COSName.LENGTH, pdfFile, 0), true);
     }
     @Override
-    public void produce(OutputStream dst, ParsingContext context) throws IOException {
+    public void produce(OutputStream dst, PDFParser pdfFile) throws IOException {
         //throw new ENotSupported();
-        super.produce(dst, context);
+        super.produce(dst, pdfFile);
         //dst.write(null);
     }
 

@@ -191,7 +191,7 @@ public class PDFDocument  {
 //
 //    public void dbgDump() {
 //        //xref.dbgPrintAll();
-//        pdfParser.parseAndCacheAll();
+//        pdfParser.parseAndDecodeAllObjects();
 //        //cache.dbgSaveAllStreams(filepath + File.separator + "[" + filename + "]" );
 //        //cache.dbgSaveAllObjects(filepath + File.separator + "[" + filename + "]" );
 //

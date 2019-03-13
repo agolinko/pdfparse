@@ -20,8 +20,8 @@
 package org.pdfparse.cos;
 
 import org.pdfparse.exception.EParseError;
+import org.pdfparse.parser.PDFParser;
 import org.pdfparse.parser.PDFRawData;
-import org.pdfparse.parser.ParsingContext;
 import org.pdfparse.utils.ByteBuffer;
 import org.pdfparse.utils.IntIntHashtable;
 
@@ -106,8 +106,8 @@ public final class COSString implements COSObject {
         binaryValue = val.getBytes();
     }
 
-    public COSString(PDFRawData src, ParsingContext context) throws EParseError {
-        parse(src, context);
+    public COSString(PDFRawData src, PDFParser pdfFile) throws EParseError {
+        parse(src, pdfFile);
     }
 
     public void clear() {
@@ -163,7 +163,7 @@ public final class COSString implements COSObject {
     }
 
         @Override
-    public void parse(PDFRawData src, ParsingContext context) throws EParseError {
+    public void parse(PDFRawData src, PDFParser pdfFile) throws EParseError {
         int nesting_brackets = 0;
         int v;
         byte ch;
@@ -172,7 +172,7 @@ public final class COSString implements COSObject {
 
         if (src.src[src.pos] == '<') {
             src.pos++; // Skip the opening bracket '<'
-            byte[] bytes = parseHexStream(src, context);
+            byte[] bytes = parseHexStream(src);
             setBinaryValue(bytes);
             forceHexForm = true;
             return;
@@ -182,7 +182,7 @@ public final class COSString implements COSObject {
         forceHexForm = false;
         src.pos++; // Skip the opening bracket '('
 
-        ByteBuffer buffer = context.tmpBuffer;
+        ByteBuffer buffer = src.tmpBuffer;
         buffer.reset();
 
         while (src.pos < src.length) {
@@ -290,14 +290,15 @@ public final class COSString implements COSObject {
             src.pos++;
         }
 
-        context.softAssertSyntaxComliance(nesting_brackets == 0, "Unbalanced brackets and illegal nesting while parsing string object");
+        pdfFile.settings.softAssertSyntaxComliance(nesting_brackets == 0, "Unbalanced brackets and illegal nesting while parsing string object");
 
         binaryValue = buffer.toByteArray();
+        buffer.reset();
         value = convertToString(binaryValue);
     }
 
     @Override
-    public void produce(OutputStream dst, ParsingContext context) throws IOException {
+    public void produce(OutputStream dst, PDFParser pdfFile) throws IOException {
         int i, j, len;
         len = binaryValue.length;
 
@@ -523,13 +524,13 @@ public final class COSString implements COSObject {
     }
 
 
-    public static final byte[] parseHexStream(PDFRawData src, ParsingContext context) throws EParseError {
+    public static final byte[] parseHexStream(PDFRawData src) throws EParseError {
         int ch, n, n1 = 0;
         boolean first = true;
 
         //src.pos++; // Skip the opening bracket '<'
 
-        ByteBuffer out = context.tmpBuffer;
+        ByteBuffer out = src.tmpBuffer;
         out.reset();
         for (int i = src.pos; i < src.length; i++) {
             ch = src.src[i] & 0xFF;

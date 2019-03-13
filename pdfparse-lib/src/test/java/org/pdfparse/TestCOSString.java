@@ -22,14 +22,13 @@ package org.pdfparse;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.pdfparse.cos.COSString;
+import org.pdfparse.parser.PDFParser;
+import org.pdfparse.parser.PDFRawData;
+import org.pdfparse.utils.ByteBuffer;
 
 import java.io.IOException;
 import java.util.Random;
-
-import org.pdfparse.cos.COSString;
-import org.pdfparse.parser.PDFRawData;
-import org.pdfparse.parser.ParsingContext;
-import org.pdfparse.utils.ByteBuffer;
 
 public class TestCOSString extends Assert {
 
@@ -38,15 +37,14 @@ public class TestCOSString extends Assert {
     private final static String ESC_CHAR_STRING_PDF_FORMAT =
             "\\( test#some\\) escaped< \\\\chars>!~1239857 ";
 
-
-    ParsingContext context;
     PDFRawData data;
     Random random;
+    PDFParser pdfFile;
 
     @Before
     public void setup() {
-        context = new ParsingContext();
         data = new PDFRawData();
+        pdfFile = new PDFParser(data);
         random = new Random();
         random.setSeed(100);
     }
@@ -59,7 +57,7 @@ public class TestCOSString extends Assert {
 
     private void setString(COSString str, String value) {
         setData(data, value);
-        str.parse(data, context);
+        str.parse(data, pdfFile);
     }
 
     @Test
@@ -69,11 +67,11 @@ public class TestCOSString extends Assert {
 
         s = " test string <>[]{}}}} ~-=,./ (())";
         setData(data, "(" + s + ")");
-        str.parse(data, context);
+        str.parse(data, pdfFile);
         Assert.assertEquals(s, str.getValue());
         //----
         setData(data,  "(" + ESC_CHAR_STRING_PDF_FORMAT + ")");
-        str.parse(data, context);
+        str.parse(data, pdfFile);
         assertEquals(ESC_CHAR_STRING, str.getValue());
     }
 
@@ -161,10 +159,10 @@ public class TestCOSString extends Assert {
             str.setForceHexForm(true);
 
             outbuffer.reset();
-            str.produce(outbuffer, context);
+            str.produce(outbuffer, pdfFile);
             parsebuffer.fromByteBuffer(outbuffer);
             str.clear();
-            str.parse(parsebuffer, context);
+            str.parse(parsebuffer, pdfFile);
 
             assertArrayEquals(bytearray, str.getBinaryValue());
 
@@ -172,10 +170,10 @@ public class TestCOSString extends Assert {
             str.setForceLiteralForm(true);
 
             outbuffer.reset();
-            str.produce(outbuffer, context);
+            str.produce(outbuffer, pdfFile);
             parsebuffer.fromByteBuffer(outbuffer);
             str.clear();
-            str.parse(parsebuffer, context);
+            str.parse(parsebuffer, pdfFile);
 
             assertArrayEquals(bytearray, str.getBinaryValue());
 

@@ -21,20 +21,20 @@ package org.pdfparse.model;
 
 
 import org.pdfparse.cos.*;
-import org.pdfparse.parser.ParsingContext;
+import org.pdfparse.parser.PDFParser;
+
 import java.util.ArrayList;
 
 public class PDFDocCatalog {
     private COSDictionary dRoot;
     private COSDictionary dPages;
-    private ParsingContext context;
+    private PDFParser pdfFile;
     private ArrayList<PDFPage> pages;
 
-    public PDFDocCatalog(ParsingContext context, COSDictionary dic) {
+    public PDFDocCatalog(PDFParser parser, COSDictionary dic) {
         dRoot = dic;
-        this.context = context;
-
-        context.softAssertSyntaxComliance(COSName.CATALOG.equals(dic.getName(COSName.TYPE, null)), "Document catalog should be /Catalog type");
+        this.pdfFile = parser;
+        this.pdfFile.settings.softAssertSyntaxComliance(COSName.CATALOG.equals(dic.getName(COSName.TYPE, null)), "Document catalog should be /Catalog type");
     }
 
 
@@ -50,14 +50,14 @@ public class PDFDocCatalog {
     public int getPagesCount() {
         if (pages == null) {
             COSReference refRootPages = dRoot.getReference(COSName.PAGES);
-            dPages = context.objectCache.getDictionary(refRootPages);
-            return dPages.getUInt(COSName.COUNT, context.objectCache, -1);
+            dPages = pdfFile.getDictionary(refRootPages);
+            return dPages.getUInt(COSName.COUNT, pdfFile, -1);
         };
 
         return pages.size();
     }
     private void loadPage(COSReference cosReference) {
-        COSDictionary dict = context.objectCache.getDictionary(cosReference);
+        COSDictionary dict = pdfFile.getDictionary(cosReference);
         if (dict.getName(COSName.TYPE, COSName.EMPTY).equals(COSName.PAGES)) {
             loadPages(dict); // This is a page node
             return;
@@ -67,20 +67,20 @@ public class PDFDocCatalog {
     }
 
     private void loadPages(COSDictionary pages) {
-        context.softAssertStructure(
+        pdfFile.settings.softAssertStructure(
                 pages.getName(COSName.TYPE, COSName.EMPTY).equals(COSName.PAGES),
                 "This dictionary should be /Type = /Pages");
 
 
-        COSArray kids = pages.getArray(COSName.KIDS, context.objectCache, null);
-        if (!context.softAssertStructure(kids != null, "Required entry '/Kids' not found")) {
+        COSArray kids = pages.getArray(COSName.KIDS, pdfFile, null);
+        if (!pdfFile.settings.softAssertStructure(kids != null, "Required entry '/Kids' not found")) {
             return; // will be zero pages
         }
 
         for (int i=0; i<kids.size(); i++) {
             COSObject ref = kids.get(i);
 
-            if (context.softAssertStructure(ref instanceof COSReference, "/Kids element should be a reference"))
+            if (pdfFile.settings.softAssertStructure(ref instanceof COSReference, "/Kids element should be a reference"))
                 loadPage((COSReference)ref);
         }
     }
@@ -105,7 +105,7 @@ public class PDFDocCatalog {
      * @return The PDF version.
      */
     public String getVersion() {
-       return dRoot.getNameAsStr(COSName.VERSION, context.objectCache, "");
+       return dRoot.getNameAsStr(COSName.VERSION, pdfFile, "");
     }
 
     /** Sets the PDF specification version this document conforms to.
@@ -126,7 +126,7 @@ public class PDFDocCatalog {
         COSReference refMetadata = dRoot.getReference(COSName.METADATA);
         if (refMetadata == null)
             return null;
-        COSStream dMetadata = context.objectCache.getStream(refMetadata);
+        COSStream dMetadata = pdfFile.getStream(refMetadata);
         if (dMetadata == null)
             return null;
         return dMetadata.getData();
@@ -138,7 +138,7 @@ public class PDFDocCatalog {
      * @return The language for the document.
      */
     public String getLanguage() {
-        return dRoot.getStr(COSName.LANG, context.objectCache, "");
+        return dRoot.getStr(COSName.LANG, pdfFile, "");
     }
 
     /**

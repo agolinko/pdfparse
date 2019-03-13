@@ -19,14 +19,21 @@
 
 package org.pdfparse.parser;
 
+import org.pdfparse.cos.IdGenPair;
 import org.pdfparse.exception.EParseError;
 import org.pdfparse.utils.ByteBuffer;
+
+import java.util.Arrays;
 
 
 public final class PDFRawData {
     public byte[] src;
     public int pos;
     public int length;
+
+    // No needed to do it thread local, as PDFRawData is not thread-safe itself
+    public IdGenPair tmpIdGenPair = new IdGenPair(0, 0);
+    public ByteBuffer tmpBuffer  = new ByteBuffer(1024);
 
     public PDFRawData() {
 
@@ -235,6 +242,36 @@ public final class PDFRawData {
         return -1;
     }
 
+    public byte[] readStream(int stream_len, boolean movePosBeyoundEndObj) throws EParseError {
+        skipWS();
+        if (!checkSignature(Token.STREAM))
+            throw new EParseError("'stream' keyword not found");
+        pos += Token.STREAM.length;
+        skipCRLForLF();
+        if (pos + stream_len > length)
+            throw new EParseError("Unexpected end of file (stream object too large)");
+
+        // TODO: Lazy parse (reference + start + len)
+        byte[] res = Arrays.copyOfRange(src, pos, pos + stream_len);
+        pos += stream_len;
+
+        if (movePosBeyoundEndObj) {
+            byte firstbyte = Token.ENDOBJ[0];
+            int max_pos = length - Token.ENDOBJ.length;
+            if (max_pos - pos > ParseSettings.MAX_SCAN_RANGE)
+                max_pos = pos + ParseSettings.MAX_SCAN_RANGE;
+            for (int i = pos; i < max_pos; i++)
+                if ((src[i] == firstbyte) && checkSignature(i, Token.ENDOBJ)) {
+                    pos = i + Token.ENDOBJ.length;
+                    return res;
+                }
+
+            throw new EParseError("'endobj' tag not found");
+        }
+
+        return res;
+    }
+
     public String dbgPrintBytes() {
         int len = 90;
 
@@ -256,8 +293,8 @@ public final class PDFRawData {
     }
 
     public String dbgPrintBytesBefore() {
-        int l = 20;
-        int r = 20;
+        int l = 30;
+        int r = 30;
 
         if (this.pos+r > this.length)
             r = this.length - this.pos;
@@ -271,12 +308,12 @@ public final class PDFRawData {
         String s = "";
 
         for (int i=0; i<chunk.length; i++) {
-            if (i == l) s += "  [";
+            if (i == l) s += "   [";
             if (chunk[i] > 0x19)
                 s += (char)chunk[i];
             else
                 s += "x"+ String.format("%02X", chunk[i]&0xFF);
-            if (i == l) s += "]  ";
+            if (i == l) s += "]   ";
         }
 
         return s + " @ " + String.valueOf(pos);
