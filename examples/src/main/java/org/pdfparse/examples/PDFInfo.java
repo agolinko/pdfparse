@@ -19,9 +19,10 @@
 
 package org.pdfparse.examples;
 
-import org.pdfparse.PDFLoader;
+import org.pdfparse.PDFFile;
 import org.pdfparse.model.PDFDocCatalog;
 import org.pdfparse.model.PDFDocInfo;
+import org.pdfparse.model.PDFDocument;
 
 public class PDFInfo {
     public static void main(String[] args) {
@@ -32,11 +33,12 @@ public class PDFInfo {
 
         try {
             // Create document object. Open file
-            PDFLoader doc = new PDFLoader(args[0]);
+            PDFFile pdf = new PDFFile(args[0]);
+            PDFDocument doc = pdf.getDocument();
 
             // Get document structure elements
-            PDFDocInfo info = doc.getDocumentInfo();
-            PDFDocCatalog cat = doc.getDocumentCatalog();
+            PDFDocInfo info = doc.getInfo();
+            PDFDocCatalog cat = doc.getCatalog();
 
 
             System.out.printf("File: %s\r\n", args[0]);

@@ -258,8 +258,8 @@ public final class PDFRawData {
         if (movePosBeyoundEndObj) {
             byte firstbyte = Token.ENDOBJ[0];
             int max_pos = length - Token.ENDOBJ.length;
-            if (max_pos - pos > ParseSettings.MAX_SCAN_RANGE)
-                max_pos = pos + ParseSettings.MAX_SCAN_RANGE;
+            if (max_pos - pos > ParserSettings.MAX_SCAN_RANGE)
+                max_pos = pos + ParserSettings.MAX_SCAN_RANGE;
             for (int i = pos; i < max_pos; i++)
                 if ((src[i] == firstbyte) && checkSignature(i, Token.ENDOBJ)) {
                     pos = i + Token.ENDOBJ.length;

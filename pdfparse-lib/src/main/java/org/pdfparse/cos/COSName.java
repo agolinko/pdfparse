@@ -20,6 +20,7 @@
 package org.pdfparse.cos;
 
 import org.pdfparse.exception.EParseError;
+import org.pdfparse.parser.Diagnostics;
 import org.pdfparse.parser.PDFParser;
 import org.pdfparse.parser.PDFRawData;
 
@@ -30,7 +31,7 @@ import java.util.Arrays;
 
 
 public class COSName implements COSObject {
-    public static final COSName EMPTY = new COSName("/");
+    public static final COSName EMPTY = new COSName("");
     public  static final COSName UNKNOWN = new COSName("/Unknown");
     public  static final COSName TRUE = new COSName("/True");
     public  static final COSName FALSE = new COSName("/False");
@@ -171,7 +172,7 @@ public class COSName implements COSObject {
     }
 
     @Override
-    public void parse(PDFRawData src, PDFParser pdfFile) throws EParseError {
+    public void parse(PDFRawData src, PDFParser parser) throws EParseError {
         src.skipWS();
         int p = src.pos;
         int len = src.length;
@@ -186,7 +187,7 @@ public class COSName implements COSObject {
 
         while ((p <= len) && !stop) {
             b = src.src[p];
-            pdfFile.settings.softAssertFormatError(b >= 0, "Illegal character in name token");
+            Diagnostics.softAssertFormatError(parser.settings, b >= 0, "Illegal character in name token");
 
             switch (b) {
                 // Whitespace

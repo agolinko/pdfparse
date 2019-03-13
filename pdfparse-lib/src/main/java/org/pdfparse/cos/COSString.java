@@ -20,6 +20,7 @@
 package org.pdfparse.cos;
 
 import org.pdfparse.exception.EParseError;
+import org.pdfparse.parser.Diagnostics;
 import org.pdfparse.parser.PDFParser;
 import org.pdfparse.parser.PDFRawData;
 import org.pdfparse.utils.ByteBuffer;
@@ -106,8 +107,8 @@ public final class COSString implements COSObject {
         binaryValue = val.getBytes();
     }
 
-    public COSString(PDFRawData src, PDFParser pdfFile) throws EParseError {
-        parse(src, pdfFile);
+    public COSString(PDFRawData src, PDFParser parser) throws EParseError {
+        parse(src, parser);
     }
 
     public void clear() {
@@ -163,7 +164,7 @@ public final class COSString implements COSObject {
     }
 
         @Override
-    public void parse(PDFRawData src, PDFParser pdfFile) throws EParseError {
+    public void parse(PDFRawData src, PDFParser parser) throws EParseError {
         int nesting_brackets = 0;
         int v;
         byte ch;
@@ -290,7 +291,7 @@ public final class COSString implements COSObject {
             src.pos++;
         }
 
-        pdfFile.settings.softAssertSyntaxComliance(nesting_brackets == 0, "Unbalanced brackets and illegal nesting while parsing string object");
+        Diagnostics.softAssertSyntaxComliance(parser.settings, nesting_brackets == 0, "Unbalanced brackets and illegal nesting while parsing string object");
 
         binaryValue = buffer.toByteArray();
         buffer.reset();
@@ -298,7 +299,7 @@ public final class COSString implements COSObject {
     }
 
     @Override
-    public void produce(OutputStream dst, PDFParser pdfFile) throws IOException {
+    public void produce(OutputStream dst, PDFParser parser) throws IOException {
         int i, j, len;
         len = binaryValue.length;
 

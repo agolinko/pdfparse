@@ -30,9 +30,9 @@ import java.nio.channels.FileChannel;
 
 public class TestPerformance {
     private static void parseFile(byte[] data) {
-        PDFLoader pdf;
-        pdf = new PDFLoader( data );
-        pdf.dbgDump();
+        PDFFile pdf;
+        pdf = new PDFFile( data );
+        pdf.parseEverything();
     }
 
     public static void main(String[] args)  throws URISyntaxException, IOException {

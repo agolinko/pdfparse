@@ -19,9 +19,11 @@
 
 package org.pdfparse.model;
 
-import org.pdfparse.parser.PDFParser;
-import org.pdfparse.cos.*;
+import org.pdfparse.cos.COSDictionary;
+import org.pdfparse.cos.COSName;
 import org.pdfparse.exception.EParseError;
+import org.pdfparse.parser.ObjectRetriever;
+
 import java.util.Calendar;
 
 /**
@@ -32,7 +34,7 @@ import java.util.Calendar;
 
 public class PDFDocInfo {
     private COSDictionary info;
-    private PDFParser pdfParser;
+    private ObjectRetriever retriever;
     private boolean owned;
 
 
@@ -40,9 +42,9 @@ public class PDFDocInfo {
      * Constructor that is used for a preexisting dictionary.
      *
      * @param dic The underlying dictionary.
-     * @param pdfParser Reference to the document parser object.
+     * @param retriever Reference to the Object retriever.
      */
-    public PDFDocInfo( COSDictionary dic, PDFParser pdfParser )
+    public PDFDocInfo( COSDictionary dic, ObjectRetriever retriever )
     {
         if (dic == null) {
             dic = new COSDictionary();
@@ -50,7 +52,7 @@ public class PDFDocInfo {
         } else owned = false;
 
         this.info = dic;
-        this.pdfParser = pdfParser;
+        this.retriever = retriever;
     }
 
     /**
@@ -71,7 +73,7 @@ public class PDFDocInfo {
      */
     public String getTitle() throws EParseError
     {
-        return info.getStr(COSName.TITLE, pdfParser, "");
+        return info.getStr(COSName.TITLE, retriever, "");
     }
 
     /**
@@ -92,7 +94,7 @@ public class PDFDocInfo {
      */
     public String getAuthor() throws EParseError
     {
-        return info.getStr( COSName.AUTHOR, pdfParser, "" );
+        return info.getStr( COSName.AUTHOR, retriever, "" );
     }
 
     /**
@@ -113,7 +115,7 @@ public class PDFDocInfo {
      */
     public String getSubject() throws EParseError
     {
-        return info.getStr( COSName.SUBJECT, pdfParser, "" );
+        return info.getStr( COSName.SUBJECT, retriever, "" );
     }
 
     /**
@@ -134,7 +136,7 @@ public class PDFDocInfo {
      */
     public String getKeywords() throws EParseError
     {
-        return info.getStr( COSName.KEYWORDS, pdfParser, "" );
+        return info.getStr( COSName.KEYWORDS, retriever, "" );
     }
 
     /**
@@ -155,7 +157,7 @@ public class PDFDocInfo {
      */
     public String getCreator() throws EParseError
     {
-        return info.getStr( COSName.CREATOR, pdfParser, "" );
+        return info.getStr( COSName.CREATOR, retriever, "" );
     }
 
     /**
@@ -176,7 +178,7 @@ public class PDFDocInfo {
      */
     public String getProducer() throws EParseError
     {
-        return info.getStr( COSName.PRODUCER, pdfParser, "" );
+        return info.getStr( COSName.PRODUCER, retriever, "" );
     }
 
     /**
@@ -198,7 +200,7 @@ public class PDFDocInfo {
      */
     public Calendar getCreationDate() throws EParseError
     {
-        return info.getDate( COSName.CREATION_DATE, pdfParser, null );
+        return info.getDate( COSName.CREATION_DATE, retriever, null );
     }
 
     /**
@@ -220,7 +222,7 @@ public class PDFDocInfo {
      */
     public Calendar getModificationDate() throws EParseError
     {
-        return info.getDate( COSName.MOD_DATE, pdfParser, null );
+        return info.getDate( COSName.MOD_DATE, retriever, null );
     }
 
     /**

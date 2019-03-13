@@ -20,6 +20,7 @@
 package org.pdfparse.cos;
 
 import org.pdfparse.exception.EParseError;
+import org.pdfparse.parser.ObjectRetriever;
 import org.pdfparse.parser.PDFParser;
 import org.pdfparse.parser.PDFRawData;
 
@@ -30,22 +31,22 @@ import java.io.OutputStream;
 public class COSStream extends COSDictionary {
     private byte[] data = null;
 
-    public COSStream(COSDictionary dict, PDFRawData src, PDFParser pdfFile) throws EParseError {
-        super(dict, pdfFile);
+    public COSStream(COSDictionary dict, PDFRawData src, ObjectRetriever retriever) throws EParseError {
+        super(dict, retriever);
 
-        data = src.readStream(this.getUInt(COSName.LENGTH, pdfFile, 0), true);
+        int length = this.getUInt(COSName.LENGTH, retriever, 0);
+        data = src.readStream(length, true);
     }
 
     @Override
-    public void parse(PDFRawData src, PDFParser pdfFile) throws EParseError {
-        super.parse(src, pdfFile);
-        data = src.readStream(this.getUInt(COSName.LENGTH, pdfFile, 0), true);
+    public void parse(PDFRawData src, PDFParser parser) throws EParseError {
+        super.parse(src, parser);
+        int length = this.getUInt(COSName.LENGTH, parser.getXref(), 0);
+        data = src.readStream(length, true);
     }
     @Override
     public void produce(OutputStream dst, PDFParser pdfFile) throws IOException {
-        //throw new ENotSupported();
         super.produce(dst, pdfFile);
-        //dst.write(null);
     }
 
     public byte[] getData() {

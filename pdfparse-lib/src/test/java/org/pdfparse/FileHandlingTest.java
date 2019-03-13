@@ -18,7 +18,7 @@ public class FileHandlingTest extends Assert
         URI uri = this.getClass().getResource("/malformed_pdfs/").toURI();
         File dir = new File(uri);
 
-        PDFLoader pp = new PDFLoader(dir.getAbsolutePath() + "\\nonexistent.pdf");
+        PDFFile pf = new PDFFile(dir.getAbsolutePath() + "\\nonexistent.pdf");
     }
 
     @Test(expected=org.pdfparse.exception.EParseError.class)
@@ -26,12 +26,12 @@ public class FileHandlingTest extends Assert
         URI uri = this.getClass().getResource("/malformed_pdfs/noise.pdf").toURI();
         File file = new File(uri);
 
-        PDFLoader pp = new PDFLoader(file);
+        PDFFile pp = new PDFFile(file);
     }
 
     @Test
     public void checkEvilPDFs() throws IOException, URISyntaxException {
-        PDFLoader pp;
+        PDFFile pp;
 
         URI uri = this.getClass().getResource("/malformed_pdfs/").toURI();
         File dir = new File(uri);
@@ -47,8 +47,8 @@ public class FileHandlingTest extends Assert
             System.out.printf("---- Parsing file: %s ... ", filename);
 
             try {
-                pp = new PDFLoader(new File(uri.resolve(filename)));
-                pp.dbgDump();
+                pp = new PDFFile(new File(uri.resolve(filename)));
+                pp.parseEverything();
                 Assert.fail();
             } catch (EParseError e) {
                 System.out.printf(" %s \r\n", e.getMessage());
@@ -61,13 +61,13 @@ public class FileHandlingTest extends Assert
         URI uri = this.getClass().getResource("/testfiles3/source11.pdf").toURI();
         File file = new File(uri);
 
-        PDFLoader pp = new PDFLoader(file);
-        pp.dbgDump();
+        PDFFile pp = new PDFFile(file);
+        pp.parseEverything();
     }
 
     //@Test
     public void checkMassiveOpeningForCrash() throws IOException, URISyntaxException {
-        PDFLoader pp;
+        PDFFile pp;
 
         URI uri = this.getClass().getResource("/testfiles/").toURI();
         File dir = new File(uri);
@@ -83,14 +83,14 @@ public class FileHandlingTest extends Assert
             System.out.printf("---- Parsing file: %s ...\r\n", filename);
 
 
-            pp = new PDFLoader(dir.getAbsolutePath() + "\\" + filename);
-            pp.dbgDump();
+            pp = new PDFFile(dir.getAbsolutePath() + "\\" + filename);
+            pp.parseEverything();
         }
     }
 
    // @Test
     public void checkMassiveOpeningForCrash2() throws EParseError, IOException, URISyntaxException {
-        PDFLoader pp;
+        PDFFile pp;
 
         URI uri = this.getClass().getResource("/testfiles2/").toURI();
         File dir = new File(uri);
@@ -106,14 +106,14 @@ public class FileHandlingTest extends Assert
             System.out.printf("---- Parsing file: %s ...\r\n", filename);
 
 
-            pp = new PDFLoader(dir.getAbsolutePath() + "\\" + filename);
-            pp.dbgDump();
+            pp = new PDFFile(dir.getAbsolutePath() + "\\" + filename);
+            pp.parseEverything();
         }
     }
 
     //@Test
     public void checkZeroPages() throws EParseError {
-        //PDFLoader doc = new PDFLoader();
+        //PDFFile doc = new PDFFile();
         //Assert.assertEquals(doc.getPagesCount(), 0);
     }
 }

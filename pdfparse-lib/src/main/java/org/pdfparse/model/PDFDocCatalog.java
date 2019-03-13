@@ -21,20 +21,28 @@ package org.pdfparse.model;
 
 
 import org.pdfparse.cos.*;
-import org.pdfparse.parser.PDFParser;
+import org.pdfparse.parser.Diagnostics;
+import org.pdfparse.parser.ObjectRetriever;
+import org.pdfparse.parser.ParserSettings;
 
 import java.util.ArrayList;
 
 public class PDFDocCatalog {
     private COSDictionary dRoot;
     private COSDictionary dPages;
-    private PDFParser pdfFile;
+    private ObjectRetriever retriever;
     private ArrayList<PDFPage> pages;
 
-    public PDFDocCatalog(PDFParser parser, COSDictionary dic) {
+    private ParserSettings settings;
+
+    public PDFDocCatalog(ObjectRetriever retriever, ParserSettings settings, COSDictionary dic) {
         dRoot = dic;
-        this.pdfFile = parser;
-        this.pdfFile.settings.softAssertSyntaxComliance(COSName.CATALOG.equals(dic.getName(COSName.TYPE, null)), "Document catalog should be /Catalog type");
+        this.retriever = retriever;
+
+        this.settings = settings;
+        Diagnostics.softAssertSyntaxComliance(settings,
+                COSName.CATALOG.equals(dic.getName(COSName.TYPE, null)),
+                "Document catalog should be /Catalog type");
     }
 
 
@@ -50,14 +58,14 @@ public class PDFDocCatalog {
     public int getPagesCount() {
         if (pages == null) {
             COSReference refRootPages = dRoot.getReference(COSName.PAGES);
-            dPages = pdfFile.getDictionary(refRootPages);
-            return dPages.getUInt(COSName.COUNT, pdfFile, -1);
+            dPages = retriever.getDictionary(refRootPages);
+            return dPages.getUInt(COSName.COUNT, retriever, -1);
         };
 
         return pages.size();
     }
     private void loadPage(COSReference cosReference) {
-        COSDictionary dict = pdfFile.getDictionary(cosReference);
+        COSDictionary dict = retriever.getDictionary(cosReference);
         if (dict.getName(COSName.TYPE, COSName.EMPTY).equals(COSName.PAGES)) {
             loadPages(dict); // This is a page node
             return;
@@ -67,20 +75,20 @@ public class PDFDocCatalog {
     }
 
     private void loadPages(COSDictionary pages) {
-        pdfFile.settings.softAssertStructure(
+        Diagnostics.softAssertStructure(settings,
                 pages.getName(COSName.TYPE, COSName.EMPTY).equals(COSName.PAGES),
                 "This dictionary should be /Type = /Pages");
 
 
-        COSArray kids = pages.getArray(COSName.KIDS, pdfFile, null);
-        if (!pdfFile.settings.softAssertStructure(kids != null, "Required entry '/Kids' not found")) {
+        COSArray kids = pages.getArray(COSName.KIDS, retriever, null);
+        if (!Diagnostics.softAssertStructure(settings, kids != null, "Required entry '/Kids' not found")) {
             return; // will be zero pages
         }
 
         for (int i=0; i<kids.size(); i++) {
             COSObject ref = kids.get(i);
 
-            if (pdfFile.settings.softAssertStructure(ref instanceof COSReference, "/Kids element should be a reference"))
+            if (Diagnostics.softAssertStructure(settings, ref instanceof COSReference, "/Kids element should be a reference"))
                 loadPage((COSReference)ref);
         }
     }
@@ -105,7 +113,7 @@ public class PDFDocCatalog {
      * @return The PDF version.
      */
     public String getVersion() {
-       return dRoot.getNameAsStr(COSName.VERSION, pdfFile, "");
+       return dRoot.getName(COSName.VERSION, retriever, COSName.EMPTY).toString();
     }
 
     /** Sets the PDF specification version this document conforms to.
@@ -126,7 +134,7 @@ public class PDFDocCatalog {
         COSReference refMetadata = dRoot.getReference(COSName.METADATA);
         if (refMetadata == null)
             return null;
-        COSStream dMetadata = pdfFile.getStream(refMetadata);
+        COSStream dMetadata = retriever.getStream(refMetadata);
         if (dMetadata == null)
             return null;
         return dMetadata.getData();
@@ -138,7 +146,7 @@ public class PDFDocCatalog {
      * @return The language for the document.
      */
     public String getLanguage() {
-        return dRoot.getStr(COSName.LANG, pdfFile, "");
+        return dRoot.getStr(COSName.LANG, retriever, "");
     }
 
     /**
