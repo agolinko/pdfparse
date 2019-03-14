@@ -7,8 +7,8 @@ public class ParserSettings {
 
     public boolean debugMessages = true;
     public boolean ignoreSyntaxCompliance = true;
-    public boolean ignoreErrors = false;
-    public boolean ignoreBasicSyntaxErrors = false;
+    public boolean ignoreStructureErrors = true;
+    public boolean ignoreDataIntegrityErrors = false;
     public boolean ignoreNonSupportedFeatures = true;
 
     public boolean allowScan = true;

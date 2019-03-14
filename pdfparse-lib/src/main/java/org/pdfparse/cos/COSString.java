@@ -288,7 +288,7 @@ public final class COSString implements COSObject {
             src.pos++;
         }
 
-        Diagnostics.softAssertSyntaxComliance(parser.settings, nesting_brackets == 0, "Unbalanced brackets and illegal nesting while parsing string object");
+        Diagnostics.softAssertSyntaxCompliance(parser.settings, nesting_brackets == 0, "Unbalanced brackets and illegal nesting while parsing string object");
 
         binaryValue = buffer.toByteArray();
         buffer.reset();

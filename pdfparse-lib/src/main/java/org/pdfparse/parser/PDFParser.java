@@ -88,7 +88,7 @@ public class PDFParser implements ObjectParser {
 
         // Scan for EOF -----------------------------------------
         int eofPosition = src.reverseScan(src.length, Token.EOF, settings.eofLookupRange);
-        Diagnostics.softAssertSyntaxComliance(settings, eofPosition > 0, "Missing EOF marker");
+        Diagnostics.softAssertSyntaxCompliance(settings, eofPosition > 0, "Missing EOF marker");
         if (eofPosition <= 0) {
             eofPosition = src.length;
         }
@@ -126,7 +126,7 @@ public class PDFParser implements ObjectParser {
             majorVersion = Integer.parseInt(tokens.nextToken());
             minorVersion = Integer.parseInt(tokens.nextToken());
         } catch (Exception e) {
-            Diagnostics.softAssertSyntaxComliance(settings, false, "Failed to parse PDF version");
+            Diagnostics.softAssertSyntaxCompliance(settings, false, "Failed to parse PDF version");
         }
 
         Diagnostics.softAssertSupportedFeatures(settings,

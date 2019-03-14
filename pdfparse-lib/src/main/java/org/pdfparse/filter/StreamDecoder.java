@@ -244,7 +244,7 @@ public class StreamDecoder {
             return in_out;
         }
 
-        if (!Diagnostics.softAssertFormatError(settings, in_out.length > bytesPerPixel, "Data to small for decoding PNG prediction")) {
+        if (!Diagnostics.softAssertDataIntegrity(settings, in_out.length > bytesPerPixel, "Data to small for decoding PNG prediction")) {
             return in_out;
         }
 

@@ -181,7 +181,7 @@ public class COSName implements COSObject {
 
         while ((p <= len)) {
             b = src.data[p];
-            Diagnostics.softAssertFormatError(parser.settings, b >= 0, "Illegal character in name token");
+            Diagnostics.softAssertSyntaxCompliance(parser.settings, b >= 0, "Illegal character in name token");
 
             switch (b) {
                 // Whitespace

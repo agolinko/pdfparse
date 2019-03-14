@@ -21,6 +21,7 @@ package org.pdfparse.model;
 
 
 import org.pdfparse.cos.*;
+import org.pdfparse.exception.EParseError;
 import org.pdfparse.parser.Diagnostics;
 import org.pdfparse.parser.ObjectRetriever;
 import org.pdfparse.parser.ParserSettings;
@@ -40,7 +41,7 @@ public class PDFDocCatalog {
         this.retriever = retriever;
 
         this.settings = settings;
-        Diagnostics.softAssertSyntaxComliance(settings,
+        Diagnostics.softAssertSyntaxCompliance(settings,
                 COSName.CATALOG.equals(dic.getName(COSName.TYPE, null)),
                 "Document catalog should be /Catalog type");
     }
@@ -75,9 +76,9 @@ public class PDFDocCatalog {
     }
 
     private void loadPages(COSDictionary pages) {
-        Diagnostics.softAssertStructure(settings,
+        Diagnostics.softAssertSyntaxCompliance(settings,
                 pages.getName(COSName.TYPE, COSName.EMPTY).equals(COSName.PAGES),
-                "This dictionary should be /Type = /Pages");
+                "Pages dictionary should has /Type = /Pages");
 
 
         COSArray kids = pages.getArray(COSName.KIDS, retriever, null);
@@ -85,9 +86,14 @@ public class PDFDocCatalog {
             return; // will be zero pages
         }
 
-        for (COSObject ref : kids) {
-            if (Diagnostics.softAssertStructure(settings, ref instanceof COSReference, "/Kids element should be a reference"))
+        if (kids != null) {
+            for (COSObject ref : kids) {
+                if (! (ref instanceof COSReference)) {
+                    throw new EParseError("/Kids element should be a reference");
+                }
+
                 loadPage((COSReference) ref);
+            }
         }
     }
 

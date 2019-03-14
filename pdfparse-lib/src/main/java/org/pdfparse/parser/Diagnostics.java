@@ -17,7 +17,7 @@ public class Diagnostics {
             throw new EParseError(message);
     }
 
-    public static boolean softAssertSyntaxComliance(ParserSettings settings, boolean condition, String message) {
+    public static boolean softAssertSyntaxCompliance(ParserSettings settings, boolean condition, String message) {
         if (!condition)
             checkAndLog(settings.ignoreSyntaxCompliance, message);
         return condition;
@@ -29,15 +29,15 @@ public class Diagnostics {
         return condition;
     }
 
-    public static boolean softAssertFormatError(ParserSettings settings, boolean condition, String message) {
+    public static boolean softAssertDataIntegrity(ParserSettings settings, boolean condition, String message) {
         if (!condition)
-            checkAndLog(settings.ignoreBasicSyntaxErrors, message);
+            checkAndLog(settings.ignoreDataIntegrityErrors, message);
         return condition;
     }
 
     public static boolean softAssertStructure(ParserSettings settings, boolean condition, String message) {
         if (!condition)
-            checkAndLog(settings.ignoreErrors, message);
+            checkAndLog(settings.ignoreStructureErrors, message);
         return condition;
     }
 
