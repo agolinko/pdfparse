@@ -26,13 +26,13 @@ import org.pdfparse.cos.COSName;
 /**
  * This represents a single page in a PDF document.
  *
- * <P>
+ * <p>
  * A Page object is a dictionary whose keys describe a single page containing text,
  * graphics, and images. A Page object is a leaf of the Pages tree.<BR>
  * This object is described in the 'Portable Document Format Reference Manual version 1.3'
  * section 6.4 (page 73-81)
  *
- * @see        PDFPageNode
+ * @see PDFPageNode
  */
 
 public class PDFPage {
@@ -52,8 +52,7 @@ public class PDFPage {
      *
      * @param size The MediaBox or the page.
      */
-    public PDFPage(PDFRectangle size)
-    {
+    public PDFPage(PDFRectangle size) {
         dPage = new COSDictionary();
         dPage.setName(COSName.TYPE, COSName.PAGE);
         //setMediaBox(size);
@@ -64,8 +63,7 @@ public class PDFPage {
      *
      * @param pageDic The existing page dictionary.
      */
-    public PDFPage(COSDictionary pageDic)
-    {
+    public PDFPage(COSDictionary pageDic) {
         dPage = pageDic;
     }
 
@@ -82,7 +80,7 @@ public class PDFPage {
     /**
      * A rectangle, expressed in default user space units, defining the boundaries of the physical medium on which the
      * page is intended to be displayed or printed
-     *
+     * <p>
      * This will get the MediaBox at this page and not look up the hierarchy. This attribute is inheritable, and
      * findMediaBox() should probably used. This will return null if no MediaBox are available at this level.
      *
@@ -109,7 +107,7 @@ public class PDFPage {
      * A rectangle, expressed in default user space units, defining the visible region of default user space. When the
      * page is displayed or printed, its contents are to be clipped (cropped) to this rectangle and then imposed on the
      * output medium in some implementation-defined manner
-     *
+     * <p>
      * This will get the CropBox at this page and not look up the hierarchy. This attribute is inheritable, and
      * findCropBox() should probably used. This will return null if no CropBox is available at this level.
      *
@@ -131,8 +129,6 @@ public class PDFPage {
             dPage.setRectangle(COSName.CROPBOX, value);
         }
     }
-
-
 
 
 }

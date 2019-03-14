@@ -44,13 +44,12 @@
  * nuclear facility.
  */
 package org.pdfparse.filter;
+
 import java.io.IOException;
 import java.io.OutputStream;
 
 /**
  * A class for performing LZW decoding.
- *
- *
  */
 public class LZWDecoder {
 
@@ -63,10 +62,10 @@ public class LZWDecoder {
     int nextBits = 0;
 
     int andTable[] = {
-        511,
-        1023,
-        2047,
-        4095
+            511,
+            1023,
+            2047,
+            4095
     };
 
     public LZWDecoder() {
@@ -75,12 +74,12 @@ public class LZWDecoder {
     /**
      * Method to decode LZW compressed data.
      *
-     * @param data            The compressed data.
-     * @param uncompData      Array to return the uncompressed data in.
+     * @param data       The compressed data.
+     * @param uncompData Array to return the uncompressed data in.
      */
     public void decode(byte data[], OutputStream uncompData) {
 
-        if(data[0] == (byte)0x00 && data[1] == (byte)0x01) {
+        if (data[0] == (byte) 0x00 && data[1] == (byte) 0x01) {
             throw new RuntimeException("LZW flavour not supported");
         }
 
@@ -143,9 +142,9 @@ public class LZWDecoder {
 
         stringTable = new byte[8192][];
 
-        for (int i=0; i<256; i++) {
+        for (int i = 0; i < 256; i++) {
             stringTable[i] = new byte[1];
-            stringTable[i][0] = (byte)i;
+            stringTable[i][0] = (byte) i;
         }
 
         tableIndex = 258;
@@ -158,8 +157,7 @@ public class LZWDecoder {
     public void writeString(byte string[]) {
         try {
             uncompData.write(string);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -230,11 +228,11 @@ public class LZWDecoder {
             }
 
             int code =
-            (nextData >> (nextBits - bitsToGet)) & andTable[bitsToGet-9];
+                    (nextData >> (nextBits - bitsToGet)) & andTable[bitsToGet - 9];
             nextBits -= bitsToGet;
 
             return code;
-        } catch(ArrayIndexOutOfBoundsException e) {
+        } catch (ArrayIndexOutOfBoundsException e) {
             // Strip not terminated as expected: return EndOfInformation code.
             return 257;
         }

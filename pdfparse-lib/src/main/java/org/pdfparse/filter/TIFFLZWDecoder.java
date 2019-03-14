@@ -50,11 +50,8 @@ package org.pdfparse.filter;
 
 /**
  * A class for performing LZW decoding.
- *
- *
  */
 public class TIFFLZWDecoder {
-
     byte stringTable[][];
     byte data[] = null, uncompData[];
     int tableIndex, bitsToGet = 9;
@@ -66,10 +63,10 @@ public class TIFFLZWDecoder {
     int nextBits = 0;
 
     int andTable[] = {
-        511,
-        1023,
-        2047,
-        4095
+            511,
+            1023,
+            2047,
+            4095
     };
 
     public TIFFLZWDecoder(int w, int predictor, int samplesPerPixel) {
@@ -81,13 +78,13 @@ public class TIFFLZWDecoder {
     /**
      * Method to decode LZW compressed data.
      *
-     * @param data            The compressed data.
-     * @param uncompData      Array to return the uncompressed data in.
-     * @param h               The number of rows the compressed data contains.
+     * @param data       The compressed data.
+     * @param uncompData Array to return the uncompressed data in.
+     * @param h          The number of rows the compressed data contains.
      */
     public byte[] decode(byte data[], byte uncompData[], int h) {
 
-        if(data[0] == (byte)0x00 && data[1] == (byte)0x01) {
+        if (data[0] == (byte) 0x00 && data[1] == (byte) 0x01) {
             throw new UnsupportedOperationException("TIFF 5.0 style lzw-codes are not supported");
         }
 
@@ -109,8 +106,8 @@ public class TIFFLZWDecoder {
         int code, oldCode = 0;
         byte string[];
 
-        while ( ((code = getNextCode()) != 257) &&
-        dstIndex < uncompData.length) {
+        while (((code = getNextCode()) != 257) &&
+                dstIndex < uncompData.length) {
 
             if (code == 256) {
 
@@ -174,9 +171,9 @@ public class TIFFLZWDecoder {
 
         stringTable = new byte[4096][];
 
-        for (int i=0; i<256; i++) {
+        for (int i = 0; i < 256; i++) {
             stringTable[i] = new byte[1];
-            stringTable[i][0] = (byte)i;
+            stringTable[i][0] = (byte) i;
         }
 
         tableIndex = 258;
@@ -261,11 +258,11 @@ public class TIFFLZWDecoder {
             }
 
             int code =
-            (nextData >> (nextBits - bitsToGet)) & andTable[bitsToGet-9];
+                    (nextData >> (nextBits - bitsToGet)) & andTable[bitsToGet - 9];
             nextBits -= bitsToGet;
 
             return code;
-        } catch(ArrayIndexOutOfBoundsException e) {
+        } catch (ArrayIndexOutOfBoundsException e) {
             // Strip not terminated as expected: return EndOfInformation code.
             return 257;
         }

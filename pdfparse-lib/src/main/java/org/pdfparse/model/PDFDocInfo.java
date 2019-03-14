@@ -19,9 +19,11 @@
 
 package org.pdfparse.model;
 
-import org.pdfparse.parser.PDFParser;
-import org.pdfparse.cos.*;
+import org.pdfparse.cos.COSDictionary;
+import org.pdfparse.cos.COSName;
 import org.pdfparse.exception.EParseError;
+import org.pdfparse.parser.ObjectRetriever;
+
 import java.util.Calendar;
 
 /**
@@ -32,25 +34,24 @@ import java.util.Calendar;
 
 public class PDFDocInfo {
     private COSDictionary info;
-    private PDFParser pdfParser;
+    private ObjectRetriever retriever;
     private boolean owned;
 
 
     /**
      * Constructor that is used for a preexisting dictionary.
      *
-     * @param dic The underlying dictionary.
-     * @param pdfParser Reference to the document parser object.
+     * @param dic       The underlying dictionary.
+     * @param retriever Reference to the Object retriever.
      */
-    public PDFDocInfo( COSDictionary dic, PDFParser pdfParser )
-    {
+    public PDFDocInfo(COSDictionary dic, ObjectRetriever retriever) {
         if (dic == null) {
             dic = new COSDictionary();
             owned = true;
         } else owned = false;
 
         this.info = dic;
-        this.pdfParser = pdfParser;
+        this.retriever = retriever;
     }
 
     /**
@@ -58,8 +59,7 @@ public class PDFDocInfo {
      *
      * @return The underlying info dictionary.
      */
-    public COSDictionary getDictionary()
-    {
+    public COSDictionary getDictionary() {
         return info;
     }
 
@@ -69,9 +69,8 @@ public class PDFDocInfo {
      * @return The title of the document.
      * @throws EParseError If there is a problem retrieving the title
      */
-    public String getTitle() throws EParseError
-    {
-        return info.getStr(COSName.TITLE, pdfParser, "");
+    public String getTitle() throws EParseError {
+        return info.getStr(COSName.TITLE, retriever, "");
     }
 
     /**
@@ -79,9 +78,8 @@ public class PDFDocInfo {
      *
      * @param title The new title for the document.
      */
-    public void setTitle( String title )
-    {
-        info.setStr( COSName.TITLE, title );
+    public void setTitle(String title) {
+        info.setStr(COSName.TITLE, title);
     }
 
     /**
@@ -90,9 +88,8 @@ public class PDFDocInfo {
      * @return The author of the document.
      * @throws EParseError If there is a problem retrieving the author
      */
-    public String getAuthor() throws EParseError
-    {
-        return info.getStr( COSName.AUTHOR, pdfParser, "" );
+    public String getAuthor() throws EParseError {
+        return info.getStr(COSName.AUTHOR, retriever, "");
     }
 
     /**
@@ -100,20 +97,18 @@ public class PDFDocInfo {
      *
      * @param author The new author for the document.
      */
-    public void setAuthor( String author )
-    {
-        info.setStr( COSName.AUTHOR, author );
+    public void setAuthor(String author) {
+        info.setStr(COSName.AUTHOR, author);
     }
 
     /**
      * This will get the subject of the document.  This will return null if no subject exists.
      *
      * @return The subject of the document.
-     *  @throws EParseError If there is a problem retrieving the subject
+     * @throws EParseError If there is a problem retrieving the subject
      */
-    public String getSubject() throws EParseError
-    {
-        return info.getStr( COSName.SUBJECT, pdfParser, "" );
+    public String getSubject() throws EParseError {
+        return info.getStr(COSName.SUBJECT, retriever, "");
     }
 
     /**
@@ -121,9 +116,8 @@ public class PDFDocInfo {
      *
      * @param subject The new subject for the document.
      */
-    public void setSubject( String subject )
-    {
-        info.setStr( COSName.SUBJECT, subject );
+    public void setSubject(String subject) {
+        info.setStr(COSName.SUBJECT, subject);
     }
 
     /**
@@ -132,9 +126,8 @@ public class PDFDocInfo {
      * @return The keywords of the document.
      * @throws EParseError If there is a problem retrieving keywords
      */
-    public String getKeywords() throws EParseError
-    {
-        return info.getStr( COSName.KEYWORDS, pdfParser, "" );
+    public String getKeywords() throws EParseError {
+        return info.getStr(COSName.KEYWORDS, retriever, "");
     }
 
     /**
@@ -142,9 +135,8 @@ public class PDFDocInfo {
      *
      * @param keywords The new keywords for the document.
      */
-    public void setKeywords( String keywords )
-    {
-        info.setStr( COSName.KEYWORDS, keywords );
+    public void setKeywords(String keywords) {
+        info.setStr(COSName.KEYWORDS, keywords);
     }
 
     /**
@@ -153,9 +145,8 @@ public class PDFDocInfo {
      * @return The creator of the document.
      * @throws EParseError If there is a problem retrieving the creator
      */
-    public String getCreator() throws EParseError
-    {
-        return info.getStr( COSName.CREATOR, pdfParser, "" );
+    public String getCreator() throws EParseError {
+        return info.getStr(COSName.CREATOR, retriever, "");
     }
 
     /**
@@ -163,9 +154,8 @@ public class PDFDocInfo {
      *
      * @param creator The new creator for the document.
      */
-    public void setCreator( String creator )
-    {
-        info.setStr( COSName.CREATOR, creator );
+    public void setCreator(String creator) {
+        info.setStr(COSName.CREATOR, creator);
     }
 
     /**
@@ -174,9 +164,8 @@ public class PDFDocInfo {
      * @return The producer of the document.
      * @throws EParseError If there is a problem retrieving the producer
      */
-    public String getProducer() throws EParseError
-    {
-        return info.getStr( COSName.PRODUCER, pdfParser, "" );
+    public String getProducer() throws EParseError {
+        return info.getStr(COSName.PRODUCER, retriever, "");
     }
 
     /**
@@ -184,21 +173,18 @@ public class PDFDocInfo {
      *
      * @param producer The new producer for the document.
      */
-    public void setProducer( String producer )
-    {
-        info.setStr( COSName.PRODUCER, producer );
+    public void setProducer(String producer) {
+        info.setStr(COSName.PRODUCER, producer);
     }
 
     /**
      * This will get the creation date of the document.  This will return null if no creation date exists.
      *
      * @return The creation date of the document.
-     *
      * @throws EParseError If there is an error creating the date.
      */
-    public Calendar getCreationDate() throws EParseError
-    {
-        return info.getDate( COSName.CREATION_DATE, pdfParser, null );
+    public Calendar getCreationDate() throws EParseError {
+        return info.getDate(COSName.CREATION_DATE, retriever, null);
     }
 
     /**
@@ -206,21 +192,18 @@ public class PDFDocInfo {
      *
      * @param date The new creation date for the document.
      */
-    public void setCreationDate( Calendar date )
-    {
-        info.setDate( COSName.CREATION_DATE, date );
+    public void setCreationDate(Calendar date) {
+        info.setDate(COSName.CREATION_DATE, date);
     }
 
     /**
      * This will get the modification date of the document.  This will return null if no modification date exists.
      *
      * @return The modification date of the document.
-     *
      * @throws EParseError If there is an error creating the date.
      */
-    public Calendar getModificationDate() throws EParseError
-    {
-        return info.getDate( COSName.MOD_DATE, pdfParser, null );
+    public Calendar getModificationDate() throws EParseError {
+        return info.getDate(COSName.MOD_DATE, retriever, null);
     }
 
     /**
@@ -228,9 +211,8 @@ public class PDFDocInfo {
      *
      * @param date The new modification date for the document.
      */
-    public void setModificationDate( Calendar date )
-    {
-        info.setDate( COSName.MOD_DATE, date );
+    public void setModificationDate(Calendar date) {
+        info.setDate(COSName.MOD_DATE, date);
     }
 
     /**
@@ -239,8 +221,7 @@ public class PDFDocInfo {
      *
      * @return The trapped value for the document.
      */
-    public COSName getTrapped()
-    {
+    public COSName getTrapped() {
         return info.getName(COSName.TRAPPED, COSName.UNKNOWN);
     }
 
@@ -259,28 +240,24 @@ public class PDFDocInfo {
 //    }
 
     /**
-     *  This will get the value of a custom metadata information field for the document.
-     *  This will return null if one is not found.
+     * This will get the value of a custom metadata information field for the document.
+     * This will return null if one is not found.
      *
      * @param fieldName Name of custom metadata field from pdf document.
-     *
      * @return String Value of metadata field
-     *
      */
-    public String getCustomMetadataValue(COSName fieldName)
-    {
-        return info.getStr( fieldName, "" );
+    public String getCustomMetadataValue(COSName fieldName) {
+        return info.getStr(fieldName, "");
     }
 
     /**
      * Set the custom metadata value.
      *
-     * @param fieldName The name of the custom metadata field.
+     * @param fieldName  The name of the custom metadata field.
      * @param fieldValue The value to the custom metadata field.
      */
-    public void setCustomMetadataValue( COSName fieldName, String fieldValue )
-    {
-        info.setStr( fieldName, fieldValue );
+    public void setCustomMetadataValue(COSName fieldName, String fieldValue) {
+        info.setStr(fieldName, fieldValue);
     }
 
     /**
@@ -289,14 +266,12 @@ public class PDFDocInfo {
      *
      * @param value The new trapped value for the document.
      */
-    public void setTrapped( String value )
-    {
-        if( value != null &&
-                !value.equals( "True" ) &&
-                !value.equals( "False" ) &&
-                !value.equals( "Unknown" ) )
-        {
-            throw new IllegalArgumentException( "Valid values for trapped are 'True', 'False', or 'Unknown'" );
+    public void setTrapped(String value) {
+        if (value != null &&
+                !value.equals("True") &&
+                !value.equals("False") &&
+                !value.equals("Unknown")) {
+            throw new IllegalArgumentException("Valid values for trapped are 'True', 'False', or 'Unknown'");
         }
 
         info.setStr(COSName.TRAPPED, value);

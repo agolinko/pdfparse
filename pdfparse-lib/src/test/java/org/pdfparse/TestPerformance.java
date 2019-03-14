@@ -19,8 +19,6 @@
 
 package org.pdfparse;
 
-import org.pdfparse.model.PDFDocument;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -31,14 +29,13 @@ import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 
 public class TestPerformance {
-    private static void parseFile(byte[] data) throws IOException {
-        PDFDocument pdf;
-        pdf = new PDFDocument( data );
-        pdf.dbgDump();
-        pdf.close();
+    private static void parseFile(byte[] data) {
+        PDFFile pdf;
+        pdf = new PDFFile(data);
+        pdf.parseEverything();
     }
 
-    public static void main(String[] args)  throws URISyntaxException, IOException {
+    public static void main(String[] args) throws URISyntaxException, IOException {
         URI uri = TestPerformance.class.getResource("/testfiles/").toURI();
         File dir = new File(uri);
         String fn = dir.getAbsolutePath() + "\\AMDC2011Poster.pdf";
@@ -46,14 +43,13 @@ public class TestPerformance {
         FileInputStream fin = new FileInputStream(fn);
         FileChannel channel = fin.getChannel();
 
-        byte[] buffer = new byte[(int)channel.size()];
+        byte[] buffer = new byte[(int) channel.size()];
         ByteBuffer bb = ByteBuffer.wrap(buffer);
         bb.order(ByteOrder.BIG_ENDIAN);
         channel.read(bb);
 
 
-
-        for (int i=0; i < 99; i++) {
+        for (int i = 0; i < 99; i++) {
             parseFile(buffer);
         }
     }

@@ -19,23 +19,23 @@
 
 package org.pdfparse.cos;
 
-import org.pdfparse.exception.*;
+import org.pdfparse.exception.EParseError;
+import org.pdfparse.parser.PDFParser;
 import org.pdfparse.parser.PDFRawData;
-import org.pdfparse.parser.ParsingContext;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
 /**
  * <CODE>COSNumber</CODE> provides two types of numbers, integer and real.
- * <P>
+ * <p>
  * Integers may be specified by signed or unsigned constants. Reals may only be
  * in decimal format.<BR>
  * This object is described in the 'Portable Document Format Reference Manual
  * version 1.7' section 3.3.2 (page 52-53).
  *
- * @see		COSObject
- * @see		EParseError
+ * @see        COSObject
+ * @see        EParseError
  */
 
 public final class COSNumber implements COSObject {
@@ -51,30 +51,32 @@ public final class COSNumber implements COSObject {
         value = val;
         isInteger = false;
     }
+
     public COSNumber(float val) {
         value = val;
         isInteger = false;
     }
+
     public COSNumber(int val) {
         value = val;
         isInteger = true;
     }
+
     public COSNumber(long val) {
         value = val;
         isInteger = true;
     }
 
-    public COSNumber(PDFRawData src, ParsingContext context) {
-        parse(src, context);
+    public COSNumber(PDFRawData src, PDFParser pdfFile) {
+        parse(src, pdfFile);
     }
 
 
     /**
      * {@inheritDoc}
      */
-    public boolean equals(Object o)
-    {
-        return o instanceof COSNumber && (((COSNumber)o).value == value);
+    public boolean equals(Object o) {
+        return o instanceof COSNumber && (((COSNumber) o).value == value);
         // TODO: make decision about precision
         // return o instanceof COSNumber && (Math.abs(((COSNumber)o).value - value) < 0.000001);
     }
@@ -82,18 +84,17 @@ public final class COSNumber implements COSObject {
     /**
      * {@inheritDoc}
      */
-    public int hashCode()
-    {
+    public int hashCode() {
         //taken from java.lang.Long
-        return Float.floatToIntBits((float)value);
+        return Float.floatToIntBits((float) value);
     }
 
 
-        /**
-         * Returns the primitive <CODE>int</CODE> value of this object.
-         *
-         * @return The value as <CODE>int</CODE>
-         */
+    /**
+     * Returns the primitive <CODE>int</CODE> value of this object.
+     *
+     * @return The value as <CODE>int</CODE>
+     */
     public int intValue() {
         return (int) value;
     }
@@ -122,12 +123,12 @@ public final class COSNumber implements COSObject {
      * @return The value as <CODE>float</CODE>
      */
     public float floatValue() {
-        return (float)value;
+        return (float) value;
     }
 
 
     @Override
-    public void parse(PDFRawData src, ParsingContext context) throws EParseError {
+    public void parse(PDFRawData src, PDFParser pdfFile) throws EParseError {
         int prev = src.pos;
         float sign = 1;
         float divider = 10;
@@ -138,7 +139,7 @@ public final class COSNumber implements COSObject {
         value = 0;
 
         while (src.pos < src.length) {
-            switch (src.src[src.pos]) {
+            switch (src.data[src.pos]) {
                 case 0x30:
                 case 0x31:
                 case 0x32:
@@ -150,10 +151,10 @@ public final class COSNumber implements COSObject {
                 case 0x38:
                 case 0x39: // 5..9
                     if (hasFractional) {
-                        value += (src.src[src.pos] - 0x30) / divider;
+                        value += (src.data[src.pos] - 0x30) / divider;
                         divider *= 10;
                     } else
-                        value = value * 10 + (src.src[src.pos] - 0x30);
+                        value = value * 10 + (src.data[src.pos] - 0x30);
                     src.pos++;
                     break;
                 case 0x2B: // +
@@ -179,10 +180,22 @@ public final class COSNumber implements COSObject {
                     break;
 
                 // Separators
-                case 0x00:  case 0x09:  case 0x0A:  case 0x0D:  case 0x20:
-                // Delimeters
-                case 0x28:  case 0x29:  case 0x3C:  case 0x3E:  case 0x2F:
-                case 0x5B:  case 0x5D:  case 0x7B:  case 0x7D:  case 0x25:
+                case 0x00:
+                case 0x09:
+                case 0x0A:
+                case 0x0D:
+                case 0x20:
+                    // Delimeters
+                case 0x28:
+                case 0x29:
+                case 0x3C:
+                case 0x3E:
+                case 0x2F:
+                case 0x5B:
+                case 0x5D:
+                case 0x7B:
+                case 0x7D:
+                case 0x25:
                     if (prev == src.pos)
                         throw new EParseError("Number expected, got no value");
 
@@ -197,18 +210,17 @@ public final class COSNumber implements COSObject {
             throw new EParseError("Number expected, got no value (2)");
 
         value = sign * value;
-        return;
     }
 
     @Override
-    public void produce(OutputStream dst, ParsingContext context) throws IOException {
+    public void produce(OutputStream dst, PDFParser pdfFile) throws IOException {
         dst.write(this.toString().getBytes());
     }
 
     @Override
     public String toString() {
         if (isInteger)
-            return String.valueOf((long)value);
+            return String.valueOf((long) value);
         else return String.format("%f.3", value);
     }
 
@@ -226,7 +238,7 @@ public final class COSNumber implements COSObject {
         int sign = 1;
 
         while (src.pos < src.length) {
-            switch (src.src[src.pos]) {
+            switch (src.data[src.pos]) {
                 case 0x30:
                 case 0x31:
                 case 0x32:
@@ -237,7 +249,7 @@ public final class COSNumber implements COSObject {
                 case 0x37:
                 case 0x38:
                 case 0x39: // 5..9
-                    res = res * 10 + (src.src[src.pos] - 0x30);
+                    res = res * 10 + (src.data[src.pos] - 0x30);
                     src.pos++;
                     break;
                 case 0x2B: // +
@@ -256,10 +268,22 @@ public final class COSNumber implements COSObject {
                     throw new EParseError("Invalid integer value");
 
                     // Separators
-                case 0x00:  case 0x09:  case 0x0A:  case 0x0D:  case 0x20:
+                case 0x00:
+                case 0x09:
+                case 0x0A:
+                case 0x0D:
+                case 0x20:
                     // Delimeters
-                case 0x28:  case 0x29:  case 0x3C:  case 0x3E:  case 0x2F:
-                case 0x5B:  case 0x5D:  case 0x7B:  case 0x7D:  case 0x25:
+                case 0x28:
+                case 0x29:
+                case 0x3C:
+                case 0x3E:
+                case 0x2F:
+                case 0x5B:
+                case 0x5D:
+                case 0x7B:
+                case 0x7D:
+                case 0x25:
                     if (prev == src.pos)
                         throw new EParseError("Number expected, got no value");
 
@@ -275,5 +299,4 @@ public final class COSNumber implements COSObject {
 
         return sign * res;
     }
-
 }

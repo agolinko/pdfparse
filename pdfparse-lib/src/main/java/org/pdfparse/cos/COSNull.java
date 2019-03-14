@@ -20,8 +20,8 @@
 package org.pdfparse.cos;
 
 import org.pdfparse.exception.EParseError;
+import org.pdfparse.parser.PDFParser;
 import org.pdfparse.parser.PDFRawData;
-import org.pdfparse.parser.ParsingContext;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -31,12 +31,12 @@ public class COSNull implements COSObject {
     private static final byte[] S_NULL = {0x6E, 0x75, 0x6C, 0x6C}; // "null"
 
     @Override
-    public void parse(PDFRawData src, ParsingContext context) throws EParseError {
+    public void parse(PDFRawData src, PDFParser pdfFile) throws EParseError {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public void produce(OutputStream dst, ParsingContext context) throws IOException {
+    public void produce(OutputStream dst, PDFParser pdfFile) throws IOException {
         dst.write(S_NULL);
     }
 

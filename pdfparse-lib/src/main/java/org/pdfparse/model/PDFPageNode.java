@@ -25,13 +25,13 @@ import org.pdfparse.cos.COSReference;
 
 /**
  * This represents a page node in a pdf document.
- * <P>
+ * <p>
  * The Pages of a document are accessible through a tree of nodes known as the Pages tree.
  * This tree defines the ordering of the pages in the document.<BR>
  * This object is described in the 'Portable Document Format Reference Manual version 1.3'
  * section 6.3 (page 71-73)
  *
- * @see        org.pdfparse.model.PDFPage
+ * @see org.pdfparse.model.PDFPage
  */
 
 public class PDFPageNode {
@@ -43,7 +43,7 @@ public class PDFPageNode {
      */
     public PDFPageNode() {
         dPageNode = new COSDictionary();
-        dPageNode.setName( COSName.TYPE, COSName.PAGES);
+        dPageNode.setName(COSName.TYPE, COSName.PAGES);
         //page.setName(COSName.KIDS, new COSArray());
         dPageNode.setInt(COSName.COUNT, 0);
     }
@@ -53,7 +53,7 @@ public class PDFPageNode {
      *
      * @param pages The dictionary pages.
      */
-    public PDFPageNode( COSDictionary pages ) {
+    public PDFPageNode(COSDictionary pages) {
         dPageNode = pages;
     }
 
@@ -63,7 +63,7 @@ public class PDFPageNode {
      * @return The total number of descendent page objects.
      */
     public int getCount() {
-        if(dPageNode == null)
+        if (dPageNode == null)
             return 0;
 
         return dPageNode.getInt(COSName.COUNT, 0);
@@ -83,7 +83,7 @@ public class PDFPageNode {
      *
      * @return The parent to this page.
      */
-    public COSReference getParent()  {
+    public COSReference getParent() {
         return dPageNode.getReference(COSName.PARENT);
     }
 
@@ -92,7 +92,7 @@ public class PDFPageNode {
      *
      * @param parent The parent to this page node.
      */
-    public void setParent( COSReference parent ) {
-        dPageNode.setReference( COSName.PARENT, parent );
+    public void setParent(COSReference parent) {
+        dPageNode.setReference(COSName.PARENT, parent);
     }
 }

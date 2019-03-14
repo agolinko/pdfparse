@@ -20,8 +20,6 @@
 
 package org.pdfparse.exception;
 
-import org.pdfparse.exception.EParseError;
-
 public class ENotSupported extends EParseError {
 
     /**

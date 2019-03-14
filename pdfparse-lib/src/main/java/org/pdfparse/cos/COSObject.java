@@ -20,15 +20,14 @@
 package org.pdfparse.cos;
 
 import org.pdfparse.exception.EParseError;
+import org.pdfparse.parser.PDFParser;
 import org.pdfparse.parser.PDFRawData;
-import org.pdfparse.parser.ParsingContext;
 
-import java.io.OutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 public interface COSObject {
+    void parse(PDFRawData src, PDFParser pdfFile) throws EParseError;
 
-    public void parse(PDFRawData src, ParsingContext context) throws EParseError;
-
-    public void produce(OutputStream dst, ParsingContext context) throws IOException;
+    void produce(OutputStream dst, PDFParser pdfFile) throws IOException;
 }

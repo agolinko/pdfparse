@@ -19,8 +19,8 @@
 
 package org.pdfparse.cos;
 
+import org.pdfparse.parser.PDFParser;
 import org.pdfparse.parser.PDFRawData;
-import org.pdfparse.parser.ParsingContext;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -29,19 +29,19 @@ public class COSBool implements COSObject {
 
     static private final byte[] TRUE = {0x74, 0x72, 0x75, 0x65};
     static private final byte[] FALSE = {0x66, 0x61, 0x6c, 0x73, 0x65};
-    public boolean value;
+    public final boolean value;
 
     public COSBool(Boolean val) {
         value = val;
     }
 
     @Override
-    public void parse(PDFRawData src, ParsingContext context) {
+    public void parse(PDFRawData src, PDFParser pdfFile) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public void produce(OutputStream dst, ParsingContext context) throws IOException {
+    public void produce(OutputStream dst, PDFParser pdfFile) throws IOException {
         if (value) {
             dst.write(TRUE);
         } else {

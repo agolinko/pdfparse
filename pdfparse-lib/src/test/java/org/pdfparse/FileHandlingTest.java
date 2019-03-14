@@ -1,9 +1,8 @@
 package org.pdfparse;
 
-import org.junit.Test;
 import org.junit.Assert;
+import org.junit.Test;
 import org.pdfparse.exception.EParseError;
-import org.pdfparse.model.PDFDocument;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -12,27 +11,26 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 
-public class FileHandlingTest extends Assert
-{
-    @Test(expected=java.io.FileNotFoundException.class)
+public class FileHandlingTest extends Assert {
+    @Test(expected = java.io.FileNotFoundException.class)
     public void checkNonExistentFileParse() throws EParseError, IOException, URISyntaxException {
         URI uri = this.getClass().getResource("/malformed_pdfs/").toURI();
         File dir = new File(uri);
 
-        PDFDocument pp = new PDFDocument(dir.getAbsolutePath() + "\\nonexistent.pdf");
+        PDFFile pf = new PDFFile(dir.getAbsolutePath() + "\\nonexistent.pdf");
     }
 
-    @Test(expected=org.pdfparse.exception.EParseError.class)
+    @Test(expected = org.pdfparse.exception.EParseError.class)
     public void checkMalformedFileParse() throws EParseError, IOException, URISyntaxException {
         URI uri = this.getClass().getResource("/malformed_pdfs/noise.pdf").toURI();
         File file = new File(uri);
 
-        PDFDocument pp = new PDFDocument(file);
+        PDFFile pp = new PDFFile(file);
     }
 
     @Test
     public void checkEvilPDFs() throws IOException, URISyntaxException {
-        PDFDocument pp;
+        PDFFile pp;
 
         URI uri = this.getClass().getResource("/malformed_pdfs/").toURI();
         File dir = new File(uri);
@@ -40,7 +38,7 @@ public class FileHandlingTest extends Assert
         FilenameFilter mask = new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
-                return name.endsWith( ".pdf" );
+                return name.endsWith(".pdf");
             }
         };
 
@@ -48,8 +46,8 @@ public class FileHandlingTest extends Assert
             System.out.printf("---- Parsing file: %s ... ", filename);
 
             try {
-                pp = new PDFDocument(new File(uri.resolve(filename)));
-                pp.dbgDump();
+                pp = new PDFFile(new File(uri.resolve(filename)));
+                pp.parseEverything();
                 Assert.fail();
             } catch (EParseError e) {
                 System.out.printf(" %s \r\n", e.getMessage());
@@ -57,64 +55,19 @@ public class FileHandlingTest extends Assert
         }
     }
 
-    //@Test
-    public void checkSingleFileParse2() throws EParseError, IOException, URISyntaxException {
-        URI uri = this.getClass().getResource("/testfiles3/source11.pdf").toURI();
-        File file = new File(uri);
-
-        PDFDocument pp = new PDFDocument(file);
-        pp.dbgDump();
-    }
-
-    //@Test
-    public void checkMassiveOpeningForCrash() throws IOException, URISyntaxException {
-        PDFDocument pp;
-
-        URI uri = this.getClass().getResource("/testfiles/").toURI();
-        File dir = new File(uri);
-
-        FilenameFilter mask = new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.endsWith( ".pdf" );
-            }
+    @Test
+    public void checkMinimalFileParse() throws EParseError, IOException, URISyntaxException {
+        String[] files = new String[] {
+                "1 - minimal by adobe.pdf",
+                "1 - minimal_crlf.pdf",
+                "p1 - minimum.pdf"
         };
 
-        for (String filename : dir.list(mask)) {
-            System.out.printf("---- Parsing file: %s ...\r\n", filename);
-
-
-            pp = new PDFDocument(dir.getAbsolutePath() + "\\" + filename);
-            pp.dbgDump();
+        for (String filename : files) {
+            System.out.println(String.format("Checking '%s'...", filename));
+            File file = new File(this.getClass().getResource("/minimal/" + filename).toURI());
+            PDFFile pp = new PDFFile(file);
+            pp.parseEverything();
         }
-    }
-
-   // @Test
-    public void checkMassiveOpeningForCrash2() throws EParseError, IOException, URISyntaxException {
-        PDFDocument pp;
-
-        URI uri = this.getClass().getResource("/testfiles2/").toURI();
-        File dir = new File(uri);
-
-        FilenameFilter mask = new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.endsWith( ".pdf" );
-            }
-        };
-
-        for (String filename : dir.list(mask)) {
-            System.out.printf("---- Parsing file: %s ...\r\n", filename);
-
-
-            pp = new PDFDocument(dir.getAbsolutePath() + "\\" + filename);
-            pp.dbgDump();
-        }
-    }
-
-    //@Test
-    public void checkZeroPages() throws EParseError {
-        //PDFDocument doc = new PDFDocument();
-        //Assert.assertEquals(doc.getPagesCount(), 0);
     }
 }

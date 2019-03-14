@@ -19,18 +19,12 @@
 
 package org.pdfparse.utils;
 
+import org.pdfparse.cos.COSString;
+import org.pdfparse.exception.EDateConvertError;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Locale;
-import java.util.SimpleTimeZone;
-import java.util.TimeZone;
-
-import  org.pdfparse.cos.COSString;
-import org.pdfparse.exception.*;
+import java.util.*;
 
 /**
  * This class is used to convert dates to strings and back using the PDF
@@ -117,7 +111,7 @@ public class DateConverter
         String retval = null;
         if( date != null )
         {
-            StringBuffer buffer = new StringBuffer();
+            StringBuilder buffer = new StringBuilder();
             TimeZone zone = date.getTimeZone();
             long offsetInMinutes = zone.getOffset( date.getTimeInMillis() )/1000/60;
             long hours = Math.abs( offsetInMinutes/60 );
@@ -202,7 +196,7 @@ public class DateConverter
                 SimpleTimeZone zone = null;
                 if( date.startsWith( "D:" ) )
                 {
-                    date = date.substring( 2, date.length() );
+                    date = date.substring(2);
                 }
                 if( date.length() < 4 )
                 {
@@ -302,7 +296,7 @@ public class DateConverter
         return retval;
     }
 
-    private static final void zeroAppend( StringBuffer out, int number )
+    private static void zeroAppend( StringBuffer out, int number )
     {
         if( number < 10 )
         {

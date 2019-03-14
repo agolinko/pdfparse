@@ -19,27 +19,27 @@
 
 package org.pdfparse.cds;
 
-import org.pdfparse.parser.PDFRawData;
-import org.pdfparse.parser.ParsingContext;
 import org.pdfparse.cos.COSArray;
 import org.pdfparse.cos.COSObject;
 import org.pdfparse.exception.EParseError;
+import org.pdfparse.parser.PDFParser;
+import org.pdfparse.parser.PDFRawData;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
 public class PDFRectangle implements COSObject {
     /** lower left x */
-    private float llx = 0;
+    private float llx;
 
     /** lower left y */
-    private float lly = 0;
+    private float lly;
 
     /** upper right x */
-    private float urx = 0;
+    private float urx;
 
     /** upper right y */
-    private float ury = 0;
+    private float ury;
 
     // constructors
 
@@ -70,8 +70,8 @@ public class PDFRectangle implements COSObject {
     }
 
     @Override
-    public void parse(PDFRawData src, ParsingContext context) throws EParseError {
-        COSArray array = new COSArray(src, context);
+    public void parse(PDFRawData src, PDFParser pdfFile) throws EParseError {
+        COSArray array = new COSArray(src, pdfFile);
         this.llx = array.getInt(0);
         this.lly = array.getInt(1);
         this.urx = array.getInt(2);
@@ -80,7 +80,7 @@ public class PDFRectangle implements COSObject {
     }
 
     @Override
-    public void produce(OutputStream dst, ParsingContext context) throws IOException {
+    public void produce(OutputStream dst, PDFParser pdfFile) throws IOException {
         String s = String.format("[%.2f %.2f %.2f %.2f]", llx, lly, urx, ury);
         dst.write(s.getBytes());
     }

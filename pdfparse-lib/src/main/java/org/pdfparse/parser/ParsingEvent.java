@@ -19,15 +19,10 @@
 
 package org.pdfparse.parser;
 
-import org.pdfparse.cos.COSDictionary;
+import org.pdfparse.cos.COSReference;
 
 public interface ParsingEvent {
-    public final static int CONTINUE = 1;
-    public final static int ABORT_PARSING = 2;
+    void onDocumentVersionFound(int majorVersion, int minorVersion);
 
-    public int onTrailerFound(COSDictionary trailer, int ordering);
-    public int onEncryptionDictFound(COSDictionary enc, int ordering);
-    public int onNotSupported(String msg);
-    public void onDocumentVersionFound(float version);
-
+    void onDocumentLoaded(COSReference rootId, COSReference infoId, COSReference encryptionId);
 }

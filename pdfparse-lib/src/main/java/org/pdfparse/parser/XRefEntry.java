@@ -20,6 +20,7 @@
 package org.pdfparse.parser;
 
 import org.pdfparse.cos.COSObject;
+import org.pdfparse.exception.EParseError;
 
 public class XRefEntry {
     public int id;
@@ -33,6 +34,29 @@ public class XRefEntry {
     public COSObject cachedObject;
     public PDFRawData decompressedStreamData;
 
+    XRefEntry(int id, int genOrId, int offsetOrIndex, boolean isCompressed) {
+        this.id = id;
+        this.isCompressed = isCompressed;
+
+        if (isCompressed) {
+            if (offsetOrIndex < 0)
+                throw new EParseError(String.format("Negative indexWithinContainer for compressed object id=%d in stream #%d", id, genOrId));
+
+            this.fileOffset = -1;
+            this.gen = -1;
+            this.containerObjId = genOrId;
+            this.indexWithinContainer = offsetOrIndex;
+        } else {
+            if (offsetOrIndex <= 0)
+                throw new EParseError("Negative or zero offset for object id=%d", id);
+
+            this.fileOffset = offsetOrIndex;
+            this.gen = genOrId;
+            this.containerObjId = -1;
+            this.indexWithinContainer = -1;
+        }
+    }
+
     @Override
     public String toString() {
         String s, name = "";
@@ -43,7 +67,7 @@ public class XRefEntry {
             s = String.format("(%d %d R)/%s @ [%d + %d]", id, gen, name, containerObjId, indexWithinContainer);
         } else {
             s = String.format("(%d %d R)/%s @ %d", id, gen, name, fileOffset);
-        };
+        }
         return s;
     }
 
