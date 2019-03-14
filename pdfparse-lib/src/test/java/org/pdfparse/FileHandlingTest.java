@@ -55,32 +55,19 @@ public class FileHandlingTest extends Assert {
         }
     }
 
-    //@Test
-    public void checkMassiveOpeningForCrash() throws IOException, URISyntaxException {
-        PDFFile pp;
-
-        URI uri = this.getClass().getResource("/testfiles/").toURI();
-        File dir = new File(uri);
-
-        FilenameFilter mask = new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.endsWith(".pdf");
-            }
+    @Test
+    public void checkMinimalFileParse() throws EParseError, IOException, URISyntaxException {
+        String[] files = new String[] {
+                "1 - minimal by adobe.pdf",
+                "1 - minimal_crlf.pdf",
+                "p1 - minimum.pdf"
         };
 
-        for (String filename : dir.list(mask)) {
-            System.out.printf("---- Parsing file: %s ...\r\n", filename);
-
-
-            pp = new PDFFile(dir.getAbsolutePath() + "\\" + filename);
+        for (String filename : files) {
+            System.out.println(String.format("Checking '%s'...", filename));
+            File file = new File(this.getClass().getResource("/minimal/" + filename).toURI());
+            PDFFile pp = new PDFFile(file);
             pp.parseEverything();
         }
-    }
-
-    //@Test
-    public void checkZeroPages() throws EParseError {
-        //PDFFile doc = new PDFFile();
-        //Assert.assertEquals(doc.getPagesCount(), 0);
     }
 }

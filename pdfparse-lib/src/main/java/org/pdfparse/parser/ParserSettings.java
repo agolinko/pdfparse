@@ -6,17 +6,17 @@ public class ParserSettings {
     public static final int MAX_SCAN_RANGE = 100;
 
     public boolean debugMessages = true;
-    public boolean checkSyntaxCompliance = false;
+    public boolean ignoreSyntaxCompliance = true;
     public boolean ignoreErrors = false;
     public boolean ignoreBasicSyntaxErrors = false;
     public boolean ignoreNonSupportedFeatures = true;
 
     public boolean allowScan = true;
     public int headerLookupRange = 100;
-    public int eofLookupRange = 100;
+    public int eofLookupRange = 1024; // Same as Acrobat implementation
 
 
     public void setSyntaxComplianceChecks(boolean value) {
-        checkSyntaxCompliance = value;
+        ignoreSyntaxCompliance = !value;
     }
 }

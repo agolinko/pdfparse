@@ -63,7 +63,7 @@ public class PDFFile implements ParsingEvent {
         pdfParser = new PDFParser(data, xref, settings, this);
 
         COSDictionary dictRoot = xref.getDictionary(rootRef);
-        COSDictionary dictInfo = xref.getDictionary(infoRef);
+        COSDictionary dictInfo = infoRef != null ? xref.getDictionary(infoRef) : null;
 
         document = new PDFDocument(xref, settings, dictRoot, dictInfo);
         return document;

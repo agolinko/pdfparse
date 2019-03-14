@@ -87,11 +87,14 @@ public class PDFParser implements ObjectParser {
         processVersion(versionLine.substring(Token.PDF_HEADER.length));
 
         // Scan for EOF -----------------------------------------
-        if (src.reverseScan(src.length, Token.EOF, settings.eofLookupRange) < 0)
-            throw new EParseError("Missing end of file marker");
+        int eofPosition = src.reverseScan(src.length, Token.EOF, settings.eofLookupRange);
+        Diagnostics.softAssertSyntaxComliance(settings, eofPosition > 0, "Missing EOF marker");
+        if (eofPosition <= 0) {
+            eofPosition = src.length;
+        }
 
         // Scan for 'startxref' marker --------------------------
-        if (src.reverseScan(src.pos, Token.STARTXREF, 100) < 0)
+        if (src.reverseScan(eofPosition, Token.STARTXREF, 100) < 0)
             throw new EParseError("Missing 'startxref' marker");
 
 
@@ -127,7 +130,7 @@ public class PDFParser implements ObjectParser {
         }
 
         Diagnostics.softAssertSupportedFeatures(settings,
-                majorVersion == 1 && (minorVersion >= 1 && minorVersion <= 8),
+                majorVersion == 1 && (minorVersion >= 0 && minorVersion <= 8),
                 "PDF version is not supported");
 
         parsingEvent.onDocumentVersionFound(majorVersion, minorVersion);

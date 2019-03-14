@@ -19,7 +19,7 @@ public class Diagnostics {
 
     public static boolean softAssertSyntaxComliance(ParserSettings settings, boolean condition, String message) {
         if (!condition)
-            checkAndLog(settings.checkSyntaxCompliance, message);
+            checkAndLog(settings.ignoreSyntaxCompliance, message);
         return condition;
     }
 
