@@ -23,7 +23,7 @@ import org.pdfparse.cos.COSDictionary;
 import org.pdfparse.parser.ObjectRetriever;
 import org.pdfparse.parser.ParserSettings;
 
-public class PDFDocument  {
+public class PDFDocument {
     private ParserSettings settings;
     private COSDictionary dictRoot;
     private COSDictionary dictInfo;

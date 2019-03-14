@@ -27,8 +27,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 public interface COSObject {
+    void parse(PDFRawData src, PDFParser pdfFile) throws EParseError;
 
-    public void parse(PDFRawData src, PDFParser pdfFile) throws EParseError;
-
-    public void produce(OutputStream dst, PDFParser pdfFile) throws IOException;
+    void produce(OutputStream dst, PDFParser pdfFile) throws IOException;
 }

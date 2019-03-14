@@ -25,8 +25,10 @@ import org.pdfparse.cos.COSReference;
 import org.pdfparse.cos.COSStream;
 
 public interface ObjectRetriever {
-    public COSObject getObject (COSReference ref);
-    public COSDictionary getDictionary(COSReference ref);
-    public COSStream getStream(COSReference ref);
+    COSObject getObject(COSReference ref);
+
+    COSDictionary getDictionary(COSReference ref);
+
+    COSStream getStream(COSReference ref);
 
 }

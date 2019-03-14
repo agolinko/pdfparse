@@ -23,6 +23,6 @@ import org.pdfparse.cos.COSReference;
 
 public interface ParsingEvent {
     void onDocumentVersionFound(int majorVersion, int minorVersion);
-    void onDocumentLoaded(COSReference rootId, COSReference infoId, COSReference encryptionId);
 
+    void onDocumentLoaded(COSReference rootId, COSReference infoId, COSReference encryptionId);
 }

@@ -29,7 +29,7 @@ import java.io.OutputStream;
 
 
 public class COSStream extends COSDictionary {
-    private byte[] data = null;
+    private byte[] data;
 
     public COSStream(COSDictionary dict, PDFRawData src, ObjectRetriever retriever) throws EParseError {
         super(dict, retriever);
@@ -44,6 +44,7 @@ public class COSStream extends COSDictionary {
         int length = this.getUInt(COSName.LENGTH, parser.getXref(), 0);
         data = src.readStream(length, true);
     }
+
     @Override
     public void produce(OutputStream dst, PDFParser pdfFile) throws IOException {
         super.produce(dst, pdfFile);

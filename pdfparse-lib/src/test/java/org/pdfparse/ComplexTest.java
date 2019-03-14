@@ -11,8 +11,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-public class ComplexTest extends Assert
-{
+public class ComplexTest extends Assert {
     @Test
     public void checkSingleFileParse_v12() throws EParseError, IOException, URISyntaxException {
         URI uri = this.getClass().getResource("/24c16.pdf").toURI();
@@ -34,8 +33,8 @@ public class ComplexTest extends Assert
         //Assert.assertEquals("Modified", "", doc.getInfo().getAuthor());
         Assert.assertEquals("Trapped", COSName.UNKNOWN, doc.getInfo().getTrapped());
 
-        Assert.assertEquals("MajorVersion",  1, pp.getMajorVersion());
-        Assert.assertEquals("MinorVersion",  2, pp.getMinorVersion());
+        Assert.assertEquals("MajorVersion", 1, pp.getMajorVersion());
+        Assert.assertEquals("MinorVersion", 2, pp.getMinorVersion());
         //Assert.assertEquals("Version2",  1.4, doc.getCatalog().getVersion(), 0.01);
         Assert.assertEquals("Page count", 17, doc.getCatalog().getPagesCount());
 
@@ -66,8 +65,8 @@ public class ComplexTest extends Assert
         //Assert.assertEquals("Modified", "", doc.getInfo().getAuthor());
         Assert.assertEquals("Trapped", COSName.UNKNOWN, doc.getInfo().getTrapped());
 
-        Assert.assertEquals("MajorVersion",  1, pp.getMajorVersion());
-        Assert.assertEquals("MinorVersion",  3, pp.getMinorVersion());
+        Assert.assertEquals("MajorVersion", 1, pp.getMajorVersion());
+        Assert.assertEquals("MinorVersion", 3, pp.getMinorVersion());
         //Assert.assertEquals("Version2",  1.4, doc.getCatalog().getVersion(), 0.01);
         Assert.assertEquals("Page count", 5, doc.getCatalog().getPagesCount());
 
@@ -98,8 +97,8 @@ public class ComplexTest extends Assert
         //Assert.assertEquals("Modified", "", doc.getInfo().getAuthor());
         Assert.assertEquals("Trapped", COSName.FALSE, doc.getInfo().getTrapped());
 
-        Assert.assertEquals("MajorVersion",  1, pp.getMajorVersion());
-        Assert.assertEquals("MinorVersion",  4, pp.getMinorVersion());
+        Assert.assertEquals("MajorVersion", 1, pp.getMajorVersion());
+        Assert.assertEquals("MinorVersion", 4, pp.getMinorVersion());
         //Assert.assertEquals("Version2",  1.4, doc.getCatalog().getVersion(), 0.01);
         Assert.assertEquals("Page count", 1, doc.getCatalog().getPagesCount());
 
@@ -130,8 +129,8 @@ public class ComplexTest extends Assert
         //Assert.assertEquals("Modified", "", doc.getInfo().getAuthor());
         Assert.assertEquals("Trapped", COSName.UNKNOWN, doc.getInfo().getTrapped());
 
-        Assert.assertEquals("MajorVersion",  1, pp.getMajorVersion());
-        Assert.assertEquals("MinorVersion",  5, pp.getMinorVersion());
+        Assert.assertEquals("MajorVersion", 1, pp.getMajorVersion());
+        Assert.assertEquals("MinorVersion", 5, pp.getMinorVersion());
         //Assert.assertEquals("Version2",  1.4, doc.getCatalog().getVersion(), 0.01);
         Assert.assertEquals("Page count", 3, doc.getCatalog().getPagesCount());
 
@@ -162,9 +161,9 @@ public class ComplexTest extends Assert
         //Assert.assertEquals("Modified", "", doc.getInfo().getAuthor());
         Assert.assertEquals("Trapped", COSName.FALSE, doc.getInfo().getTrapped());
 
-        Assert.assertEquals("MajorVersion",  1, pp.getMajorVersion());
-        Assert.assertEquals("MinorVersion",  6, pp.getMinorVersion());
-        Assert.assertEquals("MinorVersion",  6, pp.getMinorVersion());
+        Assert.assertEquals("MajorVersion", 1, pp.getMajorVersion());
+        Assert.assertEquals("MinorVersion", 6, pp.getMinorVersion());
+        Assert.assertEquals("MinorVersion", 6, pp.getMinorVersion());
 
 
         Assert.assertEquals("Page count", 176, doc.getCatalog().getPagesCount());
@@ -196,8 +195,8 @@ public class ComplexTest extends Assert
         //Assert.assertEquals("Modified", "", doc.getInfo().getAuthor());
         Assert.assertEquals("Trapped", COSName.FALSE, doc.getInfo().getTrapped());
 
-        Assert.assertEquals("MajorVersion",  1, pp.getMajorVersion());
-        Assert.assertEquals("MinorVersion",  7, pp.getMinorVersion());
+        Assert.assertEquals("MajorVersion", 1, pp.getMajorVersion());
+        Assert.assertEquals("MinorVersion", 7, pp.getMinorVersion());
 
         Assert.assertEquals("Page count", 1, doc.getCatalog().getPagesCount());
 

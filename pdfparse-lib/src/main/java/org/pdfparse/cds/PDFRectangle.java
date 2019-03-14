@@ -30,16 +30,16 @@ import java.io.OutputStream;
 
 public class PDFRectangle implements COSObject {
     /** lower left x */
-    private float llx = 0;
+    private float llx;
 
     /** lower left y */
-    private float lly = 0;
+    private float lly;
 
     /** upper right x */
-    private float urx = 0;
+    private float urx;
 
     /** upper right y */
-    private float ury = 0;
+    private float ury;
 
     // constructors
 

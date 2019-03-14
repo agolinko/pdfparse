@@ -1,6 +1,6 @@
 package org.pdfparse.exception;
 
-public class EGenericException extends RuntimeException  {
+public class EGenericException extends RuntimeException {
     /**
      * Creates a new instance of
      * <code>EGenericException</code> without detail message.

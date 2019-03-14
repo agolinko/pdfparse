@@ -11,7 +11,7 @@ import java.nio.charset.Charset;
 
 public class COSId extends IdGenPair implements COSObject {
     public COSId(int id, int gen) {
-        super(id,gen);
+        super(id, gen);
     }
 
     @Override

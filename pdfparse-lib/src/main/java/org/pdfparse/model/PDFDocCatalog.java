@@ -60,7 +60,7 @@ public class PDFDocCatalog {
             COSReference refRootPages = dRoot.getReference(COSName.PAGES);
             dPages = retriever.getDictionary(refRootPages);
             return dPages.getUInt(COSName.COUNT, retriever, -1);
-        };
+        }
 
         return pages.size();
     }
@@ -85,11 +85,9 @@ public class PDFDocCatalog {
             return; // will be zero pages
         }
 
-        for (int i=0; i<kids.size(); i++) {
-            COSObject ref = kids.get(i);
-
+        for (COSObject ref : kids) {
             if (Diagnostics.softAssertStructure(settings, ref instanceof COSReference, "/Kids element should be a reference"))
-                loadPage((COSReference)ref);
+                loadPage((COSReference) ref);
         }
     }
 

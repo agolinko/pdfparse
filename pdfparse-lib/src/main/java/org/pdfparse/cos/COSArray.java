@@ -45,9 +45,9 @@ public class COSArray extends ArrayList<COSObject> implements COSObject {
         src.skipWS();
 
         while (src.pos < src.length) {
-            if (src.src[src.pos] == 0x5D)
+            if (src.data[src.pos] == 0x5D)
                 break; // ']'
-            this.add( pdfFile.parseObject(src) );
+            this.add(pdfFile.parseObject(src));
             src.skipWS();
         }
         if (src.pos == src.length)
@@ -79,13 +79,13 @@ public class COSArray extends ArrayList<COSObject> implements COSObject {
 
     public int getInt(int idx) {
         COSObject obj = get(idx);
-         if (obj instanceof COSNumber) return ((COSNumber)obj).intValue();
-         else return 0;
+        if (obj instanceof COSNumber) return ((COSNumber) obj).intValue();
+        else return 0;
     }
 
     public float getFloat(int idx) {
         COSObject obj = get(idx);
-        if (obj instanceof COSNumber) return ((COSNumber)obj).floatValue();
+        if (obj instanceof COSNumber) return ((COSNumber) obj).floatValue();
         else return 0;
     }
 }

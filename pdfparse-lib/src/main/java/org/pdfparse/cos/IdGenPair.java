@@ -33,48 +33,48 @@ public class IdGenPair {
         if (pos >= len) return false;
 
         // parse int #1 --------------------------------------------
-        ch = src.src[pos];
-        while ((ch >= 0x30)&&(ch <= 0x39)) {
-            obj_id = obj_id*10 + (ch - 0x30);
+        ch = src.data[pos];
+        while ((ch >= 0x30) && (ch <= 0x39)) {
+            obj_id = obj_id * 10 + (ch - 0x30);
             pos++; // 0..9
             if (pos >= len) return false;
-            ch = src.src[pos];
+            ch = src.data[pos];
         }
 
         //check if not a whitespace or EOF
-        if (!((ch==0x20)||(ch==0x09)||(ch==0x0A)||(ch==0x0D)||(ch==0x00)))
+        if (!((ch == 0x20) || (ch == 0x09) || (ch == 0x0A) || (ch == 0x0D) || (ch == 0x00)))
             return false;
         pos++; // skip this space
         if (pos >= len) return false;
 
         // skip succeeded spaces if any
-        ch = src.src[pos];
-        while ((ch==0x20)||(ch==0x09)||(ch==0x0A)||(ch==0x0D)) {
+        ch = src.data[pos];
+        while ((ch == 0x20) || (ch == 0x09) || (ch == 0x0A) || (ch == 0x0D)) {
             pos++;
             if (pos >= len) return false;
-            ch = src.src[pos];
+            ch = src.data[pos];
         }
 
         // parse int #2 --------------------------------------------
-        while ((ch >= 0x30)&&(ch <= 0x39)) {
-            obj_gen = obj_gen*10 + (ch - 0x30);
+        while ((ch >= 0x30) && (ch <= 0x39)) {
+            obj_gen = obj_gen * 10 + (ch - 0x30);
             pos++;
             if (pos >= len) return false;
-            ch = src.src[pos];
+            ch = src.data[pos];
         }
 
         //check if not a whitespace or EOF
-        if (!((ch==0x20)||(ch==0x09)||(ch==0x0A)||(ch==0x0D)||(ch==0x00)))
+        if (!((ch == 0x20) || (ch == 0x09) || (ch == 0x0A) || (ch == 0x0D) || (ch == 0x00)))
             return false;
         pos++; // skip space
         if (pos >= len) return false;
 
         // skip succeeded spaces if any
-        ch = src.src[pos];
-        while ((ch==0x20)||(ch==0x09)||(ch==0x0A)||(ch==0x0D)) {
+        ch = src.data[pos];
+        while ((ch == 0x20) || (ch == 0x09) || (ch == 0x0A) || (ch == 0x0D)) {
             pos++;
             if (pos >= len) return false;
-            ch = src.src[pos];
+            ch = src.data[pos];
         }
 
         // check if next token is endToken ---------------------------------

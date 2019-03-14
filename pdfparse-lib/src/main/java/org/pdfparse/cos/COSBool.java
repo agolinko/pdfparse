@@ -29,7 +29,7 @@ public class COSBool implements COSObject {
 
     static private final byte[] TRUE = {0x74, 0x72, 0x75, 0x65};
     static private final byte[] FALSE = {0x66, 0x61, 0x6c, 0x73, 0x65};
-    public boolean value;
+    public final boolean value;
 
     public COSBool(Boolean val) {
         value = val;

@@ -39,8 +39,8 @@ public class TestCOSNumber extends Assert{
     }
 
     private void setData(PDFRawData data, String value) {
-        data.src = value.getBytes();
-        data.length = data.src.length;
+        data.data = value.getBytes();
+        data.length = data.data.length;
         data.pos = 0;
     }
 
@@ -60,21 +60,21 @@ public class TestCOSNumber extends Assert{
             COSNumber test3 = new COSNumber(i);
 
             // Reflexive (x == x)
-            assertTrue(test1.equals(test1));
+            assertEquals(test1, test1);
             // Symmetric is preserved ( x==y then y===x)
-            assertTrue(test2.equals(test1));
-            assertTrue(test1.equals(test2));
+            assertEquals(test2, test1);
+            assertEquals(test1, test2);
             // Transitive (if x==y && y==z then x===z)
-            assertTrue(test1.equals(test2));
-            assertTrue(test2.equals(test3));
-            assertTrue(test1.equals(test3));
+            assertEquals(test1, test2);
+            assertEquals(test2, test3);
+            assertEquals(test1, test3);
             // Non-nullity
-            assertFalse(test1.equals(null));
-            assertFalse(test2.equals(null));
-            assertFalse(test3.equals(null));
+            assertNotEquals(test1, null);
+            assertNotEquals(test2, null);
+            assertNotEquals(test3, null);
 
             COSNumber test4 = new COSNumber(i + 1);
-            assertFalse(test4.equals(test1));
+            assertNotEquals(test4, test1);
         }
 
         // Test float values
@@ -87,22 +87,22 @@ public class TestCOSNumber extends Assert{
             COSNumber test2 = new COSNumber(num);
             COSNumber test3 = new COSNumber(num);
             // Reflexive (x == x)
-            assertTrue(test1.equals(test1));
+            assertEquals(test1, test1);
             // Symmetric is preserved ( x==y then y==x)
-            assertTrue(test2.equals(test1));
-            assertTrue(test1.equals(test2));
+            assertEquals(test2, test1);
+            assertEquals(test1, test2);
             // Transitive (if x==y && y==z then x==z)
-            assertTrue(test1.equals(test2));
-            assertTrue(test2.equals(test3));
-            assertTrue(test1.equals(test3));
+            assertEquals(test1, test2);
+            assertEquals(test2, test3);
+            assertEquals(test1, test3);
             // Non-nullity
-            assertFalse(test1.equals(null));
-            assertFalse(test2.equals(null));
-            assertFalse(test3.equals(null));
+            assertNotEquals(null, test1);
+            assertNotEquals(null, test2);
+            assertNotEquals(null, test3);
 
             float nf = Float.intBitsToFloat(Float.floatToIntBits(num)+1);
             COSNumber test4 = new COSNumber(nf);
-            assertFalse(String.format("%e and %e", num, nf), test4.equals(test1));
+            assertNotEquals(String.format("%e and %e", num, nf), test4, test1);
         }
     }
 
@@ -120,7 +120,7 @@ public class TestCOSNumber extends Assert{
             assertEquals(test1.hashCode(), test2.hashCode());
 
             COSNumber test3 = new COSNumber(i + 1);
-            assertFalse(test3.hashCode() == test1.hashCode());
+            assertNotEquals(test3.hashCode(), test1.hashCode());
         }
         // Float
         for (int i = -100000; i < 300000; i += 20000)
@@ -132,7 +132,7 @@ public class TestCOSNumber extends Assert{
 
             float nf = Float.intBitsToFloat(Float.floatToIntBits(num)+1);
             COSNumber test3 = new COSNumber(nf);
-            assertFalse(test3.hashCode()==test1.hashCode());
+            assertNotEquals(test3.hashCode(), test1.hashCode());
         }
     }
 

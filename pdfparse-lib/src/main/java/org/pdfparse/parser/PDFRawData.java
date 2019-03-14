@@ -27,26 +27,26 @@ import java.util.Arrays;
 
 
 public final class PDFRawData {
-    public byte[] src;
+    public byte[] data;
     public int pos;
     public int length;
 
     // No needed to do it thread local, as PDFRawData is not thread-safe itself
     public IdGenPair tmpIdGenPair = new IdGenPair(0, 0);
-    public ByteBuffer tmpBuffer  = new ByteBuffer(1024);
+    public ByteBuffer tmpBuffer = new ByteBuffer(1024);
 
     public PDFRawData() {
 
     }
 
     public PDFRawData(byte[] bytearray) {
-        src = bytearray;
+        data = bytearray;
         pos = 0;
-        length = src.length;
+        length = data.length;
     }
 
     public final void fromByteBuffer(ByteBuffer bb) {
-        src = bb.getBuffer();
+        data = bb.getBuffer();
         pos = 0;
         length = bb.size();
     }
@@ -54,28 +54,29 @@ public final class PDFRawData {
     public final void skipWS() {
         byte ch;
         while (pos < length) {
-            ch = src[pos];
+            ch = data[pos];
             if ((ch != 0x20) && (ch != 0x09) && (ch != 0x0A) && (ch != 0x0D) && (ch != 0x00)) {
                 break;
             }
             pos++;
         }
     }
-    public static final boolean isWhitespace(int ch) {
+
+    public static boolean isWhitespace(int ch) {
         return ((ch == 0x20) || (ch == 0x09) || (ch == 0x0A) || (ch == 0x0D) || (ch == 0x00));
     }
 
     public final void skipLine() {
         int ch;
         while (pos < length) {
-            ch = src[pos];
+            ch = data[pos];
             if ((ch == 10) || (ch == 13)) {
                 break;
             }
             pos++;
         }
         while (pos < length) {
-            ch = src[pos];
+            ch = data[pos];
             if ((ch == 10) || (ch == 13)) {
                 pos++;
             } else {
@@ -92,10 +93,10 @@ public final class PDFRawData {
         StringBuilder sb = new StringBuilder();
 
         while (pos < length) {
-            char ch = (char) src[pos++];
+            char ch = (char) data[pos++];
 
             if (ch == '\r') {
-                if (pos < length && ((char) src[pos] == '\n')) {
+                if (pos < length && ((char) data[pos] == '\n')) {
                     pos++;
                 }
                 break;
@@ -111,10 +112,10 @@ public final class PDFRawData {
 
     public final void skipCRLForLF() throws EParseError {
         byte ch;
-        ch = src[pos];
+        ch = data[pos];
         if (ch == 0x0D) {
             pos++;
-            if (src[pos] != 0x0A) {
+            if (data[pos] != 0x0A) {
                 java.lang.System.out.println("Expected CRLF but got CR alone");
                 //throw new ParseError("Expected CRLF but got CR alone");
                 return;
@@ -130,13 +131,12 @@ public final class PDFRawData {
     }
 
 
-
     public final int fetchUInt() throws EParseError {
         int prev = pos;
         int res = 0;
         this.skipWS();
         while (pos < length) {
-            byte b = src[pos];
+            byte b = data[pos];
             switch (b) {
                 case 0x30:
                 case 0x31:
@@ -153,19 +153,19 @@ public final class PDFRawData {
                     break;
                 default:
                     if (prev == pos) {
-                        throw new EParseError("Expected number, but got #" + Integer.toHexString(src[pos]));
+                        throw new EParseError("Expected number, but got #" + Integer.toHexString(data[pos]));
                     }
                     return res;
             } // switch
         } // while
         if (prev == pos) {
-            throw new EParseError("Expected number, but got " + Integer.toHexString(src[pos]));
+            throw new EParseError("Expected number, but got " + Integer.toHexString(data[pos]));
         }
         return res;
     }
 
     //public final byte getByte(int relOffs) {
-    //    return src[pos + relOffs];
+    //    return data[pos + relOffs];
     //}
 
     // high-order byte first.
@@ -176,32 +176,32 @@ public final class PDFRawData {
         int r;
         int b;
 
-        b = src[pos++];
+        b = data[pos++];
         r = (b & 0xFF);
         if (size == 1) return r;
 
-        b = src[pos++] & 0xFF;
-        r = (r<<8) | b;
+        b = data[pos++] & 0xFF;
+        r = (r << 8) | b;
         if (size == 2) return r;
 
-        b = src[pos++] & 0xFF;
-        r = (r<<8) | b;
+        b = data[pos++] & 0xFF;
+        r = (r << 8) | b;
         if (size == 3) return r;
 
-        b = src[pos++] & 0xFF;
-        r = (r<<8) | b;
+        b = data[pos++] & 0xFF;
+        r = (r << 8) | b;
         if (size == 4) return r;
 
         throw
-            new EParseError("Invalid bytes length");
+                new EParseError("Invalid bytes length");
 
     }
 
     public final boolean checkSignature(byte[] sign) {
         int _to = this.pos + sign.length;
         if (_to > this.length) return false;
-        for (int i = this.pos, j=0; i<_to; i++, j++)
-            if (this.src[i] != sign[j])
+        for (int i = this.pos, j = 0; i < _to; i++, j++)
+            if (this.data[i] != sign[j])
                 return false;
         return true;
     }
@@ -209,13 +209,13 @@ public final class PDFRawData {
     public final boolean checkSignature(int from, byte[] sign) {
         int _to = from + sign.length;
         if (_to > this.length) return false;
-        for (int i = from, j=0; i<_to; i++, j++)
-            if (this.src[i] != sign[j])
+        for (int i = from, j = 0; i < _to; i++, j++)
+            if (this.data[i] != sign[j])
                 return false;
         return true;
     }
 
-    public final int reverseScan(int from,  byte[] sign, int limit) {
+    public final int reverseScan(int from, byte[] sign, int limit) {
         pos = from - sign.length;
         if (pos < 0) {
             pos = 0;
@@ -230,7 +230,7 @@ public final class PDFRawData {
         while (pos >= scanto) {
             found = true;
             for (int i = 0; i < sign.length; i++)
-                if (this.src[pos + i] != sign[i]) {
+                if (this.data[pos + i] != sign[i]) {
                     found = false;
                     break;
                 }
@@ -252,7 +252,7 @@ public final class PDFRawData {
             throw new EParseError("Unexpected end of file (stream object too large)");
 
         // TODO: Lazy parse (reference + start + len)
-        byte[] res = Arrays.copyOfRange(src, pos, pos + stream_len);
+        byte[] res = Arrays.copyOfRange(data, pos, pos + stream_len);
         pos += stream_len;
 
         if (movePosBeyoundEndObj) {
@@ -261,7 +261,7 @@ public final class PDFRawData {
             if (max_pos - pos > ParserSettings.MAX_SCAN_RANGE)
                 max_pos = pos + ParserSettings.MAX_SCAN_RANGE;
             for (int i = pos; i < max_pos; i++)
-                if ((src[i] == firstbyte) && checkSignature(i, Token.ENDOBJ)) {
+                if ((data[i] == firstbyte) && checkSignature(i, Token.ENDOBJ)) {
                     pos = i + Token.ENDOBJ.length;
                     return res;
                 }
@@ -272,47 +272,49 @@ public final class PDFRawData {
         return res;
     }
 
+    @SuppressWarnings("StringConcatenationInLoop")
     public String dbgPrintBytes() {
         int len = 90;
 
-        if (this.pos+len > this.length)
+        if (this.pos + len > this.length)
             len = this.length - this.pos;
 
         byte[] chunk = new byte[len];
 
-        System.arraycopy(src, pos, chunk, 0, len);
+        System.arraycopy(data, pos, chunk, 0, len);
         String s = "";
 
-        for (int i=0; i<chunk.length; i++)
-            if (chunk[i] > 0x19)
-                s += (char)chunk[i];
+        for (byte aChunk : chunk)
+            if (aChunk > 0x19)
+                s += (char) aChunk;
             else
-                s += "x"+ String.format("%02X", chunk[i]&0xFF);
+                s += "x" + String.format("%02X", aChunk & 0xFF);
 
         return s + " @ " + String.valueOf(pos);
     }
 
+    @SuppressWarnings("StringConcatenationInLoop")
     public String dbgPrintBytesBefore() {
         int l = 30;
         int r = 30;
 
-        if (this.pos+r > this.length)
+        if (this.pos + r > this.length)
             r = this.length - this.pos;
-        if (this.pos-l < 0)
+        if (this.pos - l < 0)
             l = this.pos;
 
         int len = r + l;
         byte[] chunk = new byte[len];
 
-        System.arraycopy(src, pos - l, chunk, 0, len);
+        System.arraycopy(data, pos - l, chunk, 0, len);
         String s = "";
 
-        for (int i=0; i<chunk.length; i++) {
+        for (int i = 0; i < chunk.length; i++) {
             if (i == l) s += "   [";
             if (chunk[i] > 0x19)
-                s += (char)chunk[i];
+                s += (char) chunk[i];
             else
-                s += "x"+ String.format("%02X", chunk[i]&0xFF);
+                s += "x" + String.format("%02X", chunk[i] & 0xFF);
             if (i == l) s += "]   ";
         }
 

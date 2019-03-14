@@ -38,42 +38,43 @@ public final class COSString implements COSObject {
     private static final byte[] C0D = {'\\', 'r'};
 
     static final char winansiByteToChar[] = {
-        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
-        16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
-        32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
-        48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63,
-        64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79,
-        80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95,
-        96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111,
-        112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127,
-        8364, 65533, 8218, 402, 8222, 8230, 8224, 8225, 710, 8240, 352, 8249, 338, 65533, 381, 65533,
-        65533, 8216, 8217, 8220, 8221, 8226, 8211, 8212, 732, 8482, 353, 8250, 339, 65533, 382, 376,
-        160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175,
-        176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191,
-        192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207,
-        208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223,
-        224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239,
-        240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255};
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+            16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
+            32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
+            48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63,
+            64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79,
+            80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95,
+            96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111,
+            112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127,
+            8364, 65533, 8218, 402, 8222, 8230, 8224, 8225, 710, 8240, 352, 8249, 338, 65533, 381, 65533,
+            65533, 8216, 8217, 8220, 8221, 8226, 8211, 8212, 732, 8482, 353, 8250, 339, 65533, 382, 376,
+            160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175,
+            176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191,
+            192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207,
+            208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223,
+            224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239,
+            240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255};
     static final IntIntHashtable winansi = new IntIntHashtable();
 
     static final char pdfEncodingByteToChar[] = {
-        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
-        16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
-        32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
-        48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63,
-        64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79,
-        80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95,
-        96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111,
-        112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127,
-        0x2022, 0x2020, 0x2021, 0x2026, 0x2014, 0x2013, 0x0192, 0x2044, 0x2039, 0x203a, 0x2212, 0x2030, 0x201e, 0x201c, 0x201d, 0x2018,
-        0x2019, 0x201a, 0x2122, 0xfb01, 0xfb02, 0x0141, 0x0152, 0x0160, 0x0178, 0x017d, 0x0131, 0x0142, 0x0153, 0x0161, 0x017e, 65533,
-        0x20ac, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175,
-        176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191,
-        192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207,
-        208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223,
-        224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239,
-        240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255};
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+            16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
+            32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
+            48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63,
+            64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79,
+            80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95,
+            96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111,
+            112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127,
+            0x2022, 0x2020, 0x2021, 0x2026, 0x2014, 0x2013, 0x0192, 0x2044, 0x2039, 0x203a, 0x2212, 0x2030, 0x201e, 0x201c, 0x201d, 0x2018,
+            0x2019, 0x201a, 0x2122, 0xfb01, 0xfb02, 0x0141, 0x0152, 0x0160, 0x0178, 0x017d, 0x0131, 0x0142, 0x0153, 0x0161, 0x017e, 65533,
+            0x20ac, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175,
+            176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191,
+            192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207,
+            208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223,
+            224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239,
+            240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255};
     static final IntIntHashtable pdfEncoding = new IntIntHashtable();
+
     static {
         for (int k = 128; k < 161; ++k) {
             char c = winansiByteToChar[k];
@@ -140,30 +141,26 @@ public final class COSString implements COSObject {
     /**
      * Forces the string to be written in literal form instead of hexadecimal form.
      *
-     * @param v
-     *            if v is true the string will be written in literal form, otherwise it will be written in hexa if
-     *            necessary.
+     * @param v if v is true the string will be written in literal form, otherwise it will be written in hexa if
+     *          necessary.
      */
 
-    public void setForceLiteralForm(boolean v)
-    {
+    public void setForceLiteralForm(boolean v) {
         forceHexForm = !v;
     }
 
     /**
      * Forces the string to be written in hexadecimal form instead of literal form.
      *
-     * @param v
-     *            if v is true the string will be written in hexadecimal form otherwise it will be written in literal if
-     *            necessary.
+     * @param v if v is true the string will be written in hexadecimal form otherwise it will be written in literal if
+     *          necessary.
      */
 
-    public void setForceHexForm(boolean v)
-    {
+    public void setForceHexForm(boolean v) {
         forceHexForm = v;
     }
 
-        @Override
+    @Override
     public void parse(PDFRawData src, PDFParser parser) throws EParseError {
         int nesting_brackets = 0;
         int v;
@@ -171,7 +168,7 @@ public final class COSString implements COSObject {
         value = "";
         binaryValue = EMPTY;
 
-        if (src.src[src.pos] == '<') {
+        if (src.data[src.pos] == '<') {
             src.pos++; // Skip the opening bracket '<'
             byte[] bytes = parseHexStream(src);
             setBinaryValue(bytes);
@@ -187,14 +184,14 @@ public final class COSString implements COSObject {
         buffer.reset();
 
         while (src.pos < src.length) {
-            ch = src.src[src.pos];
+            ch = src.data[src.pos];
             switch (ch) {
                 case 0x5C: // '\'
                     src.pos++;
                     if (src.pos >= src.length)
                         break; // finish. ignore this reverse solidus
 
-                    ch = src.src[src.pos];
+                    ch = src.data[src.pos];
                     switch (ch) {
                         case 0x6E: // 'n'
                             buffer.append(0x0A);
@@ -229,18 +226,18 @@ public final class COSString implements COSObject {
                         case 0x36:
                         case 0x37:
                             v = ch - 0x30; // convert first char to number
-                            if ((src.src[src.pos + 1] >= 0x30) && (src.src[src.pos + 1] <= 0x37)) {
+                            if ((src.data[src.pos + 1] >= 0x30) && (src.data[src.pos + 1] <= 0x37)) {
                                 src.pos++;
-                                v = v * 8 + (src.src[src.pos] - 0x30);
-                                if ((src.src[src.pos + 1] >= 0x30) && (src.src[src.pos + 1] <= 0x37)) {
+                                v = v * 8 + (src.data[src.pos] - 0x30);
+                                if ((src.data[src.pos + 1] >= 0x30) && (src.data[src.pos + 1] <= 0x37)) {
                                     src.pos++;
-                                    v = v * 8 + (src.src[src.pos] - 0x30);
+                                    v = v * 8 + (src.data[src.pos] - 0x30);
                                 }
                             }
                             buffer.append(v);
                             break;
                         case 0x0A:
-                            if ((src.pos < src.length) &&  (src.src[src.pos + 1] == 0x0D)) {
+                            if (((src.pos + 1) < src.length) && (src.data[src.pos + 1] == 0x0D)) {
                                 src.pos++;
                             }
                             break;
@@ -250,7 +247,7 @@ public final class COSString implements COSObject {
                         default:
                             // If the character following the REVERSE SOLIDUS is not one of those shown in Table 3,
                             // the REVERSE SOLIDUS shall be ignored.
-                            buffer.append(src.src[src.pos]); //add this char
+                            buffer.append(src.data[src.pos]); //add this char
                     }//switch after '\'
 
                     src.pos++;
@@ -281,7 +278,7 @@ public final class COSString implements COSObject {
                     src.pos++;
                     break;
                 default:
-                    buffer.append(src.src[src.pos]);
+                    buffer.append(src.data[src.pos]);
                     src.pos++;
             } // switch
         } // while ...
@@ -353,20 +350,22 @@ public final class COSString implements COSObject {
     }
 
 
-    /** Converts a <CODE>String</CODE> to a </CODE>byte</CODE> array according
+    /**
+     * Converts a <CODE>String</CODE> to a </CODE>byte</CODE> array according
      * to the font's encoding.
-     * @return an array of <CODE>byte</CODE> representing the conversion according to the font's encoding
+     *
      * @param encoding the encoding
-     * @param text the <CODE>String</CODE> to be converted
+     * @param text     the <CODE>String</CODE> to be converted
+     * @return an array of <CODE>byte</CODE> representing the conversion according to the font's encoding
      */
-    public static final byte[] convertToBytes(String text, String encoding) {
+    public static byte[] convertToBytes(String text, String encoding) {
         if (text == null)
             return new byte[0];
         if (encoding == null || encoding.length() == 0) {
             int len = text.length();
             byte b[] = new byte[len];
             for (int k = 0; k < len; ++k)
-                b[k] = (byte)text.charAt(k);
+                b[k] = (byte) text.charAt(k);
             return b;
         }
 
@@ -437,19 +436,22 @@ public final class COSString implements COSObject {
     }
 
 
-    /** Converts a </CODE>byte</CODE> array to a <CODE>String</CODE> trying to detect encoding
+    /**
+     * Converts a </CODE>byte</CODE> array to a <CODE>String</CODE> trying to detect encoding
+     *
      * @param bytes the bytes to convert
      * @return the converted <CODE>String</CODE>
      */
-    public static final String convertToString(byte bytes[], int offset, int length) {
+    public static String convertToString(byte bytes[], int offset, int length) {
         if (bytes == null)
             return "";
         // trying to detect encoding
         if (bytes.length > 2 && ((bytes[0] & 0xFF) == 0xFE) && ((bytes[1] & 0xFF) == 0xFF)) { // UTF-16 BE
             try {
                 return
-                    new String(bytes, offset, length, "UTF-16");
-            } catch (Exception e) {}
+                        new String(bytes, offset, length, "UTF-16");
+            } catch (Exception e) {
+            }
         }
 
         if (offset + length > bytes.length)
@@ -461,30 +463,29 @@ public final class COSString implements COSObject {
         char c[] = new char[length];
         int i = 0;
 
-        char[] map = pdfEncodingByteToChar; // use PDFEncoding
-
         for (int k = offset; k < dest; k++)
-            c[i++] = (char)map[bytes[k] & 0xff];
+            c[i++] = pdfEncodingByteToChar[bytes[k] & 0xff];
         return new String(c);
     }
 
-    public static final String convertToString(byte bytes[]) {
+    public static String convertToString(byte bytes[]) {
         return convertToString(bytes, 0, bytes.length);
     }
 
-    public static final String convertToString(ByteBuffer bytes) {
+    public static String convertToString(ByteBuffer bytes) {
         return convertToString(bytes.getBuffer(), 0, bytes.size());
     }
 
-    public static final String convertToString(byte bytes[], int offset, int length, String encoding) {
+    public static String convertToString(byte bytes[], int offset, int length, String encoding) {
         if (bytes == null)
             return "";
         // trying to detect encoding
         if (bytes.length > 2 && ((bytes[0] & 0xFF) == 0xFE) && ((bytes[1] & 0xFF) == 0xFF)) { // UTF-16 BE
             try {
                 return
-                    new String(bytes, offset, length, "UTF-16");
-            } catch (Exception e) {}
+                        new String(bytes, offset, length, "UTF-16");
+            } catch (Exception e) {
+            }
         }
 
         if (offset + length > bytes.length)
@@ -503,10 +504,13 @@ public final class COSString implements COSObject {
             map = pdfEncodingByteToChar; // use PDFEncoding
 
         for (int k = offset; k < dest; k++)
-            c[i++] = (char)map[bytes[k] & 0xff];
+            c[i++] = map[bytes[k] & 0xff];
         return new String(c);
     }
-    /** Checks is <CODE>text</CODE> only has PdfDocEncoding characters.
+
+    /**
+     * Checks is <CODE>text</CODE> only has PdfDocEncoding characters.
+     *
      * @param text the <CODE>String</CODE> to test
      * @return <CODE>true</CODE> if only PdfDocEncoding characters are present
      */
@@ -525,21 +529,21 @@ public final class COSString implements COSObject {
     }
 
 
-    public static final byte[] parseHexStream(PDFRawData src) throws EParseError {
+    public static byte[] parseHexStream(PDFRawData src) throws EParseError {
         int ch, n, n1 = 0;
         boolean first = true;
 
-        //src.pos++; // Skip the opening bracket '<'
+        //data.pos++; // Skip the opening bracket '<'
 
         ByteBuffer out = src.tmpBuffer;
         out.reset();
         for (int i = src.pos; i < src.length; i++) {
-            ch = src.src[i] & 0xFF;
+            ch = src.data[i] & 0xFF;
 
             if (ch == 0x3E) { // '>' - EOD
                 src.pos = i + 1;
                 if (!first)
-                    out.append((byte)(n1 << 4));
+                    out.append((byte) (n1 << 4));
                 return out.toByteArray();
             }
             // whitespace ?
@@ -556,7 +560,7 @@ public final class COSString implements COSObject {
             if (first)
                 n1 = n;
             else
-                out.append((byte)((n1 << 4) + n));
+                out.append((byte) ((n1 << 4) + n));
             first = !first;
         }
 
@@ -564,13 +568,11 @@ public final class COSString implements COSObject {
     }
 
     @Override
-    public boolean equals(Object obj)
-    {
+    public boolean equals(Object obj) {
         if (this == obj)
             return true;
 
-        if (obj instanceof COSString)
-        {
+        if (obj instanceof COSString) {
             COSString strObj = (COSString) obj;
             return this.getValue().equals(strObj.getValue()) && this.forceHexForm == strObj.forceHexForm;
         }
@@ -578,10 +580,10 @@ public final class COSString implements COSObject {
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         int result = getValue().hashCode();
-        return result += forceHexForm ? 17 : 0;
+        result += forceHexForm ? 17 : 0;
+        return result;
     }
 
 }

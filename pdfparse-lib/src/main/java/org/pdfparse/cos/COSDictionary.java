@@ -24,6 +24,7 @@ import org.pdfparse.exception.EParseError;
 import org.pdfparse.parser.ObjectRetriever;
 import org.pdfparse.parser.PDFParser;
 import org.pdfparse.parser.PDFRawData;
+import org.pdfparse.parser.ParserSettings;
 import org.pdfparse.utils.DateConverter;
 
 import java.io.IOException;
@@ -53,12 +54,13 @@ public class COSDictionary extends LinkedHashMap<COSName, COSObject> implements 
     @Override
     public void parse(PDFRawData src, PDFParser pdfFile) throws EParseError {
         //throw new UnsupportedOperationException("Not supported yet.");
-        src.pos +=2;
+        src.pos += 2;
 
         while (src.pos < src.length) {
             src.skipWS();
-            if ((src.src[src.pos] == 0x3E)&&(src.src[src.pos+1] == 0x3E)) { // '>'
-                src.pos+=2; return;
+            if ((src.data[src.pos] == 0x3E) && (src.data[src.pos + 1] == 0x3E)) { // '>'
+                src.pos += 2;
+                return;
             }
 
             src.skipWS();
@@ -73,11 +75,11 @@ public class COSDictionary extends LinkedHashMap<COSName, COSObject> implements 
     @Override
     public void produce(OutputStream dst, PDFParser pdfFile) throws IOException {
         COSObject obj;
-        if (pdfFile.settings.PRETTY_PRINT)
+        if (ParserSettings.PRETTY_PRINT)
             dst.write(S_OPEN_PP); // "<<\n"
         else dst.write(S_OPEN); // "<<"
 
-        for(COSName key: this.keySet()) {
+        for (COSName key : this.keySet()) {
             key.produce(dst, pdfFile);
             dst.write(0x20);
             obj = this.get(key);
@@ -85,7 +87,7 @@ public class COSDictionary extends LinkedHashMap<COSName, COSObject> implements 
                 dst.write(S_NULL);
             else
                 obj.produce(dst, pdfFile);
-            if (pdfFile.settings.PRETTY_PRINT)
+            if (ParserSettings.PRETTY_PRINT)
                 dst.write(0xA);
         }
 
@@ -100,7 +102,7 @@ public class COSDictionary extends LinkedHashMap<COSName, COSObject> implements 
     private COSObject dereference(COSObject obj, ObjectRetriever cache) throws EParseError {
         int counter = 5;
         while (obj instanceof COSReference) {
-            obj = cache.getObject((COSReference)obj);
+            obj = cache.getObject((COSReference) obj);
             if (counter-- == 0)
                 throw new EParseError("Infinite or too deep loop for " + obj.toString());
         }
@@ -110,7 +112,7 @@ public class COSDictionary extends LinkedHashMap<COSName, COSObject> implements 
     public boolean getBool(COSName name, boolean def_value) {
         COSObject obj = this.get(name);
         if (obj == null) return def_value;
-        if (obj instanceof COSBool) return ((COSBool)obj).value;
+        if (obj instanceof COSBool) return ((COSBool) obj).value;
         else return def_value;
     }
 
@@ -119,7 +121,7 @@ public class COSDictionary extends LinkedHashMap<COSName, COSObject> implements 
         if (obj == null) return def_value;
         if (obj instanceof COSReference)
             obj = dereference(obj, cache);
-        if (obj instanceof COSBool) return ((COSBool)obj).value;
+        if (obj instanceof COSBool) return ((COSBool) obj).value;
         else return def_value;
     }
 
@@ -131,20 +133,23 @@ public class COSDictionary extends LinkedHashMap<COSName, COSObject> implements 
     public int getInt(COSName name, int def_value) {
         COSObject obj = this.get(name);
         if (obj == null) return def_value;
-        if (obj instanceof COSNumber) return ((COSNumber)obj).intValue();
+        if (obj instanceof COSNumber) return ((COSNumber) obj).intValue();
         else return def_value;
     }
+
     public int getInt(COSName name, ObjectRetriever cache, int def_value) throws EParseError {
         COSObject obj = this.get(name);
         if (obj == null) return def_value;
         if (obj instanceof COSReference)
             obj = dereference(obj, cache);
-        if (obj instanceof COSNumber) return ((COSNumber)obj).intValue();
+        if (obj instanceof COSNumber) return ((COSNumber) obj).intValue();
         else return def_value;
     }
+
     public int getUInt(COSName name, int def_value) {
         return getInt(name, def_value);
     }
+
     public int getUInt(COSName name, ObjectRetriever cache, int def_value) throws EParseError {
         return getInt(name, cache, def_value);
     }
@@ -161,7 +166,7 @@ public class COSDictionary extends LinkedHashMap<COSName, COSObject> implements 
     public String getStr(COSName name, String def_value) {
         COSObject obj = this.get(name);
         if (obj == null) return def_value;
-        if (obj instanceof COSString) return ((COSString)obj).getValue();
+        if (obj instanceof COSString) return ((COSString) obj).getValue();
         else return def_value;
 
     }
@@ -172,11 +177,12 @@ public class COSDictionary extends LinkedHashMap<COSName, COSObject> implements 
         if (obj instanceof COSReference)
             obj = dereference(obj, cache);
         if (obj == null) return def_value;
-        if (obj instanceof COSString) return ((COSString)obj).getValue();
+        if (obj instanceof COSString) return ((COSString) obj).getValue();
         return def_value;
     }
+
     public void setStr(COSName name, String value) {
-       this.put(name, new COSString(value));
+        this.put(name, new COSString(value));
     }
 
     public void setDate(COSName name, Calendar date) {
@@ -186,19 +192,19 @@ public class COSDictionary extends LinkedHashMap<COSName, COSObject> implements 
     public Calendar getDate(COSName name, Calendar def_value) throws EParseError {
         String date = getStr(name, "");
         if (date.equals("")) return null;
-        return DateConverter.toCalendar( date );
+        return DateConverter.toCalendar(date);
     }
 
     public Calendar getDate(COSName name, ObjectRetriever cache, Calendar def_value) throws EParseError {
-        String date = getStr(name, cache,  "");
+        String date = getStr(name, cache, "");
         if (date.equals("")) return null;
-        return DateConverter.toCalendar( date );
+        return DateConverter.toCalendar(date);
     }
 
     public COSName getName(COSName name, COSName def_value) {
         COSObject obj = this.get(name);
         if (obj == null) return def_value;
-        if (obj instanceof COSName) return (COSName)obj;
+        if (obj instanceof COSName) return (COSName) obj;
         else return def_value;
     }
 
@@ -207,41 +213,43 @@ public class COSDictionary extends LinkedHashMap<COSName, COSObject> implements 
         if (obj == null) return def_value;
         if (obj instanceof COSReference)
             obj = dereference(obj, cache);
-        if (obj instanceof COSName) return (COSName)obj;
+        if (obj instanceof COSName) return (COSName) obj;
         else return def_value;
     }
 
     public void setName(COSName name, COSName value) {
-       this.put(name, value);
+        this.put(name, value);
     }
 
     public COSArray getArray(COSName name, COSArray def_value) {
         COSObject obj = this.get(name);
         if (obj == null) return def_value;
-        if (obj instanceof COSArray) return (COSArray)obj;
+        if (obj instanceof COSArray) return (COSArray) obj;
         else return def_value;
     }
+
     public COSArray getArray(COSName name, ObjectRetriever cache, COSArray def_value) throws EParseError {
         COSObject obj = this.get(name);
         if (obj == null) return def_value;
         if (obj instanceof COSReference)
             obj = dereference(obj, cache);
-        if (obj instanceof COSArray) return (COSArray)obj;
+        if (obj instanceof COSArray) return (COSArray) obj;
         else return def_value;
     }
 
     public COSDictionary getDictionary(COSName name, COSDictionary def_value) {
         COSObject obj = this.get(name);
         if (obj == null) return def_value;
-        if (obj instanceof COSDictionary) return (COSDictionary)obj;
+        if (obj instanceof COSDictionary) return (COSDictionary) obj;
         else return def_value;
     }
+
     public COSDictionary getDictionary(COSName name, ObjectRetriever cache, COSDictionary def_value) throws EParseError {
         COSObject obj = this.get(name);
         if (obj == null) return def_value;
         if (obj instanceof COSReference)
             obj = dereference(obj, cache);
-        if (obj instanceof COSDictionary) return (COSDictionary)obj;
+        if (obj instanceof COSDictionary) return (COSDictionary) obj;
         else return def_value;
     }
 
@@ -265,7 +273,7 @@ public class COSDictionary extends LinkedHashMap<COSName, COSObject> implements 
     public COSReference getReference(COSName name) {
         COSObject obj = this.get(name);
         if (obj == null) return null;
-        if (obj instanceof COSReference) return (COSReference)obj;
+        if (obj instanceof COSReference) return (COSReference) obj;
         else return null;
     }
 
@@ -273,11 +281,11 @@ public class COSDictionary extends LinkedHashMap<COSName, COSObject> implements 
         COSObject obj = this.get(name);
         if (obj == null) return null;
         if (obj instanceof COSArray) {
-            PDFRectangle rect = new PDFRectangle((COSArray)obj);
+            PDFRectangle rect = new PDFRectangle((COSArray) obj);
             this.put(name, rect); // override existing COSArray with rectangle
             return rect;
         }
-        if (obj instanceof PDFRectangle) return (PDFRectangle)obj;
+        if (obj instanceof PDFRectangle) return (PDFRectangle) obj;
         else return null;
     }
 

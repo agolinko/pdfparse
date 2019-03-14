@@ -32,9 +32,9 @@ import java.util.Arrays;
 
 public class COSName implements COSObject {
     public static final COSName EMPTY = new COSName("");
-    public  static final COSName UNKNOWN = new COSName("/Unknown");
-    public  static final COSName TRUE = new COSName("/True");
-    public  static final COSName FALSE = new COSName("/False");
+    public static final COSName UNKNOWN = new COSName("/Unknown");
+    public static final COSName TRUE = new COSName("/True");
+    public static final COSName FALSE = new COSName("/False");
 
     public static final COSName PREV = new COSName("/Prev");
     public static final COSName XREFSTM = new COSName("/XRefStm");
@@ -58,7 +58,6 @@ public class COSName implements COSObject {
     public static final COSName JPXDECODE = new COSName("/JPXDecode");
     public static final COSName CCITTFAXDECODE = new COSName("/CCITTFaxDecode");
     public static final COSName JBIG2DECODE = new COSName("/JBIG2Decode");
-
 
 
     public static final COSName DCTDECODE = new COSName("/DCTDecode");
@@ -115,7 +114,6 @@ public class COSName implements COSObject {
     public static final COSName KIDS = new COSName("Kids");
 
 
-
     public static final COSName FIRST = new COSName("/First");
     public static final COSName N = new COSName("/N");
 
@@ -124,7 +122,6 @@ public class COSName implements COSObject {
             -1, 10, 11, 12, 13, 14, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1,
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
             -1, 10, 11, 12, 13, 14, 15};
-
 
 
     private byte[] value;
@@ -160,10 +157,7 @@ public class COSName implements COSObject {
             return false;
         }
         final COSName other = (COSName) obj;
-        if ((this.hc != other.hc) || !Arrays.equals(this.value, other.value)) {
-            return false;
-        }
-        return true;
+        return (this.hc == other.hc) && Arrays.equals(this.value, other.value);
     }
 
     @Override
@@ -180,13 +174,13 @@ public class COSName implements COSObject {
         byte b, v1, v2;
         boolean stop = false;
 
-        if (src.src[src.pos] != 0x2F)
-            throw new EParseError("Expected SOLIDUS sign #2F in name object, but got x" + Integer.toHexString(src.src[p]));
+        if (src.data[src.pos] != 0x2F)
+            throw new EParseError("Expected SOLIDUS sign #2F in name object, but got x" + Integer.toHexString(src.data[p]));
 
         p++; // skip '/'
 
-        while ((p <= len) && !stop) {
-            b = src.src[p];
+        while ((p <= len)) {
+            b = src.data[p];
             Diagnostics.softAssertFormatError(parser.settings, b >= 0, "Illegal character in name token");
 
             switch (b) {
@@ -230,22 +224,22 @@ public class COSName implements COSObject {
 
         if (cnt == 0) {
             value = new byte[p - src.pos];
-            System.arraycopy(src.src, src.pos, value, 0, value.length);
+            System.arraycopy(src.data, src.pos, value, 0, value.length);
             src.pos = p;
             hc = Arrays.hashCode(value);
             return;
         }
 
-        value = new byte[p-src.pos - 2*cnt];
+        value = new byte[p - src.pos - 2 * cnt];
         cnt = 0;
-        for (i=src.pos; i<p; i++) {
-            if (src.src[i] == 0x23) {
-                v1 = (byte)HEX[src.src[i+1] - 0x30];
-                v2 = (byte)HEX[src.src[i+2] - 0x30];
-                value[cnt++] = (byte) ((v1<<4)&(v2&0xF));
-                i +=2; //agh!!!!!
+        for (i = src.pos; i < p; i++) {
+            if (src.data[i] == 0x23) {
+                v1 = (byte) HEX[src.data[i + 1] - 0x30];
+                v2 = (byte) HEX[src.data[i + 2] - 0x30];
+                value[cnt++] = (byte) ((v1 << 4) & (v2 & 0xF));
+                i += 2; //agh!!!!!
             } else
-                value[cnt++] = src.src[i];
+                value[cnt++] = src.data[i];
         }
 
         src.pos = p;
@@ -256,18 +250,18 @@ public class COSName implements COSObject {
     public void produce(OutputStream dst, PDFParser pdfFile) throws IOException {
         int cnt = 0;
         int i;
-        for (i=0; i<value.length; i++)
+        for (i = 0; i < value.length; i++)
             if (value[i] < 0x21) cnt++; // count characters that need escape
         if (cnt == 0) {
-          dst.write(value);
-          return;
+            dst.write(value);
+            return;
         }
 
-        for (i=0; i<value.length; i++) {
+        for (i = 0; i < value.length; i++) {
             if (value[i] < 0x21) {
                 dst.write(0x23);
-                dst.write(0x30 + (value[i]>>4));
-                dst.write(0x30 + (value[i]&0xF));
+                dst.write(0x30 + (value[i] >> 4));
+                dst.write(0x30 + (value[i] & 0xF));
             } else
                 dst.write(value[i]);
         }

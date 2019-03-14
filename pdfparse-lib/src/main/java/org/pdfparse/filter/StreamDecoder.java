@@ -37,11 +37,12 @@ import java.util.zip.Inflater;
 
 public class StreamDecoder {
 
-    public static interface FilterHandler{
-        public byte[] decode(byte[] b, COSName filterName, COSObject decodeParams, final COSDictionary streamDictionary, ParserSettings settings) throws EParseError;
+    public interface FilterHandler {
+        byte[] decode(byte[] b, COSName filterName, COSObject decodeParams, final COSDictionary streamDictionary, ParserSettings settings) throws EParseError;
     }
 
     private static final Map<COSName, FilterHandler> defaults;
+
     static {
         HashMap<COSName, FilterHandler> map = new HashMap<COSName, FilterHandler>();
 
@@ -66,8 +67,7 @@ public class StreamDecoder {
     }
 
 
-
-    public static byte[] FLATEDecode(final byte[] src) {
+    private static byte[] FLATEDecode(final byte[] src) {
         byte[] buf = new byte[1024];
 
         Inflater decompressor = new Inflater();
@@ -82,43 +82,49 @@ public class StreamDecoder {
                 bos.write(buf, 0, count);
             }
         } catch (DataFormatException e) {
-          decompressor.end();
-          throw new EDecoderException("FlateDecode error", e);
+            decompressor.end();
+            throw new EDecoderException("FlateDecode error", e);
         }
         decompressor.end();
 
         return bos.toByteArray();
     }
 
-    /** Decodes a stream that has the LZWDecode filter.
+    /**
+     * Decodes a stream that has the LZWDecode filter.
+     *
      * @param in the input data
      * @return the decoded data
      */
-    public static byte[] LZWDecode(final byte in[]) {
+    private static byte[] LZWDecode(final byte in[]) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         LZWDecoder lzw = new LZWDecoder();
         lzw.decode(in, out);
         return out.toByteArray();
     }
 
-    /** Decodes a stream that has the ASCIIHexDecode filter.
+    /**
+     * Decodes a stream that has the ASCIIHexDecode filter.
+     *
      * @param in the input data
      * @return the decoded data
      */
-    public static byte[] ASCIIHexDecode(final byte in[], ParserSettings settings) throws EParseError {
+    private static byte[] ASCIIHexDecode(final byte in[], ParserSettings settings) throws EParseError {
         PDFRawData data = new PDFRawData();
-        data.src = in;
+        data.data = in;
         data.length = in.length;
         data.pos = 0;
 
         return COSString.parseHexStream(data);
     }
 
-    /** Decodes a stream that has the ASCII85Decode filter.
+    /**
+     * Decodes a stream that has the ASCII85Decode filter.
+     *
      * @param in the input data
      * @return the decoded data
      */
-    public static byte[] ASCII85Decode(final byte in[]) {
+    private static byte[] ASCII85Decode(final byte in[]) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         int state = 0;
         int chn[] = new int[5];
@@ -145,30 +151,28 @@ public class StreamDecoder {
                 int r = 0;
                 for (int j = 0; j < 5; ++j)
                     r = r * 85 + chn[j];
-                out.write((byte)(r >> 24));
-                out.write((byte)(r >> 16));
-                out.write((byte)(r >> 8));
-                out.write((byte)r);
+                out.write((byte) (r >> 24));
+                out.write((byte) (r >> 16));
+                out.write((byte) (r >> 8));
+                out.write((byte) r);
             }
         }
-        int r = 0;
+        int r;
         // We'll ignore the next two lines for the sake of perpetuating broken PDFs
 //        if (state == 1)
 //            throw new RuntimeException("illegal.length.in.ascii85decode");
         if (state == 2) {
-            r = chn[0] * 85 * 85 * 85 * 85 + chn[1] * 85 * 85 * 85 + 85 * 85 * 85  + 85 * 85 + 85;
-            out.write((byte)(r >> 24));
-        }
-        else if (state == 3) {
-            r = chn[0] * 85 * 85 * 85 * 85 + chn[1] * 85 * 85 * 85  + chn[2] * 85 * 85 + 85 * 85 + 85;
-            out.write((byte)(r >> 24));
-            out.write((byte)(r >> 16));
-        }
-        else if (state == 4) {
-            r = chn[0] * 85 * 85 * 85 * 85 + chn[1] * 85 * 85 * 85  + chn[2] * 85 * 85  + chn[3] * 85 + 85;
-            out.write((byte)(r >> 24));
-            out.write((byte)(r >> 16));
-            out.write((byte)(r >> 8));
+            r = chn[0] * 85 * 85 * 85 * 85 + chn[1] * 85 * 85 * 85 + 85 * 85 * 85 + 85 * 85 + 85;
+            out.write((byte) (r >> 24));
+        } else if (state == 3) {
+            r = chn[0] * 85 * 85 * 85 * 85 + chn[1] * 85 * 85 * 85 + chn[2] * 85 * 85 + 85 * 85 + 85;
+            out.write((byte) (r >> 24));
+            out.write((byte) (r >> 16));
+        } else if (state == 4) {
+            r = chn[0] * 85 * 85 * 85 * 85 + chn[1] * 85 * 85 * 85 + chn[2] * 85 * 85 + chn[3] * 85 + 85;
+            out.write((byte) (r >> 24));
+            out.write((byte) (r >> 16));
+            out.write((byte) (r >> 8));
         }
         return out.toByteArray();
     }
@@ -179,13 +183,13 @@ public class StreamDecoder {
         if (objFilter != null) {
             COSArray filters = new COSArray();
             if (objFilter instanceof COSName)
-                filters.add((COSName)objFilter);
+                filters.add(objFilter);
             else if (objFilter instanceof COSArray)
-                filters.addAll((COSArray)objFilter);
+                filters.addAll((COSArray) objFilter);
 
             byte[] bytes = src;
-            for (int i=0; i<filters.size(); i++) {
-                COSName currFilterName = (COSName)filters.get(i);
+            for (int i = 0; i < filters.size(); i++) {
+                COSName currFilterName = (COSName) filters.get(i);
                 FilterHandler fhandler = defaults.get(currFilterName);
                 if (fhandler == null)
                     throw new EParseError("Stream filter not supported: " + currFilterName.toString());
@@ -197,23 +201,6 @@ public class StreamDecoder {
 
         return new PDFRawData(src);
 
-//            if (filter.equals(COSName.FLATEDECODE)) {
-//               src = FLATEDecode(src);
-//            } else if (filter.equals(COSName.DCTDECODE)) {
-//                // do nothing
-//            } else
-//            throw new EParseError("Stream filter not supported: " + filter.toString());
-//        }
-//        // ------------
-//        COSDictionary decodeParams = dic.getDictionary(COSName.DECODEPARMS, null);
-//        if (decodeParams != null)
-//          src = unpredictStream(src, decodeParams.getInt(COSName.PREDICTOR, 1), decodeParams.getInt(COSName.COLUMNS, 0));
-//
-//        PDFRawData pd = new PDFRawData();
-//        pd.length = src.length;
-//        pd.pos = 0;
-//        pd.src = src;
-//        return pd;
     }
 
     public static PDFRawData decodeStream(PDFRawData src, COSDictionary dic, ParserSettings settings) throws EParseError {
@@ -228,7 +215,7 @@ public class StreamDecoder {
      * @param dic
      * @return a new length
      */
-    public static byte[] decodePredictor (byte in_out[], final COSDictionary dic, ParserSettings settings) {
+    private static byte[] decodePredictor(byte in_out[], final COSDictionary dic, ParserSettings settings) {
         int predictor = dic.getInt(COSName.PREDICTOR, -1);
         if (predictor < 0)
             return in_out;
@@ -241,7 +228,7 @@ public class StreamDecoder {
         int bpc = dic.getInt(COSName.BITSPERCOMPONENT, 8);
 
         int bytesPerPixel = colors * bpc / 8;
-        int bytesPerRow = (colors*width*bpc + 7)/8;
+        int bytesPerRow = (colors * width * bpc + 7) / 8;
 
         if (predictor == 2) {
             if (bpc == 8) {
@@ -250,19 +237,19 @@ public class StreamDecoder {
                     int rowStart = row * bytesPerRow;
                     for (int col = 0 + bytesPerPixel; col < bytesPerRow; col++) {       // TODO: Check documentation (BUG ?)
                         int idx = rowStart + col;
-                        in_out[idx] = (byte)(in_out[idx] + in_out[idx - bytesPerPixel]);
+                        in_out[idx] = (byte) (in_out[idx] + in_out[idx - bytesPerPixel]);
                     }
                 }
             }
             return in_out;
         }
 
-        if (!Diagnostics.softAssertFormatError(settings, in_out.length > bytesPerPixel, "Data to small for decoding PNG prediction") ) {
+        if (!Diagnostics.softAssertFormatError(settings, in_out.length > bytesPerPixel, "Data to small for decoding PNG prediction")) {
             return in_out;
         }
 
 
-        int filter = 0;
+        int filter;
         int curr_in_idx = 0, curr_out_idx = 0, prior_idx = 0;
         // Decode the first line -------------------
         filter = in_out[curr_in_idx++];
@@ -270,25 +257,21 @@ public class StreamDecoder {
         switch (filter) {
             case 0: //PNG_FILTER_NONE
             case 2: //PNG_FILTER_UP
-                //curr[i] += prior[i];
-                for (int i = 0; i < bytesPerRow; i++)
-                    in_out[curr_out_idx + i] = in_out[curr_in_idx + i];
+                System.arraycopy(in_out, curr_in_idx, in_out, curr_out_idx, bytesPerRow);
                 break;
             case 1: //PNG_FILTER_SUB
             case 4: //PNG_FILTER_PAETH
                 //curr[i] += curr[i - bytesPerPixel];
-                for (int i = 0; i < bytesPerPixel; i++)
-                    in_out[curr_out_idx + i] = in_out[curr_in_idx + i];
+                System.arraycopy(in_out, curr_in_idx, in_out, curr_out_idx, bytesPerPixel);
 
                 for (int i = bytesPerPixel; i < bytesPerRow; i++)
-                    in_out[curr_out_idx + i] = (byte)((in_out[curr_out_idx + i - bytesPerPixel]&0xff + in_out[curr_in_idx + i]&0xff)&0xff);
+                    in_out[curr_out_idx + i] = (byte) ((in_out[curr_out_idx + i - bytesPerPixel] & 0xff + in_out[curr_in_idx + i] & 0xff) & 0xff);
                 break;
             case 3: //PNG_FILTER_AVERAGE
-                for (int i = 0; i < bytesPerPixel; i++)
-                    in_out[curr_out_idx + i] = in_out[curr_in_idx + i];
+                System.arraycopy(in_out, curr_in_idx, in_out, curr_out_idx, bytesPerPixel);
 
                 for (int i = bytesPerPixel; i < bytesPerRow; i++)
-                    in_out[curr_out_idx + i] = (byte) ((in_out[curr_in_idx + i - bytesPerPixel] & 0xff)/2);
+                    in_out[curr_out_idx + i] = (byte) ((in_out[curr_in_idx + i - bytesPerPixel] & 0xff) / 2);
                 break;
             default:
                 // Error -- unknown filter type
@@ -301,46 +284,41 @@ public class StreamDecoder {
 
 
         // Decode the (sub)image row-by-row
-        while (true) {
-             if (curr_in_idx >= in_out.length)
-                 break;
-
-             filter = in_out[curr_in_idx++];
+        while (curr_in_idx < in_out.length) {
+            filter = in_out[curr_in_idx++];
 
             switch (filter) {
                 case 0: //PNG_FILTER_NONE
-                    for (int i = 0; i < bytesPerPixel; i++)
-                        in_out[curr_out_idx + i] = in_out[curr_in_idx + i];
+                    System.arraycopy(in_out, curr_in_idx, in_out, curr_out_idx, bytesPerPixel);
                     break;
                 case 1: //PNG_FILTER_SUB
                     //curr[i] += curr[i - bytesPerPixel];
-                    for (int i = 0; i < bytesPerPixel; i++)
-                        in_out[curr_out_idx + i] = in_out[curr_in_idx + i];
+                    System.arraycopy(in_out, curr_in_idx, in_out, curr_out_idx, bytesPerPixel);
 
                     for (int i = bytesPerPixel; i < bytesPerRow; i++)
-                        in_out[curr_out_idx + i] = (byte)(((in_out[curr_out_idx + i - bytesPerPixel]&0xff) + (in_out[curr_in_idx + i]&0xff))&0xff);
+                        in_out[curr_out_idx + i] = (byte) (((in_out[curr_out_idx + i - bytesPerPixel] & 0xff) + (in_out[curr_in_idx + i] & 0xff)) & 0xff);
                     break;
                 case 2: //PNG_FILTER_UP
                     for (int i = 0; i < bytesPerRow; i++) {
                         //curr[i] += prior[i];
-                        in_out[curr_out_idx + i] = (byte) ((in_out[curr_in_idx + i]&0xff) + (in_out[prior_idx + i]&0xff)&0xff);
+                        in_out[curr_out_idx + i] = (byte) ((in_out[curr_in_idx + i] & 0xff) + (in_out[prior_idx + i] & 0xff) & 0xff);
                     }
                     break;
                 case 3: //PNG_FILTER_AVERAGE
                     for (int i = 0; i < bytesPerPixel; i++) {
                         //curr[i] += prior[i] / 2;
-                        in_out[curr_out_idx + i] += (byte) (((in_out[curr_in_idx + i]&0xff) + (in_out[prior_idx + i]&0xff) / 2)&0xff);
+                        in_out[curr_out_idx + i] += (byte) (((in_out[curr_in_idx + i] & 0xff) + (in_out[prior_idx + i] & 0xff) / 2) & 0xff);
                     }
                     for (int i = bytesPerPixel; i < bytesPerRow; i++) {
                         //curr[i] += ((curr[i - bytesPerPixel] & 0xff) + (prior[i] & 0xff))/2;
                         in_out[curr_out_idx + i] += (byte) ((
-                                (in_out[curr_out_idx + i - bytesPerPixel] & 0xff)+(in_out[prior_idx + i] & 0xff))/2);
+                                (in_out[curr_out_idx + i - bytesPerPixel] & 0xff) + (in_out[prior_idx + i] & 0xff)) / 2);
                     }
                     break;
                 case 4: //PNG_FILTER_PAETH
                     for (int i = 0; i < bytesPerPixel; i++) {
                         //curr[i] += prior[i];
-                        in_out[curr_out_idx + i] = (byte) (((in_out[curr_in_idx + i]&0xff) + (in_out[prior_idx + i]&0xff)&0xff));
+                        in_out[curr_out_idx + i] = (byte) (((in_out[curr_in_idx + i] & 0xff) + (in_out[prior_idx + i] & 0xff) & 0xff));
                     }
 
                     for (int i = bytesPerPixel; i < bytesPerRow; i++) {
@@ -366,7 +344,7 @@ public class StreamDecoder {
                             ret = c;
                         }
                         //curr[i] += (byte)ret;
-                        in_out[curr_out_idx + i] += (byte)ret;
+                        in_out[curr_out_idx + i] += (byte) ret;
                     }
                     break;
                 default:
@@ -381,18 +359,18 @@ public class StreamDecoder {
         } // while (true) ...
 
         byte[] res = new byte[curr_out_idx];
-        System.arraycopy(in_out,0, res, 0, res.length);
+        System.arraycopy(in_out, 0, res, 0, res.length);
         return res;
     }
 
     /**
      * Handles FLATEDECODE filter
      */
-    private static class Filter_FLATEDECODE implements FilterHandler{
+    private static class Filter_FLATEDECODE implements FilterHandler {
         public byte[] decode(byte[] b, COSName filterName, COSObject decodeParams, COSDictionary streamDictionary, ParserSettings settings) throws EParseError {
             b = StreamDecoder.FLATEDecode(b);
             if (decodeParams != null)
-                b = StreamDecoder.decodePredictor(b, (COSDictionary)decodeParams, settings);
+                b = StreamDecoder.decodePredictor(b, (COSDictionary) decodeParams, settings);
             return b;
         }
     }
@@ -400,7 +378,7 @@ public class StreamDecoder {
     /**
      * Handles ASCIIHEXDECODE filter
      */
-    private static class Filter_ASCIIHEXDECODE implements FilterHandler{
+    private static class Filter_ASCIIHEXDECODE implements FilterHandler {
         public byte[] decode(byte[] b, COSName filterName, COSObject decodeParams, COSDictionary streamDictionary, ParserSettings settings) throws EParseError {
             b = StreamDecoder.ASCIIHexDecode(b, settings);
             return b;
@@ -410,7 +388,7 @@ public class StreamDecoder {
     /**
      * Handles ASCIIHEXDECODE filter
      */
-    private static class Filter_ASCII85DECODE implements FilterHandler{
+    private static class Filter_ASCII85DECODE implements FilterHandler {
         public byte[] decode(byte[] b, COSName filterName, COSObject decodeParams, COSDictionary streamDictionary, ParserSettings settings) throws EParseError {
             b = StreamDecoder.ASCII85Decode(b);
             return b;
@@ -420,11 +398,11 @@ public class StreamDecoder {
     /**
      * Handles LZWDECODE filter
      */
-    private static class Filter_LZWDECODE implements FilterHandler{
+    private static class Filter_LZWDECODE implements FilterHandler {
         public byte[] decode(byte[] b, COSName filterName, COSObject decodeParams, COSDictionary streamDictionary, ParserSettings settings) throws EParseError {
             b = StreamDecoder.LZWDecode(b);
             if (decodeParams != null)
-                b = StreamDecoder.decodePredictor(b, (COSDictionary)decodeParams, settings);
+                b = StreamDecoder.decodePredictor(b, (COSDictionary) decodeParams, settings);
             return b;
         }
     }
@@ -433,7 +411,7 @@ public class StreamDecoder {
     /**
      * A filter that doesn't modify the stream at all
      */
-    private static class Filter_DoNothing implements FilterHandler{
+    private static class Filter_DoNothing implements FilterHandler {
         public byte[] decode(byte[] b, COSName filterName, COSObject decodeParams, COSDictionary streamDictionary, ParserSettings settings) throws EParseError {
             return b;
         }
@@ -442,24 +420,25 @@ public class StreamDecoder {
     /**
      * Handles RUNLENGTHDECODE filter
      */
-    private static class Filter_RUNLENGTHDECODE implements FilterHandler{
+    private static class Filter_RUNLENGTHDECODE implements FilterHandler {
+
 
         public byte[] decode(byte[] b, COSName filterName, COSObject decodeParams, COSDictionary streamDictionary, ParserSettings settings) throws EParseError {
-         // allocate the output buffer
+            // allocate the output buffer
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            byte dupCount = -1;
-            for(int i = 0; i < b.length; i++){
+            byte dupCount;
+            for (int i = 0; i < b.length; i++) {
                 dupCount = b[i];
                 if (dupCount == -128) break; // this is implicit end of data
 
-                if (dupCount >= 0 && dupCount <= 127){
-                    int bytesToCopy = dupCount+1;
+                if (dupCount >= 0) { //  && dupCount <= 127
+                    int bytesToCopy = dupCount + 1;
                     baos.write(b, i, bytesToCopy);
-                    i+=bytesToCopy;
+                    i += bytesToCopy;
                 } else {
                     // make dupcount copies of the next byte
                     i++;
-                    for(int j = 0; j < 1-(int)(dupCount);j++){
+                    for (int j = 0; j < 1 - (int) (dupCount); j++) {
                         baos.write(b[i]);
                     }
                 }

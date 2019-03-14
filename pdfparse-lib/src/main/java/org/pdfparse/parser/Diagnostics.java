@@ -4,10 +4,10 @@ import org.pdfparse.exception.EParseError;
 
 public class Diagnostics {
     ParserSettings settings;
-    public Diagnostics (ParserSettings settings) {
+
+    public Diagnostics(ParserSettings settings) {
         this.settings = settings;
     }
-
 
 
     private static void checkAndLog(boolean canContinue, String message) {
@@ -48,7 +48,7 @@ public class Diagnostics {
     }
 
 
-    public static void debugMessage(ParserSettings settings, String msg, Object ... args) {
+    public static void debugMessage(ParserSettings settings, String msg, Object... args) {
         if (settings.debugMessages) {
             System.out.println(String.format(msg, args));
         }

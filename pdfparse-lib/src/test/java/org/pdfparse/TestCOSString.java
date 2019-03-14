@@ -50,8 +50,8 @@ public class TestCOSString extends Assert {
     }
 
     private void setData(PDFRawData data, String value) {
-        data.src = value.getBytes();
-        data.length = data.src.length;
+        data.data = value.getBytes();
+        data.length = data.data.length;
         data.pos = 0;
     }
 
@@ -79,7 +79,7 @@ public class TestCOSString extends Assert {
     public void checkUnicode() {
         String theString = "\u4e16";
         COSString string = new COSString(theString);
-        assertTrue(string.getValue().equals(theString));
+        assertEquals(string.getValue(), theString);
     }
 
     @Test
@@ -107,40 +107,40 @@ public class TestCOSString extends Assert {
         {
             // Reflexive
             COSString x1 = new COSString("Test");
-            assertTrue(x1.equals(x1));
+            assertEquals(x1, x1);
 
             // Symmetry i.e. if x == y then y == x
             COSString y1 = new COSString("Test");
-            assertTrue(x1.equals(y1));
-            assertTrue(y1.equals(x1));
+            assertEquals(x1, y1);
+            assertEquals(y1, x1);
             COSString x2 = new COSString("Test");
 
             x2.setForceHexForm(true);
             // also if x != y then y != x
-            assertFalse(x1.equals(x2));
-            assertFalse(x2.equals(x1));
+            assertNotEquals(x1, x2);
+            assertNotEquals(x2, x1);
 
             // Transitive if x == y && y == z then x == z
             COSString z1 = new COSString("Test");
-            assertTrue(x1.equals(y1));
-            assertTrue(y1.equals(z1));
-            assertTrue(x1.equals(z1));
+            assertEquals(x1, y1);
+            assertEquals(y1, z1);
+            assertEquals(x1, z1);
             // Test the negative as well if x1 == y1 && y1 != x2 then x1 != x2
-            assertTrue(x1.equals(y1));
-            assertFalse(y1.equals(x2));
-            assertFalse(x1.equals(x2));
+            assertEquals(x1, y1);
+            assertNotEquals(y1, x2);
+            assertNotEquals(x1, x2);
 
             // Non-nullity
-            assertFalse(x1.equals(null));
-            assertFalse(y1.equals(null));
-            assertFalse(z1.equals(null));
-            assertFalse(x2.equals(null));
+            assertNotEquals(null, x1);
+            assertNotEquals(null, y1);
+            assertNotEquals(null, z1);
+            assertNotEquals(null, x2);
 
             // Also check other state
             COSString y2 = new COSString("Test");
             y2.setForceLiteralForm(true);
-            assertFalse(y2.equals(x2));
-            assertTrue(y2.equals(x1));
+            assertNotEquals(y2, x2);
+            assertEquals(y2, x1);
         }
     }
 

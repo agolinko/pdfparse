@@ -27,7 +27,7 @@ public class XRefTable implements ObjectRetriever {
     public void add(int id, int gen, int offs) throws EParseError {
         // Skip invalid or not-used objects (assumed that they are free objects)
         if (offs == 0) {
-            Diagnostics.debugMessage(settings,"XREF: Got object with zero offset. Assumed that this was a free object(%d %d R)", id, gen);
+            Diagnostics.debugMessage(settings, "XREF: Got object with zero offset. Assumed that this was a free object(%d %d R)", id, gen);
             return;
         }
 
@@ -48,7 +48,7 @@ public class XRefTable implements ObjectRetriever {
             XRefEntry xref = new XRefEntry(id, containerId, indexWithinContainer, true);
             by_id.put(id, xref);
         } else {
-            Diagnostics.debugMessage(settings,"XREF: Got containerId which is zero. Assumed that this was a free object (%d 0 R)", id);
+            Diagnostics.debugMessage(settings, "XREF: Got containerId which is zero. Assumed that this was a free object (%d 0 R)", id);
         }
     }
 
@@ -57,16 +57,16 @@ public class XRefTable implements ObjectRetriever {
     }
 
     @Override
-    public COSObject getObject (COSReference ref) {
+    public COSObject getObject(COSReference ref) {
         XRefEntry x = this.get(ref.id);
 
         if (x == null) {
-            Diagnostics.debugMessage(settings,"No XRef entry for object %d %d R. Used COSNull instead", ref.id, ref.gen);
+            Diagnostics.debugMessage(settings, "No XRef entry for object %d %d R. Used COSNull instead", ref.id, ref.gen);
             return new COSNull();
         }
 
         if (x.gen != ref.gen) {
-            Diagnostics.debugMessage(settings,"Object %s not found. But there is object with %d generation number", ref, x.gen);
+            Diagnostics.debugMessage(settings, "Object %s not found. But there is object with %d generation number", ref, x.gen);
         }
 
         if (x.cachedObject != null) {
@@ -74,7 +74,7 @@ public class XRefTable implements ObjectRetriever {
         }
 
         if (parser != null) {
-            return parser.getObject(ref);
+            return parser.getObject(x);
         }
 
         throw new EGenericException("Trying to access %s. Object is not loaded/parsed yet", ref);
@@ -84,7 +84,7 @@ public class XRefTable implements ObjectRetriever {
     public COSDictionary getDictionary(COSReference ref) {
         COSObject obj = this.getObject(ref);
         if (obj instanceof COSDictionary)
-            return (COSDictionary)obj;
+            return (COSDictionary) obj;
 
         throw new EParseError("Dictionary expected for %s. But retrieved object is %s", ref, obj.getClass().getName());
     }
@@ -93,7 +93,7 @@ public class XRefTable implements ObjectRetriever {
     public COSStream getStream(COSReference ref) {
         COSObject obj = this.getObject(ref);
         if (obj instanceof COSStream)
-            return (COSStream)obj;
+            return (COSStream) obj;
 
         throw new EParseError("Stream expected for %s. But retrieved object is %s", ref, obj.getClass().getName());
     }
